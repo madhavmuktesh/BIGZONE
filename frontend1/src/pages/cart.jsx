@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -75,11 +75,15 @@ const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
     return (
         <div className="cart-item-card">
             <div className="cart-item-image">
-                <img src={imageUrl} alt={productName} />
+                <Link to={`/products/${productId}`} className="product-link">
+                    <img src={imageUrl} alt={productName} />
+                </Link>
             </div>
             <div className="cart-item-details">
                 <div>
-                    <h3>{productName}</h3>
+                    <Link to={`/products/${productId}`} className="product-link">
+                        <h3>{productName}</h3>
+                    </Link>
                     <p>Price: ${productPrice.toFixed(2)}</p>
                     <div className="validation-message">{renderValidationMessage()}</div>
                 </div>

@@ -1,0 +1,265 @@
+/* FONT & VARIABLES */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary-color: #7C7DF4;
+    --light-purple-color: #CBC8FF;
+    --accent-teal-color: #20B2AA;
+    --dark-text-color: #2F2F4F;
+    --green-color: #22C55E;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+}
+
+
+/* BASE */
+body, .profile-page-container {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--gray-50);
+    min-height: 100vh;
+    margin: 0;
+    color: var(--dark-text-color);
+}
+
+/* PAGE HEADER */
+.page-header {
+    margin-bottom: 2rem;
+}
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+}
+.breadcrumb-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-weight: 500;
+}
+.breadcrumb-separator {
+    width: 1rem;
+    height: 1rem;
+    margin: 0 0.5rem;
+    color: var(--gray-400);
+}
+.breadcrumb-current {
+    color: var(--gray-500);
+}
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+}
+.page-subtitle {
+    font-size: 1rem;
+    color: var(--gray-600);
+    margin: 0.25rem 0 0;
+}
+
+/* LAYOUT */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+}
+@media (max-width: 768px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* SIDEBAR */
+.profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.sticky-card {
+    position: sticky;
+    top: 1rem;
+}
+.photo-section {
+    text-align: center;
+}
+.avatar-wrapper {
+    margin-bottom: 1rem;
+}
+.profile-avatar-large {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-teal-color), #48CAE4);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+.profile-avatar-large-img {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+.photo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.button-upload,
+.button-remove {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+.button-upload {
+    background: linear-gradient(135deg, var(--accent-teal-color), #17A2B8);
+    color: white;
+}
+.button-upload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(32, 178, 170, 0.3);
+}
+.button-remove {
+    background-color: var(--gray-100);
+    color: var(--gray-600);
+}
+.button-remove:hover {
+    background-color: var(--gray-200);
+}
+
+/* MAIN FORM */
+.profile-main-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+.card-title-xl {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.form-group.full-width {
+    grid-column: span 2;
+}
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    margin-bottom: 0.25rem;
+}
+.form-input,
+.form-textarea {
+    border: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(124,125,244,0.15);
+}
+.form-textarea {
+    resize: vertical;
+}
+
+/* ACTION BUTTONS */
+.action-buttons-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.button-cancel {
+    background-color: var(--gray-100);
+    color: var(--gray-600);
+    padding: 0.6rem 1.25rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+.button-cancel:hover {
+    background-color: var(--gray-200);
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-teal-color), #17A2B8);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(32,178,170,0.3);
+}
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* FORM CONTAINER */
+.profile-main-form form {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* two columns */
+    gap: 2rem;
+}
+
+/* Ensure each section card takes full height */
+.profile-main-form .card {
+    height: 100%;
+}
+
+/* Personal Info & Address side by side */
+.profile-main-form .card:nth-child(1),
+.profile-main-form .card:nth-child(2) {
+    grid-column: auto;
+}
+
+/* Action buttons (Save/Cancel) should span across both columns */
+.profile-main-form .card:last-child {
+    grid-column: span 2;
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 768px) {
+    .profile-main-form form {
+        grid-template-columns: 1fr; /* single column on small screens */
+    }
+    .profile-main-form .card:last-child {
+        grid-column: auto;
+    }
+}

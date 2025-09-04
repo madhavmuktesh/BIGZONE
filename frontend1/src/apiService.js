@@ -1,31 +1,33 @@
 /**
- * ✅ Centralized API service with authentication.
- * - Automatically includes httpOnly cookies (credentials: 'include')
- * - Handles errors gracefully and returns parsed JSON
+ * Centralized API service using functional exports.
+ * - Automatically includes httpOnly cookies for authentication.
+ * - Gracefully handles errors and file uploads.
  */
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = '/api/v1';
 
 /**
- * Core authenticated fetch wrapper
+ * Core authenticated fetch wrapper.
+ * Handles JSON and FormData automatically.
  */
 const authenticatedFetch = async (url, options = {}) => {
   try {
+    const headers = { ...options.headers };
+
+    // If the body is FormData, let the browser set the Content-Type header.
+    // Otherwise, set it to application/json.
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(url, {
       ...options,
-      credentials: 'include', // ✅ Sends httpOnly cookie for authentication
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      credentials: 'include',
+      headers,
     });
 
-    let data;
-    try {
-      data = await response.json();
-    } catch {
-      data = {};
-    }
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : {};
 
     if (!response.ok) {
       throw new Error(data.message || `Request failed with status ${response.status}`);
@@ -33,23 +35,47 @@ const authenticatedFetch = async (url, options = {}) => {
 
     return data;
   } catch (error) {
-    console.error("API Fetch Error:", error.message);
+    console.error(`API Fetch Error on ${options.method || 'GET'} ${url}:`, error.message);
     throw error;
   }
 };
 
+/* ---------------- USER SERVICE ---------------- */
+
+export const updateUserProfileAPI = (profileData) => {
+  return authenticatedFetch(`${API_BASE_URL}/users/profile`, {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  });
+};
+
+export const uploadProfilePhotoAPI = (formData) => {
+  return authenticatedFetch(`${API_BASE_URL}/users/profile-photo`, {
+    method: 'PUT',
+    body: formData,
+  });
+};
+
+export const addUserAddressAPI = (addressData) => {
+  return authenticatedFetch(`${API_BASE_URL}/users/address`, {
+    method: 'POST',
+    body: JSON.stringify(addressData),
+  });
+};
+
+export const updateUserAddressAPI = (addressId, addressData) => {
+  return authenticatedFetch(`${API_BASE_URL}/users/address/${addressId}`, {
+    method: 'PUT',
+    body: JSON.stringify(addressData),
+  });
+};
+
 /* ---------------- CART SERVICE ---------------- */
 
-/**
- * Fetch the user's entire cart
- */
 export const fetchCartAPI = () => {
   return authenticatedFetch(`${API_BASE_URL}/cart/`);
 };
 
-/**
- * Add a new item to the cart
- */
 export const addItemToCartAPI = (productId, quantity = 1) => {
   return authenticatedFetch(`${API_BASE_URL}/cart/items`, {
     method: 'POST',
@@ -57,9 +83,6 @@ export const addItemToCartAPI = (productId, quantity = 1) => {
   });
 };
 
-/**
- * Update quantity of a specific cart item
- */
 export const updateItemQuantityAPI = (productId, quantity) => {
   return authenticatedFetch(`${API_BASE_URL}/cart/items/${productId}`, {
     method: 'PUT',
@@ -67,18 +90,12 @@ export const updateItemQuantityAPI = (productId, quantity) => {
   });
 };
 
-/**
- * Remove a specific item from the cart
- */
 export const removeItemFromCartAPI = (productId) => {
   return authenticatedFetch(`${API_BASE_URL}/cart/items/${productId}`, {
     method: 'DELETE',
   });
 };
 
-/**
- * Clear the entire cart
- */
 export const clearCartAPI = () => {
   return authenticatedFetch(`${API_BASE_URL}/cart/`, {
     method: 'DELETE',
@@ -87,16 +104,10 @@ export const clearCartAPI = () => {
 
 /* ---------------- PRODUCT SERVICE ---------------- */
 
-/**
- * Fetch all products
- */
 export const fetchAllProductsAPI = () => {
   return authenticatedFetch(`${API_BASE_URL}/products/`);
 };
 
-/**
- * Fetch single product by ID
- */
 export const fetchProductByIdAPI = (id) => {
   return authenticatedFetch(`${API_BASE_URL}/products/${id}`);
 };

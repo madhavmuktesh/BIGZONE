@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
-const Header = ({ deliveryLocation, setDeliveryLocation }) => {
+const Header = () => {
     const navigate = useNavigate();
     const { user, logout, isAuthenticated } = useAuth();
     const { cartCount } = useCart();
@@ -28,6 +28,22 @@ const Header = ({ deliveryLocation, setDeliveryLocation }) => {
             navigate('/signin');
         }
     };
+
+    // --- MODIFIED LOGIC ---
+    // Determine the delivery location from the authenticated user's profile data
+    const deliveryCity = isAuthenticated ? user?.profile?.address?.[0]?.city : null;
+
+    // Handle clicks on the delivery location link
+    const handleDeliveryClick = () => {
+        if (isAuthenticated) {
+            // If logged in, navigate to the profile edit page to change the address
+            navigate('/profile/edit');
+        } else {
+            // If not logged in, direct them to sign in to set an address
+            handleProtectedAction('/profile/edit');
+        }
+    };
+    // --- END MODIFIED LOGIC ---
 
     return (
         <header className="header">
@@ -63,7 +79,7 @@ const Header = ({ deliveryLocation, setDeliveryLocation }) => {
                         {isAuthenticated ? (
                             <div className="action-button" style={{ cursor: 'default' }}>
                                 <i className="fas fa-user-check"></i>
-                                <span>Hi, {user?.fullname || user?.username}</span>
+                                <span>Hi, {user?.fullname?.split(' ')[0] || 'User'}</span>
                                 <button
                                     onClick={handleSignOut}
                                     className="sign-out-button"
@@ -86,10 +102,12 @@ const Header = ({ deliveryLocation, setDeliveryLocation }) => {
                         <a className="nav-link" onClick={() => handleProtectedAction('/profile')}>
                             <i className="fas fa-user-circle" style={{marginRight: '8px'}}></i>Profile
                         </a>
-                        <a className="nav-link" onClick={() => setDeliveryLocation(prompt("Enter new delivery city:") || deliveryLocation)}>
+                        {/* --- MODIFIED LINK --- */}
+                        <a className="nav-link" onClick={handleDeliveryClick}>
                             <i className="fas fa-map-marker-alt" style={{marginRight: '8px'}}></i>
-                            Deliver to {deliveryLocation}
+                            {deliveryCity ? `Deliver to ${deliveryCity}` : 'Select Address'}
                         </a>
+                        {/* --- END MODIFIED LINK --- */}
                         <a className="nav-link" onClick={() => handleProtectedAction('/orders')}>
                             <i className="fas fa-box" style={{marginRight: '8px'}}></i>Returns & Orders
                         </a>

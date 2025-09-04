@@ -16,6 +16,8 @@ import Cart from "./pages/cart";
 import OrdersPage from './pages/Orderpage';
 import Productmain from "../src/pages/productdetailmain.jsx";
 import RegisterPage from './pages/registerpage.jsx';
+import ProfilePage from './pages/profilepage.jsx';
+import EditProfile from './pages/profileedit.jsx';
 
 // Protected Route
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -24,7 +26,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
 
 // Placeholder Components
-const ProfilePage = () => <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>My Profile (Protected)</div>;
 const DashboardPage = () => <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>Welcome to your Dashboard! (Protected)</div>;
 
 // Create QueryClient instance
@@ -68,6 +69,9 @@ function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/editprofile" element={<EditProfile />} />
+
                 </Route>
 
                 {/* Catch-all → redirect to home */}

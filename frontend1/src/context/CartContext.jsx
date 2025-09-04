@@ -41,13 +41,12 @@ export const CartProvider = ({ children }) => {
     try {
       const response = await fetchCartAPI();
       if (response && response.cart) {
-        setCart(response.cart); // Set the nested cart object
+        setCart(response.cart);
       } else {
         setCart({ items: [], totalPrice: 0 });
       }
     } catch (err) {
       setError("Failed to fetch cart");
-      console.error("Cart fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -61,10 +60,8 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       try {
-        const updatedCartData = await addItemToCartAPI(productId, quantity);
-        if (updatedCartData && updatedCartData.cart) {
-          setCart(updatedCartData.cart);
-        }
+        await addItemToCartAPI(productId, quantity);
+        await fetchCart(); // ✅ Re-fetch the cart to get the latest state
         return { success: true };
       } catch (err) {
         setError(`Failed to add item: ${err.message}`);
@@ -73,7 +70,7 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, fetchCart] // Add fetchCart to dependency array
   );
 
   const removeItemFromCart = useCallback(
@@ -84,10 +81,8 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       try {
-        const updatedCartData = await removeItemFromCartAPI(productId);
-        if (updatedCartData && updatedCartData.cart) {
-          setCart(updatedCartData.cart);
-        }
+        await removeItemFromCartAPI(productId);
+        await fetchCart(); // ✅ Re-fetch the cart to get the latest state
       } catch (err) {
         setError(`Failed to remove item: ${err.message}`);
         throw err;
@@ -95,7 +90,7 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, fetchCart] // Add fetchCart to dependency array
   );
   
   const updateItemQuantity = useCallback(
@@ -103,21 +98,16 @@ export const CartProvider = ({ children }) => {
       if (!isAuthenticated) {
         throw new Error("Please sign in to update cart.");
       }
-      setLoading(true);
-      setError(null);
+      // Note: We don't set a global loading state here for a smoother UX
       try {
-        const updatedCartData = await updateItemQuantityAPI(productId, quantity);
-        if (updatedCartData && updatedCartData.cart) {
-          setCart(updatedCartData.cart);
-        }
+        await updateItemQuantityAPI(productId, quantity);
+        await fetchCart(); // ✅ Re-fetch the cart to get the latest state
       } catch (err) {
         setError(`Failed to update quantity: ${err.message}`);
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, fetchCart] // Add fetchCart to dependency array
   );
 
   const clearCart = useCallback(async () => {
@@ -127,22 +117,15 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const updatedCartData = await clearCartAPI();
-      if (updatedCartData && updatedCartData.cart) {
-        setCart(updatedCartData.cart);
-      } else {
-        setCart({ items: [], totalPrice: 0 });
-      }
+      await clearCartAPI();
+      await fetchCart(); // ✅ Re-fetch the cart to get the latest state
     } catch (err) {
       setError(`Failed to clear cart: ${err.message}`);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
-
-  // The useEffect that was causing an infinite loop has been removed from this file.
-  // The Cart.jsx component is now responsible for triggering the initial fetch.
+  }, [isAuthenticated, fetchCart]); // Add fetchCart to dependency array
 
   const value = useMemo(() => ({
     cart,

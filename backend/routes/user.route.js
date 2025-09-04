@@ -1,4 +1,4 @@
-// ===== USER ROUTES (user.route.js) =====
+// ===== CORRECTED USER ROUTES (user.route.js) =====
 import express from "express";
 import {
     register,
@@ -37,15 +37,19 @@ router.get("/me", getCurrentUser);
 
 // Profile management
 router.get("/profile", getProfile);
-router.patch("/profile", updateProfile);
-router.patch("/profile/photo", upload.single("profilePhoto"), updateProfilePhoto);
+// *** CHANGED FROM PATCH ***
+router.put("/profile", updateProfile); 
+// *** CHANGED FROM PATCH ***
+router.put("/profile-photo", upload.single("profilePhoto"), updateProfilePhoto); 
+
 router.post("/change-password", changePassword);
 router.delete("/account", deleteAccount);
 
 // Address management
-router.post("/addresses", addAddress);
-router.put("/addresses/:addressId", updateAddress);
-router.delete("/addresses/:addressId", deleteAddress);
+// *** CORRECTED ROUTE PATH ***
+router.post("/address", addAddress); 
+router.put("/address/:addressId", updateAddress);
+router.delete("/address/:addressId", deleteAddress);
 
 // --- ADMIN ONLY ROUTES ---
 router.get("/", requireRole("admin"), getAllUsers);
