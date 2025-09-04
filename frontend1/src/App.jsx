@@ -15,6 +15,7 @@ import SignIn from "./pages/signin";
 import Cart from "./pages/cart";
 import OrdersPage from './pages/Orderpage';
 import Productmain from "../src/pages/productdetailmain.jsx";
+import RegisterPage from './pages/registerpage.jsx';
 
 // Protected Route
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -22,7 +23,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Styles
 import "../src/index.css";
 
-// Placeholder Components (remove these once you create actual components)
+// Placeholder Components (remove once actual components exist)
 const ProfilePage = () => (
   <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>
     My Profile (Protected)
@@ -41,9 +42,16 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       cacheTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
     },
   },
 });
+
+// Gate for auth pages: redirect authenticated users away from /signin and /register
+function AuthGate({ children }) {
+  const { user } = useAuth();
+  return user ? <Navigate to="/" replace /> : children;
+}
 
 function AppRoutes() {
   const { user } = useAuth(); // Get current user from AuthContext
@@ -56,10 +64,22 @@ function AppRoutes() {
         <Route path="/ecozone" element={<Ecozone />} />
         <Route path="/products/:id" element={<Productmain />} />
 
-        {/* Prevent signed-in users from seeing SignIn page */}
+        {/* Auth pages are blocked for signed-in users */}
         <Route
           path="/signin"
-          element={!user ? <SignIn /> : <Navigate to="/" replace />}
+          element={
+            <AuthGate>
+              <SignIn />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <AuthGate>
+              <RegisterPage />
+            </AuthGate>
+          }
         />
 
         {/* --- Protected Routes --- */}

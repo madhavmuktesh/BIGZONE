@@ -100,7 +100,7 @@ const SignIn = () => {
           </div>
           <div className="header-right">
             <span>New to BIGZONE?</span>
-            <button onClick={() => alert('Redirecting to register...')} className="create-account-button">
+            <button onClick={() => navigate('/register')} className="create-account-button">
               Create Account
             </button>
           </div>
