@@ -130,7 +130,6 @@ const EditProfile = () => {
 
     return (
         <div className="profile-page-container">
-            <Header></Header>
             <main className="main-content">
                 <div className="profile-layout">
                     <aside className="profile-sidebar">

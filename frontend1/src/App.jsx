@@ -1,34 +1,34 @@
-import React from 'react';
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "react-hot-toast";
 
-// Context Providers
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
-// Pages
 import Ecozone from "./pages/Ecozone";
 import Onepage from "./pages/onepage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductUploadForm from "./pages/form";
 import SignIn from "./pages/signin";
 import Cart from "./pages/cart";
-import OrdersPage from './pages/Orderpage';
+import OrdersPage from "./pages/Orderpage";
 import Productmain from "../src/pages/productdetailmain.jsx";
-import RegisterPage from './pages/registerpage.jsx';
-import ProfilePage from './pages/profilepage.jsx';
-import EditProfile from './pages/profileedit.jsx';
+import RegisterPage from "./pages/registerpage.jsx";
+import ProfilePage from "./pages/profilepage.jsx";
+import EditProfile from "./pages/profileedit.jsx";
+import SearchResults from "./pages/SearchResults";
 
-// Protected Route
 import ProtectedRoute from "./components/ProtectedRoute";
-
-// Styles
 import "../src/index.css";
+import Header from "./components/Header/Headermain.jsx";
 
-// Placeholder Components
-const DashboardPage = () => <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>Welcome to your Dashboard! (Protected)</div>;
+const DashboardPage = () => (
+  <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>
+    Welcome to your Dashboard! (Protected)
+  </div>
+);
 
-// Create QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -39,9 +39,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Gate for auth pages: redirect authenticated users away from /signin and /register
 function AuthGate({ children }) {
-  const { isAuthenticated } = useAuth(); // Use isAuthenticated for clarity
+  const { isAuthenticated } = useAuth();
   return isAuthenticated ? <Navigate to="/" replace /> : children;
 }
 
@@ -52,29 +51,31 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <div className="App">
+              {/* Global toaster for popups */}
+              <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+              <Header />
               <Routes>
-                {/* --- Public Routes --- */}
+                {/* Public */}
                 <Route path="/" element={<Onepage />} />
                 <Route path="/ecozone" element={<Ecozone />} />
                 <Route path="/products/:id" element={<Productmain />} />
+                <Route path="/search" element={<SearchResults />} />
 
-                {/* Auth pages are blocked for signed-in users */}
+                {/* Auth-only gates */}
                 <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />
                 <Route path="/register" element={<AuthGate><RegisterPage /></AuthGate>} />
 
-                {/* --- Protected Routes --- */}
+                {/* Protected */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/form" element={<ProductUploadForm />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/orders" element={<OrdersPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/editprofile" element={<EditProfile />} />
-
                 </Route>
 
-                {/* Catch-all → redirect to home */}
+                {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>

@@ -154,50 +154,57 @@ const ProductUploadForm = () => {
     };
 
     const handleImageUpload = (e) => {
-        const files = Array.from(e.target.files);
-        const maxFiles = 10 - currentProduct.images.length;
-        const acceptedFiles = [];
+    const files = Array.from(e.target.files);
+    const maxFiles = 10 - currentProduct.images.length;
+    const acceptedFiles = [];
 
-        files.slice(0, maxFiles).forEach(file => {
-            if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
+    files.slice(0, maxFiles).forEach(file => {
+        if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
+            // ✅ Prevent duplicates by checking file.name + lastModified
+            const alreadyExists = currentProduct.images.some(
+                img => img.file?.name === file.name && img.file?.lastModified === file.lastModified
+            );
+            if (!alreadyExists) {
                 acceptedFiles.push(file);
-            } else {
-                alert(`Invalid file: ${file.name}. Please upload images under 5MB.`);
             }
+        } else {
+            alert(`Invalid file: ${file.name}. Please upload images under 5MB.`);
+        }
+    });
+
+    if (acceptedFiles.length === 0) return;
+
+    const fileReadPromises = acceptedFiles.map(file => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                resolve({
+                    file,
+                    url: event.target.result,
+                    alt_text: file.name,
+                    size: file.size,
+                });
+            };
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
         });
+    });
 
-        if (acceptedFiles.length === 0) return;
-
-        const fileReadPromises = acceptedFiles.map(file => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    resolve({
-                        file: file,
-                        url: event.target.result,
-                        alt_text: file.name,
-                        size: file.size,
-                    });
-                };
-                reader.onerror = (error) => reject(error);
-                reader.readAsDataURL(file);
-            });
+    Promise.all(fileReadPromises).then(newImages => {
+        setProducts(prev => {
+            const newProducts = [...prev];
+            const updatedImages = [...newProducts[activeProductIndex].images, ...newImages];
+            newProducts[activeProductIndex].images = updatedImages;
+            return newProducts;
         });
+    }).catch(error => {
+        console.error("Error reading files:", error);
+        alert("There was an error processing your images.");
+    });
 
-        Promise.all(fileReadPromises).then(newImages => {
-            setProducts(prev => {
-                const newProducts = [...prev];
-                const updatedImages = [...newProducts[activeProductIndex].images, ...newImages];
-                newProducts[activeProductIndex].images = updatedImages;
-                return newProducts;
-            });
-        }).catch(error => {
-            console.error("Error reading files:", error);
-            alert("There was an error processing your images.");
-        });
+    e.target.value = ''; // Reset file input
+};
 
-        e.target.value = ''; // Reset file input
-    };
 
     const removeImage = (index) => {
         setProducts(prev => {
@@ -466,7 +473,6 @@ const ProductUploadForm = () => {
 
     return (
         <div className="form-container">
-            <Header></Header>
             <div className="form-header">
                 <h1><i className="fas fa-plus-circle"></i> Add New Products</h1>
                 <p>Fill in the details below to add products to your store</p>

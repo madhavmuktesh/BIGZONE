@@ -85,10 +85,6 @@ function Onepage() {
     return (
         <div style={{ overflowX: 'hidden' }}>
             <Toaster position="top-center" reverseOrder={false} />
-            <Header 
-                deliveryLocation={deliveryLocation}
-                setDeliveryLocation={setDeliveryLocation}
-            />
             <HeroCarousel />
             <Categories categories={categories} />
             <Promotions />

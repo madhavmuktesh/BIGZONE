@@ -5,34 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import "../styles/cart.css";
 
-const CartHeader = () => {
-    const { user, isAuthenticated, logout } = useAuth();
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-        toast.success('Logged out successfully');
-    };
-
-    return (
-        <header className="cart-header-nav">
-            <div className="cart-header-content">
-                <h1 onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>BIGZONE</h1>
-                <div className="nav-group">
-                    {isAuthenticated ? (
-                        <>
-                            <span>Welcome, {user?.fullname || user?.username}</span>
-                            <button onClick={handleLogout} className="btn-secondary">Logout</button>
-                        </>
-                    ) : (
-                        <button onClick={() => navigate('/signin')} className="btn-primary">Login</button>
-                    )}
-                </div>
-            </div>
-        </header>
-    );
-};
 
 const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
     const renderValidationMessage = () => {
@@ -296,7 +268,7 @@ const Cart = () => {
     return (
         <div className="cart-page-body">
             <Toaster position="top-center" reverseOrder={false} />
-            <CartHeader />
+            
             <main className="cart-container">
                 <div className="breadcrumbs">
                     <button onClick={() => navigate('/')} className="breadcrumb-link">Home</button>

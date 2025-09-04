@@ -47,8 +47,6 @@ const ProfilePage = () => {
         <div className="profile-body">
             {notification && <div className="notification-bar">{notification}</div>}
 
-            <Header></Header>
-
             <main className="main-container">
                 <div className="main-grid">
                     <div className="card profile-card card-hover">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
@@ -8,6 +8,8 @@ const Header = () => {
     const navigate = useNavigate();
     const { user, logout, isAuthenticated } = useAuth();
     const { cartCount } = useCart();
+
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleSignOut = () => {
         logout();
@@ -29,42 +31,47 @@ const Header = () => {
         }
     };
 
-    // --- MODIFIED LOGIC ---
-    // Determine the delivery location from the authenticated user's profile data
     const deliveryCity = isAuthenticated ? user?.profile?.address?.[0]?.city : null;
 
-    // Handle clicks on the delivery location link
     const handleDeliveryClick = () => {
         if (isAuthenticated) {
-            // If logged in, navigate to the profile edit page to change the address
             navigate('/profile/edit');
         } else {
-            // If not logged in, direct them to sign in to set an address
             handleProtectedAction('/profile/edit');
         }
     };
-    // --- END MODIFIED LOGIC ---
+
+    // --- SEARCH HANDLER ---
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (!searchQuery.trim()) {
+            toast.error("Please enter something to search!");
+            return;
+        }
+        navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+        setSearchQuery("");
+    };
+    // ----------------------
 
     return (
         <header className="header">
             <div className="header-container">
                 <div className="header-content">
-                    <div
-                        className="logo"
-                        onClick={() => navigate('/')}
-                    >
+                    <div className="logo" onClick={() => navigate('/')}>
                         BIGZONE
                     </div>
-                    <div className="search-container">
+                    <form className="search-container" onSubmit={handleSearch}>
                         <input
                             type="text"
                             className="search-input"
                             placeholder="Search for products, brands, and more..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
-                        <button className="search-button">
+                        <button type="submit" className="search-button">
                             <i className="fas fa-search"></i>
                         </button>
-                    </div>
+                    </form>
                     <div className="user-actions">
                         <button className="action-button" onClick={() => navigate('/ecozone')}>
                             <i className="fas fa-leaf"></i>
@@ -80,10 +87,7 @@ const Header = () => {
                             <div className="action-button" style={{ cursor: 'default' }}>
                                 <i className="fas fa-user-check"></i>
                                 <span>Hi, {user?.fullname?.split(' ')[0] || 'User'}</span>
-                                <button
-                                    onClick={handleSignOut}
-                                    className="sign-out-button"
-                                >
+                                <button onClick={handleSignOut} className="sign-out-button">
                                     Sign Out
                                 </button>
                             </div>
@@ -99,26 +103,27 @@ const Header = () => {
             <nav className="nav">
                 <div className="nav-container">
                     <div className="nav-links">
-                        <a className="nav-link" onClick={() => handleProtectedAction('/profile')}>
-                            <i className="fas fa-user-circle" style={{marginRight: '8px'}}></i>Profile
+                        <a className="nav-link" onClick={() => handleProtectedAction('/')}>
+                            <i className="fas fa-user-circle" style={{ marginRight: '8px' }}></i>HOME
                         </a>
-                        {/* --- MODIFIED LINK --- */}
+                        <a className="nav-link" onClick={() => handleProtectedAction('/profile')}>
+                            <i className="fas fa-user-circle" style={{ marginRight: '8px' }}></i>Profile
+                        </a>
                         <a className="nav-link" onClick={handleDeliveryClick}>
-                            <i className="fas fa-map-marker-alt" style={{marginRight: '8px'}}></i>
+                            <i className="fas fa-map-marker-alt" style={{ marginRight: '8px' }}></i>
                             {deliveryCity ? `Deliver to ${deliveryCity}` : 'Select Address'}
                         </a>
-                        {/* --- END MODIFIED LINK --- */}
                         <a className="nav-link" onClick={() => handleProtectedAction('/orders')}>
-                            <i className="fas fa-box" style={{marginRight: '8px'}}></i>Returns & Orders
+                            <i className="fas fa-box" style={{ marginRight: '8px' }}></i>Returns & Orders
                         </a>
                         <a href="#" className="nav-link">
-                            <i className="fas fa-globe" style={{marginRight: '8px'}}></i>Language
+                            <i className="fas fa-globe" style={{ marginRight: '8px' }}></i>Language
                         </a>
                         <a href="#" className="nav-link">
-                            <i className="fas fa-headset" style={{marginRight: '8px'}}></i>Customer Service
+                            <i className="fas fa-headset" style={{ marginRight: '8px' }}></i>Customer Service
                         </a>
                         <a className="nav-link" onClick={() => handleProtectedAction('/form')}>
-                            <i className="fas fa-box" style={{marginRight: '8px'}}></i>Sell A Product
+                            <i className="fas fa-box" style={{ marginRight: '8px' }}></i>Sell A Product
                         </a>
                     </div>
                 </div>

@@ -14,6 +14,8 @@ import {
   deleteProduct,
   handleProductErrors,
 } from "../controllers/product.controller.js";
+import { searchProducts } from "../controllers/product.controller.js";
+
 
 import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 import {
@@ -32,6 +34,7 @@ const router = express.Router();
    📌 PUBLIC ROUTES
 ====================== */
 // Anyone can view products
+router.get("/search", searchProducts);   // <-- move this up
 router.get("/", getAllProducts);
 router.get("/user/:userId", getUserProducts); // must come before /:id
 router.get("/:id", getSingleProduct);

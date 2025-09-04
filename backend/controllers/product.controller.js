@@ -544,3 +544,22 @@ export const handleProductErrors = (error, req, res, next) => {
   }
   return res.status(500).json({ success: false, message: "Internal server error" });
 };
+
+// --- SEARCH PRODUCTS ---
+export const searchProducts = handleAsyncError(async (req, res) => {
+  const { query } = req.query;
+
+  if (!query || query.trim().length === 0) {
+    return res.status(400).json({ success: false, message: "Search query is required" });
+  }
+
+  // Text search using MongoDB indexes
+  const products = await Product.find(
+    { $text: { $search: query } },   // <-- do NOT use ID validation here
+    { score: { $meta: "textScore" } }
+  )
+    .sort({ score: { $meta: "textScore" } })
+    .populate("createdBy", "username email");
+
+  return res.status(200).json({ success: true, count: products.length, products });
+});
