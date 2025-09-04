@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -71,7 +71,7 @@ const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
     const productPrice = item.productDetails?.currentPrice || item.priceAtAddition || 0;
     const imageUrl = item.productDetails?.images?.[0]?.url || 'https://placehold.co/300x300?text=No+Image';
     const maxStock = item.productDetails?.currentStock || 999;
-
+    
     return (
         <div className="cart-item-card">
             <div className="cart-item-image">
@@ -122,8 +122,8 @@ const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
 };
 
 const OrderSummary = ({ cart, onCheckout, disableCheckout }) => {
-    const subtotal = cart.totalPrice || 0;
-    const ecoDiscount = 2.00; // Fixed eco discount
+    const subtotal = cart?.totalPrice || 0;
+    const ecoDiscount = 2.00;
     const total = Math.max(0, subtotal - ecoDiscount);
 
     return (
@@ -150,7 +150,7 @@ const OrderSummary = ({ cart, onCheckout, disableCheckout }) => {
             >
                 {disableCheckout ? 'Cannot Checkout' : 'Proceed to Checkout'}
             </button>
-            {cart.validationIssues > 0 && (
+            {cart?.validationIssues > 0 && (
                 <p className="checkout-warning">
                     Please resolve {cart.validationIssues} issue(s) before checkout
                 </p>
@@ -160,33 +160,38 @@ const OrderSummary = ({ cart, onCheckout, disableCheckout }) => {
 };
 
 const Cart = () => {
+    // --- 1. HOOKS AND STATE ---
     const { isAuthenticated } = useAuth();
     const { 
         cart, 
         loading, 
         error, 
+        fetchCart,
         updateItemQuantity, 
         removeItemFromCart, 
         clearCart 
     } = useCart();
-    
     const navigate = useNavigate();
 
-    // Redirect unauthenticated users who somehow access cart
+    // --- 2. EFFECTS ---
     useEffect(() => {
-        if (!isAuthenticated) {
+        fetchCart();
+    }, [fetchCart]);
+
+    useEffect(() => {
+        if (!loading && !isAuthenticated) {
             toast.error('Please sign in to access your cart');
             navigate('/signin');
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, loading, navigate]);
 
+    // --- 3. HANDLER FUNCTIONS ---
     const handleQuantityChange = async (productId, newQuantity) => {
         if (newQuantity < 1) return;
-        
         try {
             await updateItemQuantity(productId, newQuantity);
-        } catch (error) {
-            toast.error(error.message || 'Failed to update quantity');
+        } catch (err) {
+            toast.error(err.message || 'Failed to update quantity');
         }
     };
 
@@ -194,8 +199,8 @@ const Cart = () => {
         try {
             await removeItemFromCart(productId);
             toast.success('Item removed from cart');
-        } catch (error) {
-            toast.error(error.message || 'Failed to remove item');
+        } catch (err) {
+            toast.error(err.message || 'Failed to remove item');
         }
     };
 
@@ -204,41 +209,34 @@ const Cart = () => {
             try {
                 await clearCart();
                 toast.success('Cart cleared');
-            } catch (error) {
-                toast.error(error.message || 'Failed to clear cart');
+            } catch (err) {
+                toast.error(err.message || 'Failed to clear cart');
             }
         }
     };
 
     const handleCheckout = () => {
-        if (cart.items.length === 0) {
+        if (!cart?.items || cart.items.length === 0) {
             toast.error('Your cart is empty');
             return;
         }
-        
         if (cart.validationIssues > 0) {
             toast.error('Please resolve cart issues before checkout');
             return;
         }
-
         toast.success('Redirecting to checkout...');
-        // Navigate to checkout page
         // navigate('/checkout');
     };
-
-    // Don't render if not authenticated (will redirect)
-    if (!isAuthenticated) {
-        return null;
-    }
-
-    const hasStockIssues = cart.items?.some(item => 
+    
+    // --- 4. DERIVED STATE & RENDER LOGIC ---
+    const hasStockIssues = cart?.items?.some(item => 
         ['INSUFFICIENT_STOCK', 'OUT_OF_STOCK', 'PRODUCT_REMOVED'].includes(item.validationStatus)
     ) || false;
 
-    const disableCheckout = !cart.items || cart.items.length === 0 || hasStockIssues;
+    const disableCheckout = !cart?.items || cart.items.length === 0 || hasStockIssues;
 
     const renderContent = () => {
-        if (loading) {
+        if (loading && (!cart?.items || cart.items.length === 0)) {
             return <div className="loading-state">Loading your cart...</div>;
         }
 
@@ -246,21 +244,17 @@ const Cart = () => {
             return (
                 <div className="error-state">
                     <p>Error: {error}</p>
-                    <button onClick={() => window.location.reload()} className="btn-primary">
-                        Retry
-                    </button>
+                    <button onClick={() => fetchCart()} className="btn-primary">Retry</button>
                 </div>
             );
         }
 
-        if (!cart.items || cart.items.length === 0) {
+        if (!cart?.items || cart.items.length === 0) {
             return (
                 <div className="empty-cart-state">
                     <h2>Your cart is empty</h2>
                     <p>Let's find something great for you!</p>
-                    <button onClick={() => navigate('/')} className="btn-primary">
-                        Continue Shopping
-                    </button>
+                    <button onClick={() => navigate('/')} className="btn-primary">Continue Shopping</button>
                 </div>
             );
         }
@@ -294,6 +288,7 @@ const Cart = () => {
         );
     };
 
+    // --- 5. RETURN JSX ---
     return (
         <div className="cart-page-body">
             <Toaster position="top-center" reverseOrder={false} />
@@ -312,7 +307,7 @@ const Cart = () => {
                     </div>
                     <div>
                         <h1>Shopping Cart</h1>
-                        <p>{cart.items?.length || 0} items in your cart</p>
+                        <p>{cart?.items?.length || 0} items in your cart</p>
                     </div>
                 </div>
                 {renderContent()}

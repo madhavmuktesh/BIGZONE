@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useMemo,
 } from "react";
 import {
   fetchCartAPI,
@@ -26,21 +27,24 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  const [cart, setCart] = useState({ items: [], total: 0 });
+  const [cart, setCart] = useState({ items: [], totalPrice: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Fetch Cart
   const fetchCart = useCallback(async () => {
     if (!isAuthenticated) {
-      setCart({ items: [], total: 0 });
+      setCart({ items: [], totalPrice: 0 });
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchCartAPI();
-      setCart(data);
+      const response = await fetchCartAPI();
+      if (response && response.cart) {
+        setCart(response.cart); // Set the nested cart object
+      } else {
+        setCart({ items: [], totalPrice: 0 });
+      }
     } catch (err) {
       setError("Failed to fetch cart");
       console.error("Cart fetch error:", err);
@@ -49,7 +53,6 @@ export const CartProvider = ({ children }) => {
     }
   }, [isAuthenticated]);
 
-  // ✅ Add Item
   const addItemToCart = useCallback(
     async (productId, quantity = 1) => {
       if (!isAuthenticated) {
@@ -58,8 +61,10 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       try {
-        await addItemToCartAPI(productId, quantity);
-        await fetchCart();
+        const updatedCartData = await addItemToCartAPI(productId, quantity);
+        if (updatedCartData && updatedCartData.cart) {
+          setCart(updatedCartData.cart);
+        }
         return { success: true };
       } catch (err) {
         setError(`Failed to add item: ${err.message}`);
@@ -68,19 +73,21 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [isAuthenticated, fetchCart]
+    [isAuthenticated]
   );
 
-  // ✅ Remove Item
   const removeItemFromCart = useCallback(
     async (productId) => {
       if (!isAuthenticated) {
         throw new Error("Please sign in to modify your cart.");
       }
       setLoading(true);
+      setError(null);
       try {
-        await removeItemFromCartAPI(productId);
-        await fetchCart();
+        const updatedCartData = await removeItemFromCartAPI(productId);
+        if (updatedCartData && updatedCartData.cart) {
+          setCart(updatedCartData.cart);
+        }
       } catch (err) {
         setError(`Failed to remove item: ${err.message}`);
         throw err;
@@ -88,19 +95,21 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [isAuthenticated, fetchCart]
+    [isAuthenticated]
   );
-
-  // ✅ Update Quantity
+  
   const updateItemQuantity = useCallback(
     async (productId, quantity) => {
       if (!isAuthenticated) {
         throw new Error("Please sign in to update cart.");
       }
       setLoading(true);
+      setError(null);
       try {
-        await updateItemQuantityAPI(productId, quantity);
-        await fetchCart();
+        const updatedCartData = await updateItemQuantityAPI(productId, quantity);
+        if (updatedCartData && updatedCartData.cart) {
+          setCart(updatedCartData.cart);
+        }
       } catch (err) {
         setError(`Failed to update quantity: ${err.message}`);
         throw err;
@@ -108,44 +117,46 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [isAuthenticated, fetchCart]
+    [isAuthenticated]
   );
 
-  // ✅ Clear Cart
   const clearCart = useCallback(async () => {
     if (!isAuthenticated) {
       throw new Error("Please sign in to clear your cart.");
     }
     setLoading(true);
+    setError(null);
     try {
-      await clearCartAPI();
-      await fetchCart();
+      const updatedCartData = await clearCartAPI();
+      if (updatedCartData && updatedCartData.cart) {
+        setCart(updatedCartData.cart);
+      } else {
+        setCart({ items: [], totalPrice: 0 });
+      }
     } catch (err) {
       setError(`Failed to clear cart: ${err.message}`);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, fetchCart]);
+  }, [isAuthenticated]);
 
-  // ✅ Load cart on login/logout
-  useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
+  // The useEffect that was causing an infinite loop has been removed from this file.
+  // The Cart.jsx component is now responsible for triggering the initial fetch.
+
+  const value = useMemo(() => ({
+    cart,
+    loading,
+    error,
+    fetchCart,
+    addItemToCart,
+    removeItemFromCart,
+    updateItemQuantity,
+    clearCart,
+  }), [cart, loading, error, fetchCart, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart]);
 
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        loading,
-        error,
-        fetchCart,
-        addItemToCart,
-        removeItemFromCart,
-        updateItemQuantity,
-        clearCart,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

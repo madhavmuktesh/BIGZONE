@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useEffect
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -28,7 +28,18 @@ const SignIn = () => {
   const [success, setSuccess] = useState('');
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  // ✅ Get both `login` and `isAuthenticated` from the context
+  const { login, isAuthenticated } = useAuth();
+
+  // ✅ This effect will now handle the navigation safely
+  useEffect(() => {
+    // If we have successfully logged in (isAuthenticated is true), then navigate.
+    if (isAuthenticated) {
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+      sessionStorage.removeItem('redirectAfterLogin');
+      navigate(redirectPath || "/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]); // This runs ONLY when isAuthenticated changes
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
@@ -49,29 +60,22 @@ const SignIn = () => {
         { email, password },
         { 
           withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         }
       );
 
       if (response.data.success) {
-        setSuccess(response.data.message);
+        setSuccess("Login successful! Redirecting...");
         console.log("Login successful! User data:", response.data.user);
-
-        // Pass only user data - token is now in httpOnly cookie
+        
+        // This will update the AuthContext and trigger the useEffect above
         login(response.data.user);
 
-        // Check if user was trying to access a protected route
-        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
-        sessionStorage.removeItem('redirectAfterLogin');
-
-        setTimeout(() => {
-          navigate(redirectPath || "/", { replace: true });
-        }, 1000);
+        // ❌ We no longer navigate from here
+        // The setTimeout and navigate calls are removed
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "An unexpected error occurred. Please try again.";
+      const errorMessage = err.response?.data?.message || "An unexpected error occurred.";
       setError(errorMessage);
       console.error("Login failed:", errorMessage);
     } finally {
@@ -88,100 +92,101 @@ const SignIn = () => {
 
   return (
     <div className="page-container">
-      <header className="header">
-        <div className="container header-content">
-          <div className="header-left">
-            <button onClick={() => window.history.back()} className="back-button">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-              </svg>
-            </button>
-            <h1 className="logo-title">BIGZONE</h1>
-          </div>
-          <div className="header-right">
-            <span>New to BIGZONE?</span>
-            <button onClick={() => navigate('/register')} className="create-account-button">
-              Create Account
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* ... The rest of your JSX remains exactly the same ... */}
+       <header className="header">
+        <div className="container header-content">
+          <div className="header-left">
+            <button onClick={() => window.history.back()} className="back-button">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 className="logo-title">BIGZONE</h1>
+          </div>
+          <div className="header-right">
+            <span>New to BIGZONE?</span>
+            <button onClick={() => navigate('/register')} className="create-account-button">
+              Create Account
+            </button>
+          </div>
+        </div>
+      </header>
 
-      <main className="main-content">
-        <div className="form-container">
-          <div className="welcome-message">
-            <h2>Welcome Back</h2>
-            <p>Sign in to your BIGZONE account to continue shopping</p>
-          </div>
+      <main className="main-content">
+        <div className="form-container">
+          <div className="welcome-message">
+            <h2>Welcome Back</h2>
+            <p>Sign in to your BIGZONE account to continue shopping</p>
+          </div>
 
-          <div className="form-card">
-            <div className="secure-signin-indicator">
-              <div className="indicator-dot"></div>
-              <span>Secure Sign In</span>
-            </div>
-            
-            <AlertMessage message={error} type="error" />
-            <AlertMessage message={success} type="success" />
+          <div className="form-card">
+            <div className="secure-signin-indicator">
+              <div className="indicator-dot"></div>
+              <span>Secure Sign In</span>
+            </div>
+            
+            <AlertMessage message={error} type="error" />
+            <AlertMessage message={success} type="success" />
 
-            <form onSubmit={handleLoginSubmit} className="login-form">
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <input 
-                  type="email" 
-                  required 
-                  className="input-field"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
+            <form onSubmit={handleLoginSubmit} className="login-form">
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input 
+                  type="email" 
+                  required 
+                  className="input-field"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
 
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <div className="password-wrapper">
-                  <input 
-                    type={showPassword ? 'text' : 'password'}
-                    required 
-                    className="input-field"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                  />
-                  <button type="button" onClick={togglePasswordVisibility} className="password-toggle-button">
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <div className="password-wrapper">
+                  <input 
+                      type={showPassword ? 'text' : 'password'}
+                      required 
+                      className="input-field"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                    />
+                  <button type="button" onClick={togglePasswordVisibility} className="password-toggle-button">
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
 
-              <div className="form-options">
-                <label className="remember-me">
-                  <input type="checkbox" disabled={isLoading}/>
-                  <span>Remember me</span>
-                </label>
-                <button type="button" onClick={() => alert('Password reset email sent! (Demo)')} className="forgot-password-button" disabled={isLoading}>
-                  Forgot password?
-                </button>
-              </div>
+              <div className="form-options">
+                <label className="remember-me">
+                  <input type="checkbox" disabled={isLoading}/>
+                  <span>Remember me</span>
+                </label>
+                <button type="button" onClick={() => alert('Password reset email sent! (Demo)')} className="forgot-password-button" disabled={isLoading}>
+                  Forgot password?
+                </button>
+              </div>
 
-              <button type="submit" className="submit-button" disabled={isLoading}>
-                {isLoading ? 'Signing In...' : 'Sign In to BIGZONE'}
-              </button>
-            </form>
+              <button type="submit" className="submit-button" disabled={isLoading}>
+                {isLoading ? 'Signing In...' : 'Sign In to BIGZONE'}
+              </button>
+            </form>
 
-            <div onClick={fillDemoCredentials} className="quick-access-box">
-              <div>
-                <p>Quick Demo Access</p>
-                <div className="quick-access-creds">
-                  <span>Email: demo@bigzone.com</span>
-                  <span>Password: demo123</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+            <div onClick={fillDemoCredentials} className="quick-access-box">
+              <div>
+                <p>Quick Demo Access</p>
+                <div className="quick-access-creds">
+                  <span>Email: demo@bigzone.com</span>
+                  <span>Password: demo123</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

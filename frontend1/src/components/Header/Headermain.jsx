@@ -35,7 +35,7 @@ const Header = ({ deliveryLocation, setDeliveryLocation }) => {
                 <div className="header-content">
                     <div
                         className="logo"
-                        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                        onClick={() => navigate('/')}
                     >
                         BIGZONE
                     </div>

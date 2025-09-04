@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import "../styles/form.css";
+import Header from '../components/Header/Headermain';
 
 const ProductUploadForm = () => {
     const getEmptyProduct = () => ({
@@ -465,8 +466,8 @@ const ProductUploadForm = () => {
 
     return (
         <div className="form-container">
+            <Header></Header>
             <div className="form-header">
-                <h1 onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>BIGZONE</h1>
                 <h1><i className="fas fa-plus-circle"></i> Add New Products</h1>
                 <p>Fill in the details below to add products to your store</p>
                 <div style={{ marginTop: '1rem', fontSize: '1rem', opacity: 0.9 }}>

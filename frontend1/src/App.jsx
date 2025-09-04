@@ -23,25 +23,16 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Styles
 import "../src/index.css";
 
-// Placeholder Components (remove once actual components exist)
-const ProfilePage = () => (
-  <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>
-    My Profile (Protected)
-  </div>
-);
-
-const DashboardPage = () => (
-  <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>
-    Welcome to your Dashboard! (Protected)
-  </div>
-);
+// Placeholder Components
+const ProfilePage = () => <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>My Profile (Protected)</div>;
+const DashboardPage = () => <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>Welcome to your Dashboard! (Protected)</div>;
 
 // Create QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
     },
   },
@@ -49,65 +40,43 @@ const queryClient = new QueryClient({
 
 // Gate for auth pages: redirect authenticated users away from /signin and /register
 function AuthGate({ children }) {
-  const { user } = useAuth();
-  return user ? <Navigate to="/" replace /> : children;
-}
-
-function AppRoutes() {
-  const { user } = useAuth(); // Get current user from AuthContext
-
-  return (
-    <div className="App">
-      <Routes>
-        {/* --- Public Routes --- */}
-        <Route path="/" element={<Onepage />} />
-        <Route path="/ecozone" element={<Ecozone />} />
-        <Route path="/products/:id" element={<Productmain />} />
-
-        {/* Auth pages are blocked for signed-in users */}
-        <Route
-          path="/signin"
-          element={
-            <AuthGate>
-              <SignIn />
-            </AuthGate>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <AuthGate>
-              <RegisterPage />
-            </AuthGate>
-          }
-        />
-
-        {/* --- Protected Routes --- */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/form" element={<ProductUploadForm />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/orders" element={<OrdersPage />} />
-        </Route>
-
-        {/* Catch-all → redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
-  );
+  const { isAuthenticated } = useAuth(); // Use isAuthenticated for clarity
+  return isAuthenticated ? <Navigate to="/" replace /> : children;
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <AppRoutes />
-          </Router>
-        </CartProvider>
-      </AuthProvider>
+      <Router>
+        <AuthProvider>
+          <CartProvider>
+            <div className="App">
+              <Routes>
+                {/* --- Public Routes --- */}
+                <Route path="/" element={<Onepage />} />
+                <Route path="/ecozone" element={<Ecozone />} />
+                <Route path="/products/:id" element={<Productmain />} />
+
+                {/* Auth pages are blocked for signed-in users */}
+                <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />
+                <Route path="/register" element={<AuthGate><RegisterPage /></AuthGate>} />
+
+                {/* --- Protected Routes --- */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/form" element={<ProductUploadForm />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/orders" element={<OrdersPage />} />
+                </Route>
+
+                {/* Catch-all → redirect to home */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </CartProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }
