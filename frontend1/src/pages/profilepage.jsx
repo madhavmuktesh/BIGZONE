@@ -30,8 +30,9 @@ const ProfilePage = () => {
     };
 
     const handleActionClick = (page) => {
-        setNotification(`${page} functionality is not yet implemented.`);
+        navigate(`/${page}`);
     };
+
 
     if (loading) {
         return <div className="loading-container">Loading Profile...</div>;
@@ -130,7 +131,7 @@ const ProfilePage = () => {
                         <div className="card card-hover">
                             <h3 className="card-title">Account Settings</h3>
                             <div className="settings-grid">
-                                <div className="setting-card" onClick={() => handleActionClick('Address Book')}>
+                                <div className="setting-card" onClick={() => handleActionClick('address')}>
                                     <div className="setting-card-content">
                                         <div className="setting-icon-wrapper primary"><svg className="setting-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg></div>
                                         <div className="setting-text">
