@@ -20,6 +20,7 @@ import EditProfile from "./pages/profileedit.jsx";
 import SearchResults from "./pages/SearchResults";
 import AddAddressPage from "./pages/AddAddress.jsx";
 import AddressPage from "./pages/Addresspage.jsx";
+import HomePage from "./pages/HomePage.jsx";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
@@ -59,7 +60,7 @@ function App() {
               <Routes>
                 {/* Public */}
                 <Route path="/" element={<Onepage />} />
-                <Route path="/ecozone" element={<Ecozone />} />
+                <Route path="/ecozone" element={<HomePage />} />
                 <Route path="/products/:id" element={<Productmain />} />
                 <Route path="/search" element={<SearchResults />} />
 
