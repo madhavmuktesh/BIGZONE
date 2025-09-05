@@ -63,7 +63,7 @@ app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
-app.use(`${API_PREFIX}/addresses`, router);
+app.use("/api/v1/addresses", router);
 
 app.get(`${API_PREFIX}/health`, (req, res) => {
   res.status(200).json({ success: true, message: "Server is healthy" });

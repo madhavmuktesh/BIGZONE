@@ -6,9 +6,9 @@ import axios from 'axios';
 // Reusable FormField component
 const FormField = ({ id, label, value, onChange, onFocus, onBlur, isFocused, children, ...props }) => {
   const wrapperClasses = [
-    'form-field-wrapper',
-    isFocused ? 'input-focused' : '',
-    value ? 'input-filled' : '',
+    'address-form-field-wrapper',
+    isFocused ? 'address-input-focused' : '',
+    value ? 'address-input-filled' : '',
   ].filter(Boolean).join(' ');
 
   return (
@@ -19,10 +19,10 @@ const FormField = ({ id, label, value, onChange, onFocus, onBlur, isFocused, chi
         onChange={onChange}
         onFocus={() => onFocus(id)}
         onBlur={onBlur}
-        className="form-input"
+        className="address-form-input"
         {...props}
       />
-      <label htmlFor={id} className="floating-label">{label}</label>
+      <label htmlFor={id} className="address-floating-label">{label}</label>
       {children}
     </div>
   );
@@ -194,10 +194,10 @@ const AddAddressPage = () => {
 
   if (isLoading) {
     return (
-      <div className="page-background">
-        <main className="container main-container">
-          <div className="page-header">
-            <h1 className="page-title">{isEditMode ? 'Edit Address' : 'Add New Address'}</h1>
+      <div className="address-page-background">
+        <main className="address-container address-main-container">
+          <div className="address-page-header">
+            <h1 className="address-page-title">{isEditMode ? 'Edit Address' : 'Add New Address'}</h1>
             <p>Loading address…</p>
           </div>
         </main>
@@ -206,47 +206,47 @@ const AddAddressPage = () => {
   }
 
   return (
-    <div className="page-background">
-      <nav className="header-nav">{/* header if any */}</nav>
+    <div className="address-page-background">
+      <nav className="address-header-nav">{/* header if any */}</nav>
 
-      <main className="container main-container">
-        <div className="breadcrumb">
+      <main className="address-container address-main-container">
+        <div className="address-breadcrumb">
           <Link to="/account">Account</Link><span>›</span>
           <Link to="/address">Addresses</Link><span>›</span>
           <span className="active">{isEditMode ? 'Edit' : 'Add New'}</span>
         </div>
 
-        <div className="page-header">
-          <h1 className="page-title">{isEditMode ? 'Edit Address' : 'Add New Address'}</h1>
-          <p className="page-subtitle">Fill in the details below to add a new delivery address.</p>
+        <div className="address-page-header">
+          <h1 className="address-page-title">{isEditMode ? 'Edit Address' : 'Add New Address'}</h1>
+          <p className="address-page-subtitle">Fill in the details below to add a new delivery address.</p>
         </div>
 
-        <div className="progress-container">
-          <div className="progress-labels">
+        <div className="address-progress-container">
+          <div className="address-progress-labels">
             <span>Form Progress</span>
             <span>{Math.round(progress)}% Complete</span>
           </div>
-          <div className="progress-bar-outer">
-            <div className="progress-bar-inner" style={{ width: `${progress}%` }}></div>
+          <div className="address-progress-bar-outer">
+            <div className="address-progress-bar-inner" style={{ width: `${progress}%` }}></div>
           </div>
         </div>
 
-        <div className="form-card">
+        <div className="address-form-card">
           <form onSubmit={handleSave} className="address-form">
-            <div className="form-field-wrapper">
-              <label htmlFor="country" className="static-label">Country *</label>
+            <div className="address-form-field-wrapper">
+              <label htmlFor="country" className="address-static-label">Country *</label>
               <select 
                 id="country" 
                 value={formData.country} 
                 onChange={handleChange} 
-                className="form-input form-select" 
+                className="address-form-input address-form-select" 
                 required
               >
                 <option value="IN">India</option>
                 <option value="US">United States</option>
                 <option value="CA">Canada</option>
               </select>
-              <div className="select-arrow"></div>
+              <div className="address-select-arrow"></div>
             </div>
 
             <FormField 
@@ -298,7 +298,7 @@ const AddAddressPage = () => {
               required 
             />
 
-            <div className="form-grid">
+            <div className="address-form-grid">
               <FormField 
                 id="pincode" 
                 label="Pincode *" 
@@ -335,20 +335,20 @@ const AddAddressPage = () => {
               required 
             />
 
-            <div className="checkbox-wrapper">
+            <div className="address-checkbox-wrapper">
               <input 
                 type="checkbox" 
                 id="makeDefault" 
                 checked={formData.makeDefault} 
                 onChange={handleChange} 
-                className="form-checkbox" 
+                className="address-form-checkbox" 
               />
               <label htmlFor="makeDefault">Make this default</label>
             </div>
 
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                {isSubmitting ? <div className="spinner"></div> : '✔'}
+            <div className="address-form-actions">
+              <button type="submit" className="address-btn address-btn-primary" disabled={isSubmitting}>
+                {isSubmitting ? <div className="address-spinner"></div> : '✔'}
                 <span>
                   {isSubmitting 
                     ? (isEditMode ? 'Updating...' : 'Saving...') 
@@ -357,18 +357,18 @@ const AddAddressPage = () => {
                 </span>
               </button>
               {!isEditMode && (
-                <button type="button" onClick={saveDraft} className="btn btn-secondary">
+                <button type="button" onClick={saveDraft} className="address-btn address-btn-secondary">
                   <span>Save Draft</span>
                 </button>
               )}
-              <button type="button" onClick={goBack} className="btn btn-tertiary">
+              <button type="button" onClick={goBack} className="address-btn address-btn-tertiary">
                 Cancel
               </button>
             </div>
           </form>
         </div>
 
-        <div className="info-box">{/* Address Tips content */}</div>
+        <div className="address-info-box">{/* Address Tips content */}</div>
       </main>
     </div>
   );

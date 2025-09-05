@@ -1,17 +1,29 @@
+// routes/address.route.js
 import express from "express";
+import isAuthenticated from "../middlewares/isAuthenticated.js"; // matches your file
 import {
   addAddress,
   getAddresses,
+  getAddressById,
   updateAddress,
-  deleteAddress,
+  deleteAddress
 } from "../controllers/address.controller.js";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 const router = express.Router();
 
-router.post("/", isAuthenticated, addAddress);
+// list
 router.get("/", isAuthenticated, getAddresses);
-router.put("/:id", isAuthenticated, updateAddress);
+
+// create
+router.post("/", isAuthenticated, addAddress);
+
+// single (fetch for edit)
+router.get("/:id", isAuthenticated, getAddressById);
+
+// update
+router.patch("/:id", isAuthenticated, updateAddress);
+
+// delete
 router.delete("/:id", isAuthenticated, deleteAddress);
 
 export default router;

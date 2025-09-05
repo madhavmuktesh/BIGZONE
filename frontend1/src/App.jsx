@@ -77,6 +77,7 @@ function App() {
                   <Route path="/editprofile" element={<EditProfile />} />
                   <Route path="/address" element={<AddressPage />} />
                   <Route path="/addaddress" element={<AddAddressPage />} />
+                  <Route path="/address/edit/:id" element={<AddAddressPage />} />
                 </Route>
 
                 {/* Fallback */}
