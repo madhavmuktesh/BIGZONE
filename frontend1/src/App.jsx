@@ -6,7 +6,6 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
-import Ecozone from "./pages/Ecozone";
 import Onepage from "./pages/onepage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductUploadForm from "./pages/form";
