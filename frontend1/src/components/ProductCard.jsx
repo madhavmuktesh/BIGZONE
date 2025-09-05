@@ -1,9 +1,41 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { HeartIcon } from './Icons';
+import { HeartIcon } from './Icons'; // Assuming you have a HeartIcon component
+import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useCart } from '../context/CartContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-  // Handle missing product data gracefully
+  const { addItemToCart, loading } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleProductClick = (e) => {
+    if (e.target.closest('button') || e.target.closest('a')) {
+      return;
+    }
+    navigate(`/ecozone/products/${product._id}`);
+  };
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error('Please sign in to add items to cart!');
+      navigate('/signin');
+      return;
+    }
+
+    try {
+      await addItemToCart(product._id, 1);
+      toast.success(`Added "${product.productname}" to cart!`);
+    } catch (error) {
+      toast.error(error.message || 'Failed to add item to cart');
+    }
+  };
+
   if (!product) {
     return null;
   }
@@ -16,71 +48,72 @@ const ProductCard = ({ product }) => {
     reviewStats,
     images,
     category,
-    specifications
+    specifications,
+    ecoScore,
+    co2SavedKg,
+    ecoAnalysisJustification
   } = product;
 
-  // Calculate discount percentage if original price exists
-  const discountPercentage = originalPrice && originalPrice > productprice 
+  const discountPercentage = originalPrice && originalPrice > productprice
     ? Math.round(((originalPrice - productprice) / originalPrice) * 100)
     : 0;
 
-  // Generate star rating display
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating || 0);
-    const hasHalfStar = (rating || 0) % 1 !== 0;
-
     for (let i = 0; i < fullStars; i++) {
       stars.push(<span key={i} className="star filled">★</span>);
     }
-
-    if (hasHalfStar) {
-      stars.push(<span key="half" className="star half">★</span>);
-    }
-
-    const emptyStars = 5 - Math.ceil(rating || 0);
+    const emptyStars = 5 - fullStars;
     for (let i = 0; i < emptyStars; i++) {
       stars.push(<span key={`empty-${i}`} className="star empty">☆</span>);
     }
-
     return stars;
   };
 
   return (
-    <div className="product-card">
+    <div className="product-card eco-card" onClick={handleProductClick} >
+      
       <div className="product-image-container">
         <div className="product-image">
           {images && images.length > 0 ? (
             <img 
               src={images[0].url} 
               alt={productname}
-              onError={(e) => {
-                e.target.src = '/placeholder.jpg';
-              }}
+              onError={(e) => { e.target.src = '/placeholder.jpg'; }}
             />
           ) : (
-            <div className="placeholder-image">
-              <i className="fas fa-image"></i>
-            </div>
+            <div className="placeholder-image" />
           )}
           
-          {/* Discount Badge */}
+          <div className="eco-leaf-badge">
+             🌱
+          </div>
+
           {discountPercentage > 0 && (
-            <div className="discount-badge">
-              {discountPercentage}% OFF
-            </div>
+            <div className="discount-badge">{discountPercentage}% OFF</div>
           )}
         </div>
-        
-        <button className="wishlist-button">
-          <HeartIcon />
-        </button>
+        <button className="wishlist-button"><HeartIcon /></button>
       </div>
       
       <div className="product-info">
         <h3 className="product-name">{productname}</h3>
         
-        {/* Category and Brand */}
+        <div 
+          className="eco-info" 
+          title={ecoAnalysisJustification || 'This is a certified eco-friendly product.'}
+        >
+          <div className="eco-score">
+            <strong>{ecoScore}</strong> Eco Score
+          </div>
+          {co2SavedKg > 0 && (
+            <div className="co2-saved">
+              {co2SavedKg} kg CO₂ Saved
+            </div>
+          )}
+        </div>
+
         <div className="product-meta">
           <span className="product-category">{category}</span>
           {specifications?.brand && (
@@ -88,7 +121,6 @@ const ProductCard = ({ product }) => {
           )}
         </div>
         
-        {/* Rating */}
         <div className="product-rating">
           <div className="rating-stars">
             {renderStars(reviewStats?.averageRating)}
@@ -98,7 +130,6 @@ const ProductCard = ({ product }) => {
           </span>
         </div>
         
-        {/* Price */}
         <div className="product-price">
           <span className="current-price">₹{productprice?.toLocaleString()}</span>
           {originalPrice && originalPrice > productprice && (
@@ -106,13 +137,18 @@ const ProductCard = ({ product }) => {
           )}
         </div>
         
-        {/* Buttons */}
         <div className="product-buttons">
-          {/* ✅ Fixed to match your router: /products/:id */}
-          <Link to={`/products/${_id}`}>
+          <Link to={`/ecozone/products/${_id}`} style={{ textDecoration: 'none' }}>
             <button className="btn-view">View Details</button>
           </Link>
-          <button className="btn-add">Add to Cart</button>
+          <button
+            className="add-to-cart-button"
+            onClick={handleAddToCart}
+            disabled={loading}
+            type="button"
+          >
+            {loading ? 'Adding...' : 'Add to Cart'}
+          </button>
         </div>
       </div>
     </div>

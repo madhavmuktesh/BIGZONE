@@ -1,4 +1,5 @@
-const API_BASE_URL = '/api/v1'; // Use a relative path, this is best practice
+// src/services/api.js
+const API_BASE_URL = '/api/v1'; // Relative path for frontend proxy
 
 class ApiService {
   /**
@@ -7,16 +8,13 @@ class ApiService {
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     const config = {
-      headers: {}, // Start with empty headers
-      credentials: "include", // Include cookies for authentication
+      headers: {},
+      credentials: "include", // Include cookies for auth
       ...options,
     };
 
-    // If body is FormData, let the browser set the Content-Type.
-    // Otherwise, it's JSON.
-    if (config.body instanceof FormData) {
-      delete config.headers["Content-Type"];
-    } else {
+    // Set headers unless body is FormData
+    if (!(config.body instanceof FormData)) {
       config.headers["Content-Type"] = "application/json";
     }
 
@@ -25,19 +23,17 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        // Use the detailed message from the backend if available
         throw new Error(data.message || "API request failed");
       }
 
       return data;
     } catch (error) {
       console.error(`API Error on ${endpoint}:`, error.message);
-      throw error; // Re-throw the error to be caught by the component
+      throw error;
     }
   }
 
-  // --- User & Auth methods ---
-
+  // ------------------ AUTH & USER ------------------
   async login(credentials) {
     return this.request("/users/login", {
       method: "POST",
@@ -53,9 +49,7 @@ class ApiService {
   }
 
   async logout() {
-    return this.request("/users/logout", {
-        method: "POST"
-    });
+    return this.request("/users/logout", { method: "POST" });
   }
 
   async getCurrentUser() {
@@ -64,17 +58,15 @@ class ApiService {
 
   async updateUserProfile(profileData) {
     return this.request("/users/profile", {
-      method: "PUT", // Using PUT for consistency
+      method: "PUT",
       body: JSON.stringify(profileData),
     });
   }
 
-  // *** ADDED THIS METHOD ***
-  // Corresponds to the `addAddress` controller function.
   async addUserAddress(addressData) {
-    return this.request('/users/address', {
-        method: 'POST',
-        body: JSON.stringify(addressData),
+    return this.request("/users/address", {
+      method: "POST",
+      body: JSON.stringify(addressData),
     });
   }
 
@@ -86,13 +78,105 @@ class ApiService {
   }
 
   async uploadProfilePhoto(formData) {
-    // *** CORRECTED THIS ENDPOINT ***
     return this.request("/users/profile-photo", {
       method: "PUT",
       body: formData,
     });
   }
+
+  // ------------------ PRODUCTS ------------------
+  async getAllProducts() {
+    return this.request("/products"); // GET /api/v1/products
+  }
+
+  async getProduct(productId) {
+    return this.request(`/products/${productId}`); // GET /api/v1/products/:id
+  }
+
+  async createProduct(productData) {
+    return this.request("/products", {
+      method: "POST",
+      body: JSON.stringify(productData),
+    });
+  }
+
+  async updateProduct(productId, productData) {
+    return this.request(`/products/${productId}`, {
+      method: "PUT",
+      body: JSON.stringify(productData),
+    });
+  }
+
+  async deleteProduct(productId) {
+    return this.request(`/products/${productId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async getUserProducts(userId) {
+    return this.request(`/products/user/${userId}`);
+  }
+  // ----------- ECO -------------
+  async getALLEcoZoneProducts() {
+    return this.request("/products/ecozone"); // GET /api/v1/products/ecozone
+  }
+  async getEcoZoneProduct(productId){
+    return this.request(`products/ecozone/${productId}`)
+  }
+
+
+
+  // ------------------ CART ------------------
+  async getCart() {
+    return this.request("/cart"); // GET /api/v1/cart
+  }
+
+  async addToCart(productId, quantity = 1, productDetails = {}) {
+    return this.request("/cart", {
+      method: "POST",
+      body: JSON.stringify({ productId, quantity, productDetails }),
+    });
+  }
+
+  async updateCartItem(cartItemId, quantity) {
+    return this.request(`/cart/${cartItemId}`, {
+      method: "PUT",
+      body: JSON.stringify({ quantity }),
+    });
+  }
+
+  async removeCartItem(cartItemId) {
+    return this.request(`/cart/${cartItemId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async clearCart() {
+    return this.request("/cart", {
+      method: "DELETE",
+    });
+  }
+
+  // ------------------ REVIEWS ------------------
+  async addProductReview(productId, reviewData) {
+    return this.request(`/products/${productId}/reviews`, {
+      method: "POST",
+      body: JSON.stringify(reviewData),
+    });
+  }
+
+  async updateProductReview(productId, reviewId, reviewData) {
+    return this.request(`/products/${productId}/reviews/${reviewId}`, {
+      method: "PUT",
+      body: JSON.stringify(reviewData),
+    });
+  }
+
+  async deleteProductReview(productId, reviewId) {
+    return this.request(`/products/${productId}/reviews/${reviewId}`, {
+      method: "DELETE",
+    });
+  }
 }
 
-// Export a singleton instance of the class
 export default new ApiService();

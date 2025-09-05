@@ -259,8 +259,8 @@ const ProductUploadForm = () => {
             newErrors.productdescription = 'Product description is required';
         } else if (product.productdescription.length < 10) {
             newErrors.productdescription = 'Product description must be at least 10 characters long';
-        } else if (product.productdescription.length > 2000) {
-            newErrors.productdescription = 'Product description cannot exceed 2000 characters';
+        } else if (product.productdescription.length > 5000) {
+            newErrors.productdescription = 'Product description cannot exceed 5000 characters';
         }
 
         if (!product.category) {
@@ -650,12 +650,12 @@ const ProductUploadForm = () => {
                                 value={currentProduct.productdescription} 
                                 onChange={handleInputChange} 
                                 className="form-textarea" 
-                                placeholder="Describe your product in detail (10-2000 characters)..." 
-                                maxLength="2000"
-                                rows="4"
+                                placeholder="Describe your product in detail (10-5000 characters)..." 
+                                maxLength="5000"
+                                rows="10"
                             />
                             <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                                {currentProduct.productdescription.length}/2000 characters
+                                {currentProduct.productdescription.length}/5000 characters
                             </div>
                             {errors[activeProductIndex]?.productdescription && (
                                 <div className="error-message">{errors[activeProductIndex].productdescription}</div>

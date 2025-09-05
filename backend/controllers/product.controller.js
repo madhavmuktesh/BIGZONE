@@ -86,97 +86,57 @@ const handleAsyncError = (fn) => (req, res, next) => {
 
 // CREATE SINGLE PRODUCT
 export const createProduct = handleAsyncError(async (req, res) => {
-  const { productname, productprice, originalPrice, productdescription, category, subcategory, specifications } = req.body;
+  // 1. Check for files (Mongoose can't validate `req.files`)
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ success: false, message: "At least one image is required" });
+  }
+  if (req.files.length > 10) {
+    return res.status(400).json({ success: false, message: "Maximum 10 images allowed" });
+  }
 
-  // ===== START: ADDED LOGS FOR DEBUGGING =====
-  console.log("--- [DEBUG] Received createProduct request ---");
-  console.log("Body:", req.body);
-  console.log("Files:", req.files);
-  console.log("-------------------------------------------");
-  // ===== END: ADDED LOGS FOR DEBUGGING =====
+  // 2. Prepare data by parsing strings from the form
+  const tags = JSON.parse(req.body.tags || '[]');
+  const stock = JSON.parse(req.body.stock || '{}');
+  const specifications = JSON.parse(req.body.specifications || '{}');
 
-  if (!isNonEmptyString(productname) || !isNonEmptyString(productdescription) || !isNonEmptyString(category)) {
-    console.error("[DEBUG] Validation failed: Missing or invalid required fields.");
-    return res.status(400).json({ success: false, message: "Missing or invalid required fields" });
-  }
-  if (!req.files || req.files.length === 0) {
-    console.error("[DEBUG] Validation failed: At least one image is required.");
-    return res.status(400).json({ success: false, message: "At least one image is required" });
-  }
-  if (req.files.length > 10) {
-    console.error("[DEBUG] Validation failed: Maximum 10 images allowed.");
-    return res.status(400).json({ success: false, message: "Maximum 10 images allowed" });
-  }
+  // 3. Upload images to Cloudinary
+  let uploadedImages = [];
+  try {
+    // Use Promise.all for faster parallel uploads
+    uploadedImages = await Promise.all(
+      req.files.map(file => handleCloudinaryUpload(file))
+    );
+  } catch (e) {
+    // If any upload fails, attempt to delete any that succeeded
+    if (uploadedImages.length > 0) {
+      await deleteCloudinaryPublicIds(uploadedImages.map(img => img.public_id));
+    }
+    // Let the async error handler catch and report the error
+    throw new Error(`Image upload failed: ${e.message}`);
+  }
 
-  // Numbers
-  const priceNum = toFiniteNumber(productprice);
-  if (!Number.isFinite(priceNum) || priceNum < 0) {
-    console.error("[DEBUG] Validation failed: Invalid product price.", { productprice });
-    return res.status(400).json({ success: false, message: "Invalid product price" });
-  }
-  const origRaw = originalPrice ?? undefined;
-  const origNum = origRaw === undefined ? undefined : toFiniteNumber(origRaw);
-  if (origNum !== undefined && (!Number.isFinite(origNum) || origNum < priceNum)) {
-    console.error("[DEBUG] Validation failed: Original price must be >= current price.");
-    return res.status(400).json({ success: false, message: "Original price must be >= current price" });
-  }
+  // 4. Create a new product instance
+  // We pass the data directly; Mongoose will validate it on .save()
+  const newProduct = new Product({
+    ...req.body,             // Pass all other fields from the form
+    tags,                    // Overwrite with our parsed versions
+    stock,
+    specifications,
+    images: uploadedImages,  // Add the uploaded image data
+    createdBy: req.id,       // Set the creator from auth middleware
+  });
 
-  // Tags
-  const parsedTagsRaw = parseMaybeJSON(req.body.tags ?? undefined);
-  if (parsedTagsRaw === Symbol.for("JSON_ERROR")) {
-    console.error("[DEBUG] Validation failed: Invalid tags JSON.");
-    return res.status(400).json({ success: false, message: "Invalid tags JSON" });
-  }
-  let parsedTags = sanitizeTags(parsedTagsRaw ?? []);
-  if (parsedTags === Symbol.for("TAGS_SHAPE")) {
-    console.error("[DEBUG] Validation failed: Tags shape is invalid.");
-    return res.status(400).json({ success: false, message: "Tags must be non-empty strings up to 20 chars" });
-  }
-  if (req.role === "user" && !parsedTags.includes("usersold")) {
-    parsedTags.push("usersold");
-  }
+  // 5. Save the product to the database
+  // Mongoose automatically runs ALL validation from your schema here.
+  // If it fails, it throws a ValidationError that your global error handler will catch.
+  await newProduct.save();
+  await newProduct.populate("createdBy", "username email");
 
-  // Stock
-  const stockRaw = parseMaybeJSON(req.body.stock ?? undefined);
-  if (stockRaw === Symbol.for("JSON_ERROR")) {
-    console.error("[DEBUG] Validation failed: Invalid stock JSON.");
-    return res.status(400).json({ success: false, message: "Invalid stock JSON" });
-  }
-  const stock = validateStock(stockRaw);
-  if (stock === Symbol.for("STOCK_SHAPE")) {
-    console.error("[DEBUG] Validation failed: Stock shape is invalid.");
-    return res.status(400).json({ success: false, message: "Invalid stock object" });
-  }
-
-  // Upload images
-  const uploaded = [];
-  try {
-    for (const file of req.files) {
-      uploaded.push(await handleCloudinaryUpload(file));
-    }
-  } catch (e) {
-    if (uploaded.length) await deleteCloudinaryPublicIds(uploaded.map(i => i.public_id));
-    return res.status(502).json({ success: false, message: e.message });
-  }
-
-  const newProduct = new Product({
-    productname: productname.trim(),
-    productprice: priceNum,
-    originalPrice: origNum,
-    productdescription: productdescription.trim(),
-    category: category.trim(),
-    subcategory: subcategory ? subcategory.trim() : undefined,
-    tags: parsedTags,
-    specifications: specifications ? (typeof specifications === "string" ? parseMaybeJSON(specifications) : specifications) : undefined,
-    stock,
-    createdBy: req.id,
-    images: uploaded,
-  });
-
-  await newProduct.save();
-  await newProduct.populate("createdBy", "username email");
-
-  return res.status(201).json({ success: true, message: "Product created successfully", product: newProduct });
+  return res.status(201).json({ 
+    success: true, 
+    message: "Product created successfully", 
+    product: newProduct 
+  });
 });
 
 export const createMultipleProducts = handleAsyncError(async (req, res) => {
@@ -621,4 +581,39 @@ export const searchProducts = handleAsyncError(async (req, res) => {
       message: "Search failed" 
     });
   }
+});
+export const getEcoZoneProducts = handleAsyncError(async (req, res) => {
+  // Find products where the ecoScore is greater than 60.
+  const ecoFriendlyProducts = await Product.find({ ecoScore: { $gt: 60 } })
+    .sort({ ecoScore: -1 }) // Optional: Sort by highest score first
+    .populate("createdBy", "username email");
+
+  return res.status(200).json({ 
+    success: true, 
+    count: ecoFriendlyProducts.length,
+    products: ecoFriendlyProducts 
+  });
+});
+
+// In controllers/product.controller.js
+
+export const getSingleecoProduct = handleAsyncError(async (req, res) => {
+  const { id } = req.params;
+  validateObjectId(id, "product ID");
+
+  // ===== MODIFIED: Find by ID AND check the ecoScore =====
+  const product = await Product.findOne({
+    _id: id,
+    ecoScore: { $gt: 60 } // Only find the product if its score is > 60
+  })
+    .populate("createdBy", "username email")
+    .populate("productreviews.user", "username");
+  // =======================================================
+
+  // If no product matches BOTH conditions, send a 404 error
+  if (!product) {
+    return res.status(404).json({ success: false, message: "Eco-friendly product not found" });
+  }
+
+  return res.status(200).json({ success: true, product });
 });

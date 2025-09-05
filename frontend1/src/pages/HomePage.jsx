@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Dashboard from '../components/Dashboard';
 import ProductGrid from '../components/ProductGrid';
 import '../styles/Homepage.css';
+import ApiService from "../services/api";
 
 const HomePage = () => {
   const [allProducts, setAllProducts] = useState([]);
@@ -17,7 +18,7 @@ const HomePage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/products');
+      const response = await fetch('/api/v1/products/ecozone');
       const data = await response.json();
       
       if (data.success) {

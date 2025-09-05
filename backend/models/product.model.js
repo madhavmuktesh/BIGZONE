@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
+import { getEcoScoresForProduct } from '../services/geminiService.js';
 
 // ===== IMAGE SCHEMA =====
 const imageSchema = new mongoose.Schema({
@@ -18,7 +19,7 @@ const imageSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// ===== REVIEW SCHEMA ===== (unchanged)
+// ===== REVIEW SCHEMA =====
 const reviewSchema = new mongoose.Schema({
   review: {
     type: String,
@@ -31,10 +32,6 @@ const reviewSchema = new mongoose.Schema({
     required: [true, "Rating is required"],
     min: [1, "Rating must be at least 1"],
     max: [5, "Rating cannot exceed 5"],
-    validate: {
-      validator: Number.isInteger,
-      message: "Rating must be a whole number"
-    }
   },
   images: [imageSchema],
   user: {
@@ -42,14 +39,9 @@ const reviewSchema = new mongoose.Schema({
     ref: "User",
     required: [true, "User reference is required"]
   },
-  helpfulCount: { type: Number, default: 0 },
-  helpfulUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  isVerified: { type: Boolean, default: false }
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-// ===== ENHANCED PRODUCT SCHEMA =====
+// ===== PRODUCT SCHEMA =====
 const productSchema = new mongoose.Schema({
   productname: {
     type: String,
@@ -77,7 +69,7 @@ const productSchema = new mongoose.Schema({
   originalPrice: {
     type: Number,
     validate: {
-      validator: function (v) {
+      validator: function(v) {
         return !v || (v >= this.productprice);
       },
       message: "Original price should be greater than or equal to current price"
@@ -88,6 +80,7 @@ const productSchema = new mongoose.Schema({
     required: [true, "Product description is required"],
     trim: true,
     minlength: [10, "Product description must be at least 10 characters long"],
+    maxlength: [5000, "Product description cannot exceed 5000 characters"]
   },
   images: {
     type: [imageSchema],
@@ -112,13 +105,6 @@ const productSchema = new mongoose.Schema({
   reviewStats: {
     averageRating: { type: Number, default: 0, min: 0, max: 5 },
     totalReviews: { type: Number, default: 0, min: 0 },
-    ratingDistribution: {
-      '5': { type: Number, default: 0 },
-      '4': { type: Number, default: 0 },
-      '3': { type: Number, default: 0 },
-      '2': { type: Number, default: 0 },
-      '1': { type: Number, default: 0 }
-    }
   },
   category: {
     type: String,
@@ -138,10 +124,6 @@ const productSchema = new mongoose.Schema({
     trim: true,
     lowercase: true,
     maxlength: 20,
-    validate: {
-      validator: v => v.trim() !== "",
-      message: "Tags cannot be empty strings"
-    }
   }],
   stock: {
     quantity: { type: Number, default: 1, min: 0 }
@@ -151,6 +133,22 @@ const productSchema = new mongoose.Schema({
     ref: "User",
     required: [true, "Creator reference is required"],
     index: true
+  },
+  // --- ECO-SCORE FIELDS ---
+  ecoScore: {
+    type: Number,
+    default: 0,
+    min: 0,
+    index: true
+  },
+  co2SavedKg: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  ecoAnalysisJustification: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true,
@@ -158,54 +156,38 @@ const productSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// ===== PRE-SAVE HOOK =====
+// --- PRE-SAVE HOOKS ---
 productSchema.pre('save', function(next) {
-    if (this.isModified('productname')) {
-        this.slug = slugify(this.productname, { lower: true, strict: true, trim: true });
-    }
-    next();
+  if (this.isModified('productname')) {
+    this.slug = slugify(this.productname, { lower: true, strict: true, trim: true });
+  }
+  next();
 });
 
-// ===== ENHANCED INDEXES FOR COMPREHENSIVE SEARCH =====
+productSchema.pre('save', async function(next) {
+  if (this.isModified('productname') || this.isModified('productdescription') || this.isModified('category') || this.isModified('tags')) {
+    const scores = await getEcoScoresForProduct(this);
+    if (scores) {
+      this.ecoScore = scores.ecoScore;
+      this.co2SavedKg = scores.co2SavedKg;
+      this.ecoAnalysisJustification = scores.justification;
+    }
+  }
+  next();
+});
 
-// 🔥 MAIN TEXT INDEX - includes all searchable fields
+// --- INDEXES ---
 productSchema.index({
   productname: "text",
   productdescription: "text",
   category: "text",
   subcategory: "text",
   "specifications.brand": "text",
-  "specifications.model": "text",
-  "specifications.color": "text",
   tags: "text"
-}, {
-  name: "comprehensive_text_search",
-  weights: {
-    productname: 10,        // Highest weight for product name
-    "specifications.brand": 8,  // High weight for brand
-    category: 6,            // Medium-high weight for category
-    subcategory: 5,         // Medium weight for subcategory
-    "specifications.model": 4,  // Medium weight for model
-    tags: 3,               // Lower weight for tags
-    productdescription: 2,  // Lower weight for description
-    "specifications.color": 1   // Lowest weight for color
-  }
 });
 
-// 🔥 INDIVIDUAL FIELD INDEXES for regex searches
-productSchema.index({ category: 1 });
-productSchema.index({ subcategory: 1 });
-productSchema.index({ "specifications.brand": 1 });
-productSchema.index({ "specifications.model": 1 });
-productSchema.index({ tags: 1 });
-
-// 🔥 COMPOUND INDEXES for common search patterns
-productSchema.index({ category: 1, subcategory: 1 });
-productSchema.index({ "specifications.brand": 1, category: 1 });
-productSchema.index({ productprice: 1, category: 1 });
-
-// ===== VIRTUALS ===== (unchanged)
-productSchema.virtual("isInStock").get(function () {
+// --- VIRTUALS ---
+productSchema.virtual("isInStock").get(function() {
   return this.stock.quantity > 0;
 });
 

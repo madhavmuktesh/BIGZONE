@@ -1,35 +1,31 @@
-// src/components/ProductHeader.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeftIcon, HeartIcon, ShoppingCartIcon } from './Icons';
 import ApiService from '../services/api';
-import { useAuth } from '../context/AuthContext'; // ✅ to get user + token
+import { useAuth } from '../context/AuthContext';
 
 const ProductHeader = ({ product }) => {
   const navigate = useNavigate();
-  const { user, token } = useAuth(); // ✅ get logged in user + token
+  const { user, token } = useAuth();
 
   const [cartCount, setCartCount] = useState(0);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
-  // Fetch cart + wishlist when product changes
   useEffect(() => {
-    if (user && token) {
+    if (user && token && product) {
       fetchCartCount();
-      if (product) checkWishlistStatus();
+      checkWishlistStatus();
     }
   }, [product, user, token]);
 
   const fetchCartCount = async () => {
-    if (!token) return; // ✅ skip if not logged in
     try {
       const response = await ApiService.request('/cart', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const totalItems =
-        response.cart?.items?.reduce((total, item) => total + item.quantity, 0) ||
-        0;
+        response.cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
       setCartCount(totalItems);
     } catch (error) {
       console.error('Error fetching cart count:', error);
@@ -38,14 +34,12 @@ const ProductHeader = ({ product }) => {
   };
 
   const checkWishlistStatus = async () => {
-    if (!product || !token) return;
     try {
       const response = await ApiService.request('/wishlist', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const isProductInWishlist =
-        response.wishlist?.items?.some((item) => item.product === product._id) ||
-        false;
+        response.wishlist?.items?.some((item) => item.product === product._id) || false;
       setIsInWishlist(isProductInWishlist);
     } catch (error) {
       console.error('Error checking wishlist status:', error);

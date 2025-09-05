@@ -1,4 +1,3 @@
-// src/pages/ProductDetailPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../styles/ProductPage.css";
@@ -9,31 +8,41 @@ import ProductInfo from "../components/ProductInfo";
 import ApiService from "../services/api";
 
 const ProductDetailPage = () => {
-  const { id } = useParams(); // expects /products/:id
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!id) return; // do nothing if no id
+
+    let isMounted = true; // avoid setting state if component unmounted
+
     const fetchProduct = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
         const response = await ApiService.getProduct(id);
 
-        // Ensure product data exists
         if (!response || !response.product) {
           throw new Error("Product not found");
         }
 
-        setProduct(response.product);
+        if (isMounted) setProduct(response.product);
       } catch (err) {
         console.error("Failed to fetch product:", err);
-        setError(err.message || "Failed to load product");
+        if (isMounted) setError(err.message || "Failed to load product");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
-    if (id) fetchProduct();
+    fetchProduct();
+
+    return () => {
+      isMounted = false; // cleanup flag
+    };
   }, [id]);
 
   if (loading) return <div className="loading">Loading product...</div>;

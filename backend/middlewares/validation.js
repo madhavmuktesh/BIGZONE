@@ -36,7 +36,7 @@ export const validateProductInput = [
     body('productdescription')
         .trim()
         .notEmpty().withMessage('Product description is required')
-        .isLength({ min: 10, max: 2000 }).withMessage('Product description must be between 10 and 2000 characters'),
+        .isLength({ min: 10, max: 5000 }).withMessage('Product description must be between 10 and 5000 characters'),
     body('productprice')
         .notEmpty().withMessage('Product price is required')
         .isFloat({ min: 0.01, max: 999999 }).withMessage('Product price must be between 0.01 and 999,999'),

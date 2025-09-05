@@ -13,6 +13,8 @@ import {
   updateProduct,
   deleteProduct,
   handleProductErrors,
+  getEcoZoneProducts,
+  getSingleecoProduct,
 } from "../controllers/product.controller.js";
 import { searchProducts } from "../controllers/product.controller.js";
 
@@ -37,7 +39,9 @@ const router = express.Router();
 router.get("/search", searchProducts);   // <-- move this up
 router.get("/", getAllProducts);
 router.get("/user/:userId", getUserProducts); // must come before /:id
-router.get("/:id", getSingleProduct);
+router.get('/ecozone', getEcoZoneProducts); 
+router.get('/:id', getSingleProduct);
+router.get("/ecozone/:id",getSingleecoProduct);
 
 /* ======================
    🔒 AUTHENTICATED ROUTES

@@ -111,3 +111,7 @@ export const fetchAllProductsAPI = () => {
 export const fetchProductByIdAPI = (id) => {
   return authenticatedFetch(`${API_BASE_URL}/products/${id}`);
 };
+
+export const fetchecoProductsAPI = () => {
+  return authenticatedFetch(`${API_BASE_URL}/products/ecozone`);
+};

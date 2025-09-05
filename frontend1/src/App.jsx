@@ -62,6 +62,7 @@ function App() {
                 <Route path="/ecozone" element={<HomePage />} />
                 <Route path="/products/:id" element={<Productmain />} />
                 <Route path="/search" element={<SearchResults />} />
+                <Route path="/ecozone/products/:id" element={<ProductDetailPage/>}/>
 
                 {/* Auth-only gates */}
                 <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />
