@@ -18,7 +18,8 @@ import RegisterPage from "./pages/registerpage.jsx";
 import ProfilePage from "./pages/profilepage.jsx";
 import EditProfile from "./pages/profileedit.jsx";
 import SearchResults from "./pages/SearchResults";
-
+import AddressPage from "./pages/AddressPage";
+import AddAddressPage from "./pages/AddAddressPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
 import Header from "./components/Header/Headermain.jsx";
@@ -73,6 +74,9 @@ function App() {
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/orders" element={<OrdersPage />} />
                   <Route path="/editprofile" element={<EditProfile />} />
+                  <Route path="/address" element={<AddressPage />} />
+                  <Route path="/address/add" element={<AddAddressPage />} />
+                  <Route path="/address/edit/:id" element={<AddAddressPage />} />
                 </Route>
 
                 {/* Fallback */}

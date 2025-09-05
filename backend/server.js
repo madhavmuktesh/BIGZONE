@@ -13,6 +13,9 @@ import userRoutes from "./routes/user.route.js";
 import productRoutes from "./routes/product.route.js";
 import orderRoutes from "./routes/order.route.js";
 import cartRoutes from "./routes/cart.route.js";
+import addressRoutes from "./routes/address.route.js";
+
+
 
 dotenv.config();
 
@@ -62,6 +65,7 @@ app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
+app.use("/api/v1/addresses", addressRoutes);
 
 app.get(`${API_PREFIX}/health`, (req, res) => {
   res.status(200).json({ success: true, message: "Server is healthy" });

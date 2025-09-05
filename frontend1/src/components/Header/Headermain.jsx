@@ -35,9 +35,9 @@ const Header = () => {
 
     const handleDeliveryClick = () => {
         if (isAuthenticated) {
-            navigate('/profile/edit');
+            navigate('/address');  // Redirect to AddressPage
         } else {
-            handleProtectedAction('/profile/edit');
+            handleProtectedAction('/address');
         }
     };
 
