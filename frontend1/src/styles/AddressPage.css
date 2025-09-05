@@ -1,7 +1,7 @@
 /* Import Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* Define custom colors as CSS variables */
+/* Define custom colors as CSS variables - Keep these global */
 :root {
     --teal-midnight: #051914;
     --dipped-cream: #FCF6EB;
@@ -14,90 +14,135 @@
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
-/* Base Body & Layout Styles */
-body {
+/* Address List Page Specific Styles */
+.address-list-body {
     font-family: 'Inter', sans-serif;
     margin: 0;
 }
-.page-background {
+
+.address-list-page-background {
     background-color: var(--dipped-cream);
     min-height: 100vh;
 }
-.container {
+
+.address-list-container {
     max-width: 56rem; /* Corresponds to max-w-4xl */
     margin: 0 auto;
     padding: 0 1rem;
 }
-.main-container {
+
+.address-list-main-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
 }
 
-/* Header */
-.header-nav {
+/* Header Styles */
+.address-list-header-nav {
     background-color: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(4px);
     box-shadow: var(--shadow-sm);
     border-bottom: 1px solid rgba(236, 234, 190, 0.5);
     height: 4rem;
 }
-.header-content {
+
+.address-list-header-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 100%;
 }
-.header-left, .header-right {
+
+.address-list-header-left, 
+.address-list-header-right {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
-.header-title {
+
+.address-list-header-title {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--last-lettuce);
 }
-.header-right span {
+
+.address-list-header-right span {
     font-size: 0.875rem;
     font-weight: 500;
     color: rgba(5, 25, 20, 0.6);
 }
-.icon-button {
+
+.address-list-icon-button {
     background: none;
     border: none;
     cursor: pointer;
     color: var(--evergreen);
     transition: color 0.2s;
 }
-.icon-button:hover { color: var(--coach-green); }
-.icon-button svg { width: 1.5rem; height: 1.5rem; }
 
-/* Breadcrumb */
-.breadcrumb {
-    display: flex; align-items: center; gap: 0.5rem;
-    font-size: 0.875rem; color: rgba(5, 25, 20, 0.6);
+.address-list-icon-button:hover { 
+    color: var(--coach-green); 
+}
+
+.address-list-icon-button svg { 
+    width: 1.5rem; 
+    height: 1.5rem; 
+}
+
+/* Breadcrumb Styles */
+.address-list-breadcrumb {
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem;
+    font-size: 0.875rem; 
+    color: rgba(5, 25, 20, 0.6);
     margin-bottom: 2rem;
 }
-.breadcrumb a { color: inherit; text-decoration: none; transition: color 0.2s; }
-.breadcrumb a:hover { color: var(--evergreen); }
-.breadcrumb span { color: var(--evergreen); font-weight: 500; }
-.breadcrumb svg { width: 1rem; height: 1rem; }
 
-/* Page Header & Search */
-.page-header {
+.address-list-breadcrumb a { 
+    color: inherit; 
+    text-decoration: none; 
+    transition: color 0.2s; 
+}
+
+.address-list-breadcrumb a:hover { 
+    color: var(--evergreen); 
+}
+
+.address-list-breadcrumb span { 
+    color: var(--evergreen); 
+    font-weight: 500; 
+}
+
+.address-list-breadcrumb svg { 
+    width: 1rem; 
+    height: 1rem; 
+}
+
+/* Page Header & Search Styles */
+.address-list-page-header {
     display: flex;
     flex-direction: column;
     margin-bottom: 2rem;
 }
-.page-title {
-    font-size: 1.875rem; font-weight: 700;
-    color: var(--teal-midnight); margin: 0 0 0.5rem 0;
+
+.address-list-page-title {
+    font-size: 1.875rem; 
+    font-weight: 700;
+    color: var(--teal-midnight); 
+    margin: 0 0 0.5rem 0;
 }
-.page-subtitle {
-    color: rgba(5, 25, 20, 0.7); margin: 0;
+
+.address-list-page-subtitle {
+    color: rgba(5, 25, 20, 0.7); 
+    margin: 0;
 }
-.search-wrapper { position: relative; margin-top: 1rem; }
-.search-input {
+
+.address-list-search-wrapper { 
+    position: relative; 
+    margin-top: 1rem; 
+}
+
+.address-list-search-input {
     width: 100%;
     padding: 0.5rem 2.5rem 0.5rem 1rem;
     background-color: rgba(255, 255, 255, 0.7);
@@ -105,20 +150,31 @@ body {
     border-radius: 0.75rem;
     transition: all 0.2s;
 }
-.search-input:focus {
+
+.address-list-search-input:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(18, 88, 73, 0.2);
     border-color: var(--evergreen);
 }
-.search-icon {
-    position: absolute; right: 0.75rem; top: 0.65rem;
-    width: 1rem; height: 1rem; color: rgba(5, 25, 20, 0.4);
+
+.address-list-search-icon {
+    position: absolute; 
+    right: 0.75rem; 
+    top: 0.65rem;
+    width: 1rem; 
+    height: 1rem; 
+    color: rgba(5, 25, 20, 0.4);
 }
 
-/* Buttons */
-.add-button-container { margin-bottom: 2rem; }
-.btn {
-    display: inline-flex; align-items: center; gap: 0.5rem;
+/* Button Styles */
+.address-list-add-button-container { 
+    margin-bottom: 2rem; 
+}
+
+.address-list-btn {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 0.5rem;
     font-weight: 500;
     padding: 0.5rem 1rem;
     border: none;
@@ -126,115 +182,254 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
 }
-.btn:hover { transform: translateY(-1px); }
-.btn-primary {
-    background-color: var(--evergreen); color: white;
+
+.address-list-btn:hover { 
+    transform: translateY(-1px); 
+}
+
+.address-list-btn-primary {
+    background-color: var(--evergreen); 
+    color: white;
     box-shadow: var(--shadow-lg);
     padding: 0.75rem 1.5rem;
 }
-.btn-primary:hover { background-color: var(--coach-green); box-shadow: var(--shadow-xl); }
-.btn-dark { background-color: var(--teal-midnight); color: white; }
-.btn-dark:hover { background-color: var(--coach-green); }
-.btn-light { background-color: var(--last-lettuce); color: var(--teal-midnight); }
-.btn-light:hover { background-color: var(--white-asparagus); }
-.btn-icon { width: 1.25rem; height: 1.25rem; }
-.btn .btn-icon { width: 1rem; height: 1rem; }
 
+.address-list-btn-primary:hover { 
+    background-color: var(--coach-green); 
+    box-shadow: var(--shadow-xl); 
+}
+
+.address-list-btn-dark { 
+    background-color: var(--teal-midnight); 
+    color: white; 
+}
+
+.address-list-btn-dark:hover { 
+    background-color: var(--coach-green); 
+}
+
+.address-list-btn-light { 
+    background-color: var(--last-lettuce); 
+    color: var(--teal-midnight); 
+}
+
+.address-list-btn-light:hover { 
+    background-color: var(--white-asparagus); 
+}
+
+.address-list-btn-icon { 
+    width: 1.25rem; 
+    height: 1.25rem; 
+}
+
+.address-list-btn .address-list-btn-icon { 
+    width: 1rem; 
+    height: 1rem; 
+}
 
 /* Address List & Cards */
-.address-list { display: flex; flex-direction: column; gap: 1.5rem; }
-.address-card {
+.address-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1.5rem; 
+}
+
+.address-list-card {
     background-color: rgba(236, 234, 190, 0.6);
     backdrop-filter: blur(4px);
     border-radius: 1rem;
     box-shadow: var(--shadow-lg);
     padding: 1.5rem;
     border: 1px solid var(--white-asparagus);
-    display: flex; flex-direction: column;
+    display: flex; 
+    flex-direction: column;
     transition: all 0.3s ease;
 }
-.address-card:hover {
+
+.address-list-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-xl);
 }
-.card-main-content { flex: 1; margin-bottom: 1rem; }
-.card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-.card-icon-wrapper {
-    width: 2.5rem; height: 2.5rem;
+
+.address-list-card-main-content { 
+    flex: 1; 
+    margin-bottom: 1rem; 
+}
+
+.address-list-card-header { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    margin-bottom: 1rem; 
+}
+
+.address-list-card-icon-wrapper {
+    width: 2.5rem; 
+    height: 2.5rem;
     background-color: rgba(18, 88, 73, 0.1);
     border-radius: 9999px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
 }
-.card-icon { width: 1.25rem; height: 1.25rem; color: var(--evergreen); }
-.card-name {
-    font-size: 1.125rem; font-weight: 700; margin: 0;
-    color: var(--teal-midnight); display: flex; align-items: center;
+
+.address-list-card-icon { 
+    width: 1.25rem; 
+    height: 1.25rem; 
+    color: var(--evergreen); 
 }
-.star-icon { width: 1rem; height: 1rem; color: var(--last-lettuce); margin-left: 0.5rem; }
-.default-badge {
-    font-size: 0.75rem; font-weight: 500;
+
+.address-list-card-name {
+    font-size: 1.125rem; 
+    font-weight: 700; 
+    margin: 0;
+    color: var(--teal-midnight); 
+    display: flex; 
+    align-items: center;
+}
+
+.address-list-star-icon { 
+    width: 1rem; 
+    height: 1rem; 
+    color: var(--last-lettuce); 
+    margin-left: 0.5rem; 
+}
+
+.address-list-default-badge {
+    font-size: 0.75rem; 
+    font-weight: 500;
     background-color: rgba(170, 221, 102, 0.2);
     color: var(--evergreen);
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
     margin-left: 0.5rem;
 }
-.card-address-type { font-size: 0.875rem; color: rgba(5, 25, 20, 0.6); margin: 0; }
-.address-details-box {
+
+.address-list-card-address-type { 
+    font-size: 0.875rem; 
+    color: rgba(5, 25, 20, 0.6); 
+    margin: 0; 
+}
+
+.address-list-address-details-box {
     background-color: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(4px);
     border-radius: 0.75rem;
     padding: 1rem;
-    display: flex; flex-direction: column; gap: 0.5rem;
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.5rem;
 }
-.address-line { margin: 0; color: rgba(5, 25, 20, 0.8); }
-.address-line.font-medium { font-weight: 500; color: var(--teal-midnight); }
-.address-phone {
-    display: flex; align-items: center; gap: 0.5rem;
-    margin-top: 0.75rem; padding-top: 0.5rem;
-    border-top: 1px solid var(--white-asparagus);
-    font-size: 0.875rem; color: rgba(5, 25, 20, 0.7);
-}
-.phone-icon { width: 1rem; height: 1rem; color: var(--evergreen); }
-.card-actions { display: flex; flex-direction: row; gap: 0.75rem; }
 
-/* Info Box */
-.info-box {
+.address-list-address-line { 
+    margin: 0; 
+    color: rgba(5, 25, 20, 0.8); 
+}
+
+.address-list-address-line.font-medium { 
+    font-weight: 500; 
+    color: var(--teal-midnight); 
+}
+
+.address-list-address-phone {
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem;
+    margin-top: 0.75rem; 
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--white-asparagus);
+    font-size: 0.875rem; 
+    color: rgba(5, 25, 20, 0.7);
+}
+
+.address-list-phone-icon { 
+    width: 1rem; 
+    height: 1rem; 
+    color: var(--evergreen); 
+}
+
+.address-list-card-actions { 
+    display: flex; 
+    flex-direction: row; 
+    gap: 0.75rem; 
+}
+
+/* Info Box Styles */
+.address-list-info-box {
     margin-top: 3rem;
     background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 1rem; border: 1px solid var(--white-asparagus);
-    padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem;
+    border-radius: 1rem; 
+    border: 1px solid var(--white-asparagus);
+    padding: 1.5rem; 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 1rem;
 }
-.info-icon-wrapper {
-    width: 2rem; height: 2rem; background-color: rgba(170, 221, 102, 0.2);
-    border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+
+.address-list-info-icon-wrapper {
+    width: 2rem; 
+    height: 2rem; 
+    background-color: rgba(170, 221, 102, 0.2);
+    border-radius: 9999px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
     flex-shrink: 0;
 }
-.info-icon { width: 1rem; height: 1rem; color: var(--evergreen); }
-.info-title { font-weight: 600; color: var(--teal-midnight); margin: 0 0 0.5rem 0; }
-.info-list {
-    list-style: none; padding: 0; margin: 0;
-    font-size: 0.875rem; color: rgba(5, 25, 20, 0.7);
-    display: flex; flex-direction: column; gap: 0.25rem;
+
+.address-list-info-icon { 
+    width: 1rem; 
+    height: 1rem; 
+    color: var(--evergreen); 
+}
+
+.address-list-info-title { 
+    font-weight: 600; 
+    color: var(--teal-midnight); 
+    margin: 0 0 0.5rem 0; 
+}
+
+.address-list-info-list {
+    list-style: none; 
+    padding: 0; 
+    margin: 0;
+    font-size: 0.875rem; 
+    color: rgba(5, 25, 20, 0.7);
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.25rem;
 }
 
 /* Responsive Styles */
 @media (min-width: 640px) { /* sm breakpoint */
-    .container { padding: 0 1.5rem; }
-    .page-header {
+    .address-list-container { 
+        padding: 0 1.5rem; 
+    }
+    .address-list-page-header {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
     }
-    .search-wrapper { margin-top: 0; }
-    .search-input { width: 16rem; }
+    .address-list-search-wrapper { 
+        margin-top: 0; 
+    }
+    .address-list-search-input { 
+        width: 16rem; 
+    }
 }
 
 @media (min-width: 1024px) { /* lg breakpoint */
-    .container { padding: 0 2rem; }
-    .address-card { flex-direction: row; align-items: flex-start; }
-    .card-main-content { margin-bottom: 0; }
-    .card-actions {
+    .address-list-container { 
+        padding: 0 2rem; 
+    }
+    .address-list-card { 
+        flex-direction: row; 
+        align-items: flex-start; 
+    }
+    .address-list-card-main-content { 
+        margin-bottom: 0; 
+    }
+    .address-list-card-actions {
         flex-direction: column;
         gap: 0.75rem;
         margin-left: 1.5rem;

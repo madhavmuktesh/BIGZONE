@@ -545,21 +545,80 @@ export const handleProductErrors = (error, req, res, next) => {
   return res.status(500).json({ success: false, message: "Internal server error" });
 };
 
-// --- SEARCH PRODUCTS ---
 export const searchProducts = handleAsyncError(async (req, res) => {
-  const { query } = req.query;
+  try {
+    const { query, page = 1, limit = 20 } = req.query;
 
-  if (!query || query.trim().length === 0) {
-    return res.status(400).json({ success: false, message: "Search query is required" });
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({ success: false, message: "Search query is required" });
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = Math.min(parseInt(limit), 50); // Max 50 results per page
+
+    // Method 1: Text search (if text index exists)
+    let textResults = [];
+    try {
+      textResults = await Product.find(
+        { $text: { $search: query } },
+        { score: { $meta: "textScore" } }
+      )
+      .populate("createdBy", "username email")
+      .sort({ score: { $meta: "textScore" } })
+      .skip(skip)
+      .limit(limitNum);
+    } catch (textError) {
+      console.log('Text search not available, using regex only');
+    }
+
+    // Method 2: Regex search on individual fields
+    const regexResults = await Product.find({
+      $or: [
+        { productname: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+        { subcategory: { $regex: query, $options: "i" } },
+        { "specifications.brand": { $regex: query, $options: "i" } },
+        { "specifications.model": { $regex: query, $options: "i" } },
+        { "specifications.color": { $regex: query, $options: "i" } }
+      ]
+    })
+    .populate("createdBy", "username email")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limitNum);
+
+    // Combine results and remove duplicates
+    const allResults = [...textResults, ...regexResults];
+    const uniqueResults = allResults.filter((product, index, self) => 
+      index === self.findIndex(p => p._id.toString() === product._id.toString())
+    );
+
+    // Get total count for pagination (approximate)
+    const totalCount = await Product.countDocuments({
+      $or: [
+        { productname: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+        { subcategory: { $regex: query, $options: "i" } },
+        { "specifications.brand": { $regex: query, $options: "i" } },
+        { "specifications.model": { $regex: query, $options: "i" } },
+        { "specifications.color": { $regex: query, $options: "i" } }
+      ]
+    });
+
+    return res.status(200).json({ 
+      success: true, 
+      count: uniqueResults.length, 
+      totalCount,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalCount / limitNum),
+      products: uniqueResults 
+    });
+
+  } catch (error) {
+    console.error('Search Error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Search failed" 
+    });
   }
-
-  // Text search using MongoDB indexes
-  const products = await Product.find(
-    { $text: { $search: query } },   // <-- do NOT use ID validation here
-    { score: { $meta: "textScore" } }
-  )
-    .sort({ score: { $meta: "textScore" } })
-    .populate("createdBy", "username email");
-
-  return res.status(200).json({ success: true, count: products.length, products });
 });

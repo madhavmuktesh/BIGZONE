@@ -18,7 +18,7 @@ const imageSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// ===== REVIEW SCHEMA =====
+// ===== REVIEW SCHEMA ===== (unchanged)
 const reviewSchema = new mongoose.Schema({
   review: {
     type: String,
@@ -49,7 +49,7 @@ const reviewSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// ===== PRODUCT SCHEMA =====
+// ===== ENHANCED PRODUCT SCHEMA =====
 const productSchema = new mongoose.Schema({
   productname: {
     type: String,
@@ -63,12 +63,10 @@ const productSchema = new mongoose.Schema({
     unique: true,
     index: true
   },
-  // --- 👇 THIS IS THE FIX 👇 ---
   sku: {
     type: String,
     unique: true,
     required: true,
-    // Use the default property to generate the SKU on creation
     default: () => nanoid(10).toUpperCase()
   },
   productprice: {
@@ -160,7 +158,7 @@ const productSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// --- 👇 The pre-save hook is now simplified 👇 ---
+// ===== PRE-SAVE HOOK =====
 productSchema.pre('save', function(next) {
     if (this.isModified('productname')) {
         this.slug = slugify(this.productname, { lower: true, strict: true, trim: true });
@@ -168,11 +166,45 @@ productSchema.pre('save', function(next) {
     next();
 });
 
-// ===== INDEXES =====
-productSchema.index({ productname: "text", productdescription: "text", tags: "text" });
-productSchema.index({ category: 1 });
+// ===== ENHANCED INDEXES FOR COMPREHENSIVE SEARCH =====
 
-// ===== VIRTUALS =====
+// 🔥 MAIN TEXT INDEX - includes all searchable fields
+productSchema.index({
+  productname: "text",
+  productdescription: "text",
+  category: "text",
+  subcategory: "text",
+  "specifications.brand": "text",
+  "specifications.model": "text",
+  "specifications.color": "text",
+  tags: "text"
+}, {
+  name: "comprehensive_text_search",
+  weights: {
+    productname: 10,        // Highest weight for product name
+    "specifications.brand": 8,  // High weight for brand
+    category: 6,            // Medium-high weight for category
+    subcategory: 5,         // Medium weight for subcategory
+    "specifications.model": 4,  // Medium weight for model
+    tags: 3,               // Lower weight for tags
+    productdescription: 2,  // Lower weight for description
+    "specifications.color": 1   // Lowest weight for color
+  }
+});
+
+// 🔥 INDIVIDUAL FIELD INDEXES for regex searches
+productSchema.index({ category: 1 });
+productSchema.index({ subcategory: 1 });
+productSchema.index({ "specifications.brand": 1 });
+productSchema.index({ "specifications.model": 1 });
+productSchema.index({ tags: 1 });
+
+// 🔥 COMPOUND INDEXES for common search patterns
+productSchema.index({ category: 1, subcategory: 1 });
+productSchema.index({ "specifications.brand": 1, category: 1 });
+productSchema.index({ productprice: 1, category: 1 });
+
+// ===== VIRTUALS ===== (unchanged)
 productSchema.virtual("isInStock").get(function () {
   return this.stock.quantity > 0;
 });
@@ -184,7 +216,7 @@ productSchema.virtual("discountPercentage").get(function () {
   return Math.round(((this.originalPrice - this.productprice) / this.originalPrice) * 100);
 });
 
-// ===== METHODS =====
+// ===== METHODS ===== (unchanged)
 productSchema.methods.calculateReviewStats = function () {
   const reviews = this.productreviews;
   const totalReviews = reviews.length;

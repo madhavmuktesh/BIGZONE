@@ -79,11 +79,20 @@ function Onepage() {
         });
     };
 
-    if (loading) return <div style={{textAlign: 'center', padding: '5rem', fontSize: '1.5rem', color: 'white', background: '#1a1a1a', height: '100vh'}}>Loading your products...</div>
-    if (error) return <div style={{textAlign: 'center', padding: '5rem', color: '#ff8a80', background: '#1a1a1a', height: '100vh'}}>Error: {error}. Please check the API connection.</div>
+    if (loading) return (
+        <div style={{textAlign: 'center', padding: '5rem', fontSize: '1.5rem', color: 'white', background: '#1a1a1a', height: '100vh'}}>
+            Loading your products...
+        </div>
+    );
+
+    if (error) return (
+        <div style={{textAlign: 'center', padding: '5rem', color: '#ff8a80', background: '#1a1a1a', height: '100vh'}}>
+            Error: {error}. Please check the API connection.
+        </div>
+    );
 
     return (
-        <div style={{ overflowX: 'hidden' }}>
+        <div className="home-page" style={{ overflowX: 'hidden' }}>
             <Toaster position="top-center" reverseOrder={false} />
             <HeroCarousel />
             <Categories categories={categories} />
