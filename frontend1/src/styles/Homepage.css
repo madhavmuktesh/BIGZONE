@@ -1,3 +1,4 @@
+
 /* --- Google Font & CSS Variables --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -18,13 +19,15 @@
   box-sizing: border-box;
 }
 
-body {
+/* --- THIS IS THE ONLY CHANGE --- */
+.ecozone-theme body {
   font-family: 'Inter', sans-serif;
-  background-image: linear-gradient(to bottom right, var(--dipped-cream), var(--white-asparagus));
+  background-color: var(--dipped-cream); /* solid cream */
   min-height: 100vh;
   margin: 0;
   line-height: 1.6;
 }
+
 
 .container {
   max-width: 1280px;
@@ -646,6 +649,7 @@ body {
 
 .product-image-container {
   position: relative;
+  padding-top: 45%;
 }
 
 .product-image {
@@ -1156,7 +1160,17 @@ body {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+  .dashboard,
+.product-grid-container,
+.eco-highlights,
+.sustainability-stats {
+  background-color: var(--dipped-cream); /* same as body */
+  backdrop-filter: none; /* remove blur */
+  border: 1px solid rgba(156, 175, 136, 0.2); /* optional, can remove if not needed */
+}
+
+
+
   .stat-number {
     font-size: 2rem;
   }

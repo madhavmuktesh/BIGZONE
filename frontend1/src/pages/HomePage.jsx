@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Dashboard from '../components/Dashboard';
@@ -9,6 +8,18 @@ const HomePage = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // --- THIS IS THE ONLY ADDITION ---
+  // This hook manages the background theme for this page only.
+  useEffect(() => {
+    // When this page loads, add the class.
+    document.body.classList.add('ecozone-theme');
+    
+    // When you navigate away from this page, remove the class.
+    return () => {
+      document.body.classList.remove('ecozone-theme');
+    };
+  }, []); // The empty [] means this runs only on page load and unload.
 
   useEffect(() => {
     fetchProducts();

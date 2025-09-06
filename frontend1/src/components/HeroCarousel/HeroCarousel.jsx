@@ -1,5 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Slide from './Slide';
+
+// The Slide component that was missing from your code.
+// It renders the image, title, and button for each item in the carousel.
+const Slide = ({ slide, isActive }) => (
+    <div className="hero-carousel-slide">
+        <div className="hero-carousel-slide-inner">
+            <img 
+                src={slide.imageUrl} 
+                alt={slide.title} 
+                className="hero-carousel-image" 
+            />
+            <div className="hero-carousel-image-overlay"></div>
+            <article className={`hero-carousel-article ${isActive ? 'active' : ''}`}>
+                <h2 className="hero-carousel-title">{slide.title}</h2>
+                <div className="hero-carousel-button-wrapper">
+                    <button className="hero-carousel-button">
+                        {slide.buttonText}
+                    </button>
+                </div>
+            </article>
+        </div>
+    </div>
+);
 
 const HeroCarousel = () => {
     const slides = [
@@ -22,6 +44,7 @@ const HeroCarousel = () => {
 
     const [activeIndex, setActiveIndex] = useState(0);
     const trackRef = useRef(null);
+    const intervalRef = useRef(null); // Ref to hold the interval ID
 
     const handleNext = () => {
         setActiveIndex((prevIndex) => (prevIndex + 1) % slides.length);
@@ -31,17 +54,36 @@ const HeroCarousel = () => {
         setActiveIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
     };
 
+    const resetInterval = () => {
+        clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(handleNext, 5000);
+    };
+    
+    // Set up the auto-play interval
     useEffect(() => {
-        const interval = setInterval(handleNext, 5000);
-        return () => clearInterval(interval);
+        resetInterval(); // Start the interval initially
+        return () => clearInterval(intervalRef.current); // Cleanup on unmount
     }, []);
 
+    // Effect to handle the sliding animation
     useEffect(() => {
         if (trackRef.current && trackRef.current.children[0]) {
             const slideWidth = trackRef.current.children[0].offsetWidth;
             trackRef.current.style.transform = `translateX(-${activeIndex * slideWidth}px)`;
         }
     }, [activeIndex]);
+
+
+    const onPrevClick = () => {
+        handlePrev();
+        resetInterval(); // Reset timer on manual navigation
+    };
+
+    const onNextClick = () => {
+        handleNext();
+        resetInterval(); // Reset timer on manual navigation
+    };
+
 
     return (
         <section className="hero-carousel-wrapper">
@@ -51,11 +93,16 @@ const HeroCarousel = () => {
                 ))}
             </div>
             <div className="hero-carousel-controls">
-                <button className="hero-carousel-control previous" onClick={handlePrev}>
-                    <i className="fas fa-arrow-left"></i>
+                {/* MODIFIED: Replaced <i> tags with SVG icons */}
+                <button className="hero-carousel-control previous" onClick={onPrevClick} aria-label="Previous slide">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                 </button>
-                <button className="hero-carousel-control next" onClick={handleNext}>
-                    <i className="fas fa-arrow-right"></i>
+                <button className="hero-carousel-control next" onClick={onNextClick} aria-label="Next slide">
+                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                 </button>
             </div>
         </section>

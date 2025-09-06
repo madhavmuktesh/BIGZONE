@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+
+
 
 const Header = () => {
     const navigate = useNavigate();
@@ -50,8 +52,6 @@ const Header = () => {
     };
 
     // --- SEARCH FUNCTIONALITY ---
-    
-    // Debounced search suggestions
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (searchQuery.trim().length > 2) {
@@ -65,7 +65,6 @@ const Header = () => {
         return () => clearTimeout(timeoutId);
     }, [searchQuery]);
 
-    // Fetch suggestions from API
     const fetchSuggestions = async (query) => {
         try {
             setLoading(true);
@@ -73,7 +72,7 @@ const Header = () => {
             const data = await response.json();
             
             if (data.success) {
-                setSuggestions(data.products.slice(0, 6)); // Limit to 6 suggestions
+                setSuggestions(data.products.slice(0, 6));
                 setIsDropdownOpen(true);
             }
         } catch (error) {
@@ -83,7 +82,6 @@ const Header = () => {
         }
     };
 
-    // Handle input change
     const handleInputChange = (e) => {
         const value = e.target.value;
         setSearchQuery(value);
@@ -95,18 +93,13 @@ const Header = () => {
         }
     };
 
-    // Handle suggestion click - Enhanced with better navigation
     const handleSuggestionClick = (product) => {
-        console.log('Navigating to product:', product._id);
         setSearchQuery('');
         setIsDropdownOpen(false);
         setSelectedIndex(-1);
-        
-        // Navigate to product detail page
         navigate(`/products/${product._id}`);
     };
 
-    // Handle search submission
     const handleSearch = (e) => {
         e.preventDefault();
         if (!searchQuery.trim()) {
@@ -119,16 +112,13 @@ const Header = () => {
         setSearchQuery("");
     };
 
-    // Handle keyboard navigation
     const handleKeyDown = (e) => {
         if (!isDropdownOpen || suggestions.length === 0) return;
 
         switch (e.key) {
             case 'ArrowDown':
                 e.preventDefault();
-                setSelectedIndex(prev => 
-                    prev < suggestions.length - 1 ? prev + 1 : prev
-                );
+                setSelectedIndex(prev => prev < suggestions.length - 1 ? prev + 1 : prev);
                 break;
             case 'ArrowUp':
                 e.preventDefault();
@@ -150,7 +140,6 @@ const Header = () => {
         }
     };
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -163,8 +152,6 @@ const Header = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // ------------------------
-
     return (
         <header className="header">
             <div className="header-container">
@@ -173,7 +160,7 @@ const Header = () => {
                         BIGZONE
                     </div>
                     
-                    {/* Enhanced Search Container with Dropdown */}
+                    {/* Search with suggestions */}
                     <div className="search-dropdown-wrapper" ref={dropdownRef}>
                         <form className="search-container" onSubmit={handleSearch}>
                             <input
@@ -196,18 +183,14 @@ const Header = () => {
                             </button>
                         </form>
 
-                        {/* Search Suggestions Dropdown */}
                         {isDropdownOpen && suggestions.length > 0 && (
                             <div className="search-suggestions-dropdown">
                                 {suggestions.map((product, index) => (
                                     <div
                                         key={product._id}
-                                        className={`search-suggestion-item ${
-                                            index === selectedIndex ? 'selected' : ''
-                                        }`}
+                                        className={`search-suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            e.stopPropagation();
                                             handleSuggestionClick(product);
                                         }}
                                         onMouseEnter={() => setSelectedIndex(index)}
@@ -217,12 +200,9 @@ const Header = () => {
                                             <img 
                                                 src={product.images?.[0]?.url || '/placeholder.jpg'} 
                                                 alt={product.productname}
-                                                onError={(e) => {
-                                                    e.target.src = '/placeholder.jpg';
-                                                }}
+                                                onError={(e) => { e.target.src = '/placeholder.jpg'; }}
                                             />
                                         </div>
-                                        
                                         <div className="suggestion-content">
                                             <div className="suggestion-name">{product.productname}</div>
                                             <div className="suggestion-details">
@@ -235,15 +215,9 @@ const Header = () => {
                                         </div>
                                     </div>
                                 ))}
-                                
-                                {/* View All Results */}
                                 <div 
                                     className="search-suggestion-item view-all-results"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleSearch(e);
-                                    }}
+                                    onClick={handleSearch}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <div className="view-all-content">
@@ -286,28 +260,25 @@ const Header = () => {
             <nav className="nav">
                 <div className="nav-container">
                     <div className="nav-links">
-                        <a className="nav-link" onClick={() => handleProtectedAction('/')}>
-                            <i className="fas fa-user-circle" style={{ marginRight: '8px' }}></i>HOME
-                        </a>
-                        <a className="nav-link" onClick={() => handleProtectedAction('/profile')}>
+                        <Link to="/" className="nav-link">
+                            <i className="fas fa-home" style={{ marginRight: '8px' }}></i>HOME
+                        </Link>
+                        <Link to="/profile" className="nav-link">
                             <i className="fas fa-user-circle" style={{ marginRight: '8px' }}></i>Profile
-                        </a>
+                        </Link>
                         <a className="nav-link" onClick={handleDeliveryClick}>
                             <i className="fas fa-map-marker-alt" style={{ marginRight: '8px' }}></i>
                             {deliveryCity ? `Deliver to ${deliveryCity}` : 'Select Address'}
                         </a>
-                        <a className="nav-link" onClick={() => handleProtectedAction('/orders')}>
+                        <Link to="/orders" className="nav-link">
                             <i className="fas fa-box" style={{ marginRight: '8px' }}></i>Returns & Orders
-                        </a>
-                        <a href="#" className="nav-link">
-                            <i className="fas fa-globe" style={{ marginRight: '8px' }}></i>Language
-                        </a>
-                        <a href="#" className="nav-link">
-                            <i className="fas fa-headset" style={{ marginRight: '8px' }}></i>Customer Service
-                        </a>
-                        <a className="nav-link" onClick={() => handleProtectedAction('/form')}>
+                        </Link>
+                        <Link to="/feedback" className="nav-link">
+                            <i className="fas fa-headset" style={{ marginRight: '8px' }}></i>Help & Contact
+                        </Link>
+                        <Link to="/form" className="nav-link">
                             <i className="fas fa-box" style={{ marginRight: '8px' }}></i>Sell A Product
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </nav>

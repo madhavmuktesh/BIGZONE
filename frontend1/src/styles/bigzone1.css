@@ -5,6 +5,7 @@
   font-family: 'Inter', sans-serif;
 }
 
+
 body {
   background-color: transparent;
   line-height: 1.6;
@@ -21,14 +22,62 @@ body {
 }
 
 /* --- Header & Navigation (Redesigned) --- */
-.header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  color: #ffffff;
+/* --- Header & Navigation (Redesigned) --- */
+/* --- Header & Navigation (MODIFIED FOR SMALLER SIZE) --- */
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3rem; /* Reduced from 4rem */
+}
+
+.logo {
+    font-size: 1.25rem; /* Reduced from 1.5rem */
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.search-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem; /* Reduced padding */
+    font-size: 0.9rem;   /* Reduced font size */
+    color: #140909;
+}
+
+.action-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    padding: 0.4rem 0.8rem; /* Reduced padding */
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem; /* Reduced gap */
+    font-size: 0.9rem; /* Added to control text size */
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.5rem; /* Reduced from 3rem */
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* This adds space so your page content isn't hidden by the header.
+   Adjust 7rem to match your header's total height if needed. */
+body {
+    padding-top: 7rem; 
 }
 
 .header-container {
@@ -43,14 +92,7 @@ body {
   height: 4rem;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #ffffff;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-  flex-shrink: 0;
-  cursor: pointer;
-}
+
 
 /* --- Search Bar (Redesigned) --- */
 .search-container {
@@ -63,14 +105,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
   margin: 0 1.5rem;
 }
-.search-input {
-  width: 100%;
-  border: none;
-  background: transparent;
-  padding: 0.65rem 1.25rem;
-  font-size: 1rem;
-  color: #ffffff;
-}
+
 .search-input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
@@ -100,19 +135,7 @@ body {
   align-items: center;
   gap: 1rem;
 }
-.action-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+
 .action-button:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
@@ -145,14 +168,7 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
-.nav-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 3rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
+
 .nav-links {
   display: flex;
   gap: 1.5rem;
@@ -271,6 +287,10 @@ body {
 .hero-carousel-button:hover {
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
 }
+.section-title::after {
+  display: none;
+}
+
 .hero-carousel-controls {
   position: absolute;
   display: flex;
@@ -498,6 +518,8 @@ body {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+/* --- Replace the old block with this modified version --- */
+
 /* Products */
 .products-section {
   margin-bottom: 3rem;
@@ -514,6 +536,188 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   color: #111827;
+}
+
+.view-all-link {
+  color: #8b5cf6;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.view-all-link:hover {
+  color: #7c3aed;
+}
+
+.products-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1.5rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.products-grid::-webkit-scrollbar { height: 8px; }
+.products-grid::-webkit-scrollbar-track { background: #e5e7eb; border-radius: 10px; }
+.products-grid::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+.products-grid::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* MODIFIED .product-card and its children */
+.product-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-container {
+  position: relative;
+  padding-top: 100%; /* Keeps the 1:1 Square Ratio */
+}
+
+.product-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.product-badge.sale {
+  background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+}
+
+.wishlist-button {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.wishlist-button:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+/* MODIFIED .product-info to be a flex container */
+.product-info {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* This is crucial for the footer alignment */
+  color: #2d3748;
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  height: 2.8em;
+  overflow: hidden;
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.rating-stars {
+  display: flex;
+  color: #fbbf24;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+}
+
+.rating-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* NEW .product-footer class to group price & button */
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto; /* This pushes the footer to the bottom */
+}
+
+.product-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.product-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #764ba2;
+}
+.product-original-price {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
+/* MODIFIED button to be a small square */
+.add-to-cart-button {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(45deg, #764ba2, #667eea);
+  color: #fff;
+  border: none;
+  border-radius: 14px; /* Squircle shape */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-to-cart-button:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .view-all-link {
@@ -575,7 +779,7 @@ body {
 
 .product-image-container {
   position: relative;
-  padding-top: 100%; /* 1:1 Aspect Ratio */
+  padding-top: 50%; /* 1:1 Aspect Ratio */
 }
 
 .product-image {

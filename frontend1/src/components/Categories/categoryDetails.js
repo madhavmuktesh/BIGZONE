@@ -1,14 +1,15 @@
+// src/components/Categories/categoryDetails.js
 export const categoryDetails = {
-    "Smartphones": { icon: "fas fa-mobile-alt", color: "blue" },
-    "Electronics": { icon: "fas fa-laptop", color: "blue" },
-    "Clothing": { icon: "fas fa-tshirt", color: "pink" },
-    "Books": { icon: "fas fa-book", color: "purple" },
-    "Home & Kitchen": { icon: "fas fa-home", color: "green" },
-    "Beauty": { icon: "fas fa-spa", color: "orange" },
-    "Sports": { icon: "fas fa-dumbbell", color: "yellow" },
-    "Toys": { icon: "fas fa-gamepad", color: "red" },
-    "Automotive": { icon: "fas fa-car", color: "gray" },
-    "Health": { icon: "fas fa-heartbeat", color: "red" },
-    "Jewelry": { icon: "fas fa-gem", color: "purple" },
-    "Others": { icon: "fas fa-box", color: "gray" },
+  Smartphones: { img: "/images/categories/smartphones.jpg" },
+  Electronics: { img: "/images/categories/electronics.jpg" },
+  Clothing: { img: "/images/categories/clothing.jpg" },
+  Books: { img: "/images/categories/books.jpg" },
+  "Home & Kitchen": { img: "/images/categories/home.jpg" },
+  Beauty: { img: "/images/categories/beauty.jpg" },
+  Sports: { img: "/images/categories/sports.jpg" },
+  Toys: { img: "/images/categories/toys.jpg" },
+  Automotive: { img: "/images/categories/automotive.jpg" },
+  Health: { img: "/images/categories/health.jpg" },
+  Jewelry: { img: "/images/categories/jewelry.jpg" },
+  Others: { img: "/images/categories/others.jpg" }, // fallback generic
 };

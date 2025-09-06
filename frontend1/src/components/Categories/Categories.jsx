@@ -1,12 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { categoryDetails } from "./categoryDetails";
+import "./Categories.css";
+
 
 const Categories = ({ categories }) => {
   const navigate = useNavigate();
 
   const goToCategory = (name) => {
-    const qs = new URLSearchParams({ category: name }).toString(); // ?category=Name
+    const qs = new URLSearchParams({ category: name }).toString();
     navigate(`/search?${qs}`);
   };
 
@@ -25,9 +27,7 @@ const Categories = ({ categories }) => {
                 onClick={() => goToCategory(categoryName)}
                 aria-label={`View ${categoryName} products`}
               >
-                <div className={`category-icon ${details.color}`}>
-                  <i className={details.icon}></i>
-                </div>
+                <img src={details.img} alt={categoryName} className="category-img" />
                 <h3 className="category-name">{categoryName}</h3>
               </button>
             );

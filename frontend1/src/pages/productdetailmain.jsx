@@ -227,12 +227,7 @@ const StickyCTA = ({ product, isVisible }) => {
     <div className={`sticky-cta ${isVisible ? 'show' : ''}`}>
       <div className="flex justify-between items-center">
         <div className="sticky-cta-price">
-          <div className="current-price">₹{product.productprice.toLocaleString('en-IN')}</div>
-          {product.originalPrice && <div className="original-price">₹{product.originalPrice.toLocaleString('en-IN')}</div>}
-        </div>
-        <div className="flex space-x-2">
-          <button className="btn btn-add-to-cart" disabled={!product.isInStock}>Add to Cart</button>
-          <button className="btn btn-buy-now" disabled={!product.isInStock}>Buy Now</button>
+          
         </div>
       </div>
     </div>

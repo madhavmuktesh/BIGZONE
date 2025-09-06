@@ -105,30 +105,9 @@ const AddressPage = () => {
 
   return (
     <div className="address-list-page-background">
-      <nav className="address-list-header-nav">
-        <div className="address-list-container address-list-header-content">
-          <div className="address-list-header-left">
-            <Link to="/account" className="address-list-icon-button">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-              </svg>
-            </Link>
-            <h1 className="address-list-header-title">Ecozone</h1>
-          </div>
-          <div className="address-list-header-right">
-            <span>Account Settings</span>
-          </div>
-        </div>
-      </nav>
-
+     
       <main className="address-list-container address-list-main-container">
-        <div className="address-list-breadcrumb">
-          <Link to="/account">Account</Link>
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-          <span>Addresses</span>
-        </div>
+       
 
         <div className="address-list-page-header">
           <div>

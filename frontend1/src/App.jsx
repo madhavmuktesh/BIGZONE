@@ -1,11 +1,14 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
+// Context Providers
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
+// Page Components
+import Breadcrumb from "./components/Breadcrumb";
 import Onepage from "./pages/onepage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductUploadForm from "./pages/form";
@@ -19,11 +22,15 @@ import EditProfile from "./pages/profileedit.jsx";
 import SearchResults from "./pages/SearchResults";
 import AddAddressPage from "./pages/AddAddress.jsx";
 import AddressPage from "./pages/Addresspage.jsx";
-import HomePage from "./pages/HomePage.jsx";
+import HomePage from "./pages/HomePage.jsx"; 
+import ThankYouPage from "./pages/ThankYouPage.jsx";
 
+// Helper Components
 import ProtectedRoute from "./components/ProtectedRoute";
-import "../src/index.css";
 import Header from "./components/Header/Headermain.jsx";
+
+// Global Styles
+import "../src/index.css";
 
 const DashboardPage = () => (
   <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>
@@ -46,44 +53,64 @@ function AuthGate({ children }) {
   return isAuthenticated ? <Navigate to="/" replace /> : children;
 }
 
+const AppContent = () => {
+  const location = useLocation();
+
+  return (
+    <div className="App">
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+
+      {/* Show Header only on landing page */}
+      {location.pathname === "/" && <Header />}
+
+      {/* Breadcrumb visible on selective pages */}
+      {location.pathname !== "/" && 
+       location.pathname !== "/ecozone" && 
+       !location.pathname.startsWith("/products/") && 
+       location.pathname !== "/productdetailpage" && (
+        <Breadcrumb />
+      )}
+
+      <Routes>
+        {/* --- Public Routes --- */}
+        <Route path="/" element={<Onepage />} />
+        <Route path="/ecozone" element={<HomePage />} />
+        <Route path="/products/:id" element={<Productmain />} />
+        <Route path="/search" element={<SearchResults />} />
+        <Route path="/feedback" element={<ThankYouPage />} /> 
+
+        {/* --- Auth-only gates --- */}
+        <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />
+        <Route path="/register" element={<AuthGate><RegisterPage /></AuthGate>} />
+
+        {/* --- Protected Routes --- */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/form" element={<ProductUploadForm />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/editprofile" element={<EditProfile />} />
+          <Route path="/address" element={<AddressPage />} />
+          <Route path="/addaddress" element={<AddAddressPage />} />
+          <Route path="/address/edit/:id" element={<AddAddressPage />} />
+          
+        </Route>
+
+        {/* --- Fallback --- */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
+  );
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
           <CartProvider>
-            <div className="App">
-              {/* Global toaster for popups */}
-              <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
-              <Header />
-              <Routes>
-                {/* Public */}
-                <Route path="/" element={<Onepage />} />
-                <Route path="/ecozone" element={<HomePage />} />
-                <Route path="/products/:id" element={<Productmain />} />
-                <Route path="/search" element={<SearchResults />} />
-
-                {/* Auth-only gates */}
-                <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />
-                <Route path="/register" element={<AuthGate><RegisterPage /></AuthGate>} />
-
-                {/* Protected */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/form" element={<ProductUploadForm />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/orders" element={<OrdersPage />} />
-                  <Route path="/editprofile" element={<EditProfile />} />
-                  <Route path="/address" element={<AddressPage />} />
-                  <Route path="/addaddress" element={<AddAddressPage />} />
-                  <Route path="/address/edit/:id" element={<AddAddressPage />} />
-                </Route>
-
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
+            <AppContent />
           </CartProvider>
         </AuthProvider>
       </Router>

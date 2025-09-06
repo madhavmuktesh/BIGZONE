@@ -10,8 +10,6 @@
   --last-lettuce: #AADD66;
   --soft-red: #F87171;
   --dark-red: #DC2626;
-
-  /* Add transitions and shadows for consistency */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -36,7 +34,7 @@
   background-color: var(--dipped-cream);
   box-shadow: var(--shadow-md);
   border-bottom: 1px solid var(--white-asparagus);
-  position: sticky; /* Make header sticky */
+  position: sticky;
   top: 0;
   z-index: 10;
 }
@@ -51,8 +49,8 @@
 }
 .cart-header-nav h1 {
   font-size: 1.5rem;
-  font-weight: 800; /* Bolder for logo */
-  color: var(--evergreen); /* Changed for better readability */
+  font-weight: 800;
+  color: var(--evergreen);
 }
 .cart-header-nav .nav-group {
   display: flex;
@@ -60,7 +58,6 @@
   gap: 1rem;
   font-size: 0.9rem;
 }
-
 .breadcrumbs {
   display: flex;
   align-items: center;
@@ -90,11 +87,11 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 2.5rem; /* Increased spacing */
+  margin-bottom: 2.5rem;
 }
 .page-title .icon-wrapper {
   padding: 0.75rem;
-  background-color: var(--white-asparagus); /* Solid color for emphasis */
+  background-color: var(--white-asparagus);
   border-radius: 1rem;
 }
 .page-title .icon-wrapper svg {
@@ -103,7 +100,7 @@
   color: var(--evergreen);
 }
 .page-title h1 {
-  font-size: 2.25rem; /* Larger title */
+  font-size: 2.25rem;
   font-weight: 800;
   color: var(--coach-green);
 }
@@ -118,14 +115,13 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
-  align-items: start; /* Align items to the top */
+  align-items: start;
 }
 @media (min-width: 1024px) {
   .cart-layout {
-    grid-template-columns: 2fr 1fr; /* Give more space to cart items */
+    grid-template-columns: 2fr 1fr;
   }
 }
-
 .cart-items-list {
   display: flex;
   flex-direction: column;
@@ -135,22 +131,21 @@
 /* --- 5. Cart Item Card --- */
 .cart-item-card {
   background-color: white;
-  border-radius: 1.5rem;
+  border-radius: 0.5rem;
   box-shadow: var(--shadow-md);
-  padding: 1.5rem;
+  padding: 2rem;
   border: 1px solid transparent;
   transition: all var(--transition-speed);
   display: flex;
-  align-items: center; /* Vertically center content */
+  align-items: center;
   gap: 1.5rem;
 }
 .cart-item-card:hover {
   box-shadow: var(--shadow-lg);
   border-color: var(--white-asparagus);
 }
-
 .cart-item-image {
-  width: 100px; /* Standardized size */
+  width: 100px;
   height: 100px;
   background-color: #f8f9fa;
   border-radius: 1rem;
@@ -160,14 +155,13 @@
   flex-shrink: 0;
 }
 .cart-item-image img {
-  width: 90%;
-  height: 90%;
-  object-fit: contain; /* Best for product images */
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
-
 .cart-item-details {
-  flex-grow: 1; /* Allow details to fill space */
-  display: grid; /* Use grid for better alignment */
+  flex-grow: 1;
+  display: grid;
   grid-template-columns: repeat(2, 1fr);
   align-items: center;
   gap: 1rem;
@@ -183,19 +177,18 @@
   opacity: 0.8;
   margin-top: 0.25rem;
 }
-
 .cart-item-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Align to the right */
+  justify-content: flex-end;
   gap: 1.5rem;
 }
 .cart-item-price {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--coach-green);
   text-align: right;
-  min-width: 100px; /* Give price consistent space */
+  min-width: 100px;
 }
 .remove-item-button {
   background: none;
@@ -216,7 +209,7 @@
   background-color: var(--dipped-cream);
   border: 1px solid var(--white-asparagus);
   border-radius: 0.75rem;
-  overflow: hidden; /* Ensure rounded corners on buttons */
+  overflow: hidden;
 }
 .quantity-selector .controls button {
   padding: 0.5rem 0.75rem;
@@ -245,10 +238,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  position: sticky; /* Make sidebar sticky */
-  top: 6rem; /* (Header height + spacing) */
+  position: sticky;
+  top: 6rem;
 }
-
 .order-summary-card, .eco-impact-card {
   background-color: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px);
@@ -305,7 +297,7 @@
   transform: translateY(-2px);
 }
 .btn:disabled {
-  background-color: #ccc;
+  background-color: #3fcee4;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -318,25 +310,33 @@
   background-color: var(--coach-green);
 }
 .btn-secondary {
-  background-color: transparent;
-  color: var(--evergreen);
-  border-color: var(--evergreen);
+    width: 50%;
+  font-weight: 600;
+  padding: 1rem;
+  background-color: #041618;
+  border-radius: 0.75rem;
+  transition: all var(--transition-speed);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  
 }
 .btn-secondary:hover {
-  background-color: var(--evergreen);
-  color: white;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(109, 250, 243, 0.4);
 }
 
+/* --- 9. Product Link --- */
 .product-link {
-  text-decoration: none; /* Removes the underline */
-  color: inherit;       /* Makes the link use the text color of its parent */
+  text-decoration: none;
+  color: inherit;
   cursor: pointer;
 }
-
 .product-link:hover h3 {
-  text-decoration: underline; /* Optional: adds an underline on hover for better UX */
+  text-decoration: underline;
 }
-
 .cart-item-image .product-link {
-  display: block; /* Ensures the link fills the image container */
+  display: block;
 }

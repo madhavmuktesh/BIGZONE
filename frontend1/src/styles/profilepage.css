@@ -23,10 +23,12 @@ body, .profile-body {
     background-color: var(--gray-50);
     min-height: 100vh;
     margin: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden; /* 🔥 Prevent horizontal scroll */
 }
 
-
-/* CUSTOM GRADIENTS & EFFECTS FROM ORIGINAL STYLE TAG */
+/* CUSTOM GRADIENTS & EFFECTS */
 .gradient-bg {
     background: linear-gradient(135deg, #7C7DF4 0%, #9B59B6 100%);
 }
@@ -73,47 +75,43 @@ body, .profile-body {
     background: rgba(203, 200, 255, 0.1);
 }
 
-
 /* MAIN LAYOUT */
 .main-container {
-    max-width: 80rem;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 2rem 1rem;
+    width: 100%;
+    max-width: 1200px; /* keeps layout centered */
+    margin: 0 auto;
+    padding: 1.5rem;
 }
-
-/* MODIFIED: Simplified grid layout */
 .main-grid {
     display: grid;
-    grid-template-columns: 1fr; /* Always one column */
+    grid-template-columns: 1fr;
     gap: 2rem;
 }
 
-/* NEW: Container for the side-by-side cards */
+/* Bottom cards flex container */
 .bottom-cards-container {
     display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    flex-wrap: wrap; /* Allows cards to stack on smaller screens */
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: space-between;
+    width: 100%;
 }
-
-/* NEW: Ensure cards inside the flex container grow equally */
 .bottom-cards-container > .card {
-    flex: 1;
-    min-width: 300px; /* Prevents cards from getting too squished */
+    flex: 1 1 300px;
+    max-width: 100%;
+    min-width: 250px;
 }
-
 
 /* GENERIC CARD STYLES */
 .card {
     background-color: white;
     border-radius: 1rem;
-    padding: 1.5rem;
+    padding: 0.5rem;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
 }
 .card-title {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--dark-text-color);
     margin-bottom: 1.5rem;
 }
@@ -176,12 +174,15 @@ body, .profile-body {
     color: var(--gray-500);
 }
 
-/* NEW: Styles for the user details list */
+/* USER DETAILS */
 .profile-details {
     margin: 1.5rem 0;
     text-align: left;
     border-top: 1px solid var(--gray-200);
     padding-top: 1.5rem;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 .detail-item {
     display: flex;
@@ -227,10 +228,11 @@ body, .profile-body {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    width: 100%;
 }
 @media (min-width: 768px) {
     .settings-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
 }
 .setting-card {

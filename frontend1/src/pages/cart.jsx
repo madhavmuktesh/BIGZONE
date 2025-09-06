@@ -270,11 +270,7 @@ const Cart = () => {
             <Toaster position="top-center" reverseOrder={false} />
             
             <main className="cart-container">
-                <div className="breadcrumbs">
-                    <button onClick={() => navigate('/')} className="breadcrumb-link">Home</button>
-                    <span>&gt;</span>
-                    <span className="current-page">Cart</span>
-                </div>
+                
                 <div className="page-title">
                     <div className="icon-wrapper">
                         <svg viewBox="0 0 24 24">

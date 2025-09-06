@@ -10,6 +10,10 @@
             min-height: 100vh;
             padding: 2rem 1rem;
         }
+        .form-header * {
+    outline: none;
+    border: none;
+}
         .form-container {
             width: 90% !important;   /* force it */
             max-width: none !important;  /* remove the 448px limit */

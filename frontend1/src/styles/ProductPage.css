@@ -1,641 +1,317 @@
-/* src/ProductPage.css */
+/* styles.css - Ecozone Theme: Whipped Cream Background & Dark Green Accents */
 
-/* Using the same variables from the main App.css */
+/* ------------------- */
+/* Variables & Base   */
+/* ------------------- */
 :root {
-  --teal-midnight: #051914;
-  --dipped-cream: #FCF6EB;
-  --evergreen: #125849;
-  --coach-green: #003527;
-  --white-asparagus: #ECEABE;
-  --last-lettuce: #AADD66;
-  --sage-green: #9CAF88;
-  --mint-fresh: #B8E6B8;
-  --forest-deep: #2D5016;
+  /* Primary Colors - Eco-Green Theme */
+  --primary: #2E7D32;        /* Deep Forest Green */
+  --primary-hover: #1B5E20;  /* Darker Forest Green */
+  --accent: #66BB6A;         /* Vibrant Leaf Green */
+
+  /* Status Colors */
+  --success: #4CAF50;        /* Healthier Green for success indicators */
+  --danger: #EF5350;         /* Soft Red for danger (updated for theme) */
+
+  /* Neutral & Text Colors */
+  --text-dark: #212121;      /* Very dark grey for strong contrast */
+  --text-medium: #424242;    /* Dark grey for general text */
+  --text-light: #757575;     /* Medium grey for subtle text */
+  --surface-white: #FFFFFF;
+  --surface-light: #FDFCEF;  /* Whipped Cream Background */
+  --border-medium: #E0E0E0;  /* Lighter border for soft contrast */
+
+  /* Specific Badge Colors */
+  --warning-bg: #FFF8E1;     /* Light cream/yellow for discount badge */
+  --warning-text: #FBC02D;   /* Amber for discount text */
 }
 
-.product-page-body {
-  background-color: var(--dipped-cream);
+/* Body with whipped cream background */
+body {
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background-color: var(--surface-light); /* Whipped Cream */
+  color: var(--text-medium);
 }
 
-.product-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
+/* ------------------- */
+/* Layout & Cards     */
+/* ------------------- */
 
-.product-card-main {
-  background-color: var(--dipped-cream);
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
+.main-layout {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 2.5rem;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1.5rem;
 }
-@media (min-width: 1280px) {
-  .product-card-main {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr 1.1fr;
   }
 }
 
-/* --- Navigation Header --- */
-.product-header {
-  background-color: var(--dipped-cream);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(0, 53, 39, 0.2);
+.details-layout, .image-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.product-header-content {
+/* Updated card style for sections */
+.section-card {
+  background: var(--surface-white);
+  border-radius: 1rem;
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Softer shadow */
+  padding: 2rem;
+  margin-top: 2rem;
+}
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+/* ------------------- */
+/* Components         */
+/* ------------------- */
+
+/* Product Top Bar (breadcrumbs & discount) */
+.product-top-bar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  height: 4rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-medium);
 }
 
-.product-header-content .left-nav,
-.product-header-content .right-nav {
+/* Discount Badge for Ecozone theme */
+.discount-badge {
+  background-color: var(--warning-bg);   /* Light cream/yellow */
+  color: var(--warning-text);    /* Amber text */
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Cleaner Breadcrumbs for Ecozone theme */
+.breadcrumbs-list {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-light);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.breadcrumbs-list a {
+  text-decoration: none;
+  color: var(--primary); /* Eco-green for links */
+  font-weight: 500;
+}
+.breadcrumbs-list a:hover {
+  text-decoration: underline;
+}
+/* Separator for breadcrumbs (using simple text) */
+.breadcrumbs-list li + li::before {
+  content: "/";
+  display: inline-block;
+  padding-right: 0.5rem;
+  color: var(--text-light);
+}
+.breadcrumbs-list .current-page {
+  color: var(--text-medium);
+  font-weight: 500;
+}
+
+/* Image Card */
+.main-image-container {
+  background: var(--surface-white);
+  border-radius: 1rem;
+  border: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+}
+.main-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.thumbnail-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 1rem;
 }
+.thumbnail {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border: 2px solid var(--border-medium);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  background: var(--surface-white);
+  padding: 0.5rem;
+  transition: all 0.2s ease;
+}
+.thumbnail.active {
+  border-color: var(--primary); /* Eco-green border for active thumbnail */
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.4); /* Green shadow */
+}
 
-.product-header-content button {
+/* Product Info */
+.product-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  line-height: 1.2;
+  margin: 0;
+}
+.product-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary); /* Eco-green price */
+}
+.stock-status {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--success);
+  background-color: #E8F5E9; /* Light green background */
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  display: inline-flex;
+}
+
+/* Inputs, Buttons, etc. */
+.pincode-input {
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-medium);
+  background: var(--surface-white);
+}
+.pincode-input:focus {
+  outline: none;
+  border-color: var(--primary); /* Eco-green focus border */
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.4); /* Green shadow */
+}
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.btn {
+  display: inline-block;
+  padding: 0.9rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.btn-primary {
+  background: var(--primary); /* Eco-green primary button */
+  color: var(--surface-white);
+}
+.btn-primary:hover {
+  background: var(--primary-hover); /* Darker eco-green on hover */
+}
+.btn-secondary {
+  background-color: var(--surface-white); /* Creamy white background */
+  color: var(--primary);                   /* Dark green text */
+  border: 2px solid var(--primary);        /* Dark green border */
+}
+.btn-secondary:hover {
+  background-color: var(--primary);        /* Dark green background on hover */
+  color: var(--surface-white);             /* White text on hover */
+}
+
+
+/* Modern Accordion FAQ */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.faq-item {
+  border: 1px solid var(--border-medium);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  transition: background-color 0.2s ease;
+}
+.faq-item:has(.faq-button[aria-expanded="true"]) {
+  background-color: #F9F9F9; /* A slightly different shade for opened FAQ */
+}
+.faq-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--evergreen);
-  transition: color 0.3s;
+  padding: 1rem 0;
 }
-
-.product-header-content button:hover {
-  color: var(--coach-green);
-}
-
-.product-header-content h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--last-lettuce);
-}
-
-.cart-button-wrapper {
+.faq-icon {
   position: relative;
-}
-
-.cart-badge-detail {
-  position: absolute;
-  top: -0.25rem;
-  right: -0.25rem;
-  background-color: var(--last-lettuce);
-  color: var(--teal-midnight);
-  font-size: 0.75rem;
-  border-radius: 9999px;
-  height: 1.25rem;
   width: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-}
-
-
-/* --- Image Gallery --- */
-.image-gallery-container {
-  padding: 1.5rem;
-  background-color: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(4px);
-  display: flex;
-  gap: 1rem;
-}
-
-.thumbnail-gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.thumbnail {
-  width: 4rem;
-  height: 4rem;
-  background-image: linear-gradient(to bottom right, var(--dipped-cream), var(--white-asparagus));
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  border: 1px solid var(--white-asparagus);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s;
-}
-.thumbnail:hover {
-  transform: scale(1.05);
-}
-.thumbnail.active {
-  border: 2px solid var(--last-lettuce);
-}
-.thumbnail svg {
-  width: 1.5rem;
-  height: 1.5rem;
-  color: var(--coach-green);
-}
-
-.main-image-container {
-  flex: 1;
-  background-image: linear-gradient(to bottom right, rgba(236, 234, 190, 0.6), var(--dipped-cream));
-  border-radius: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 20rem;
-  border: 1px solid var(--white-asparagus);
-}
-.main-image-container svg {
-  width: 6rem;
-  height: 6rem;
-  color: var(--coach-green);
-  filter: drop-shadow(0 4px 3px rgba(0,0,0,0.07));
-}
-
-
-/* --- Product Info --- */
-.product-info-container {
-  grid-column: span 1 / span 1;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-@media (min-width: 1280px) {
-  .product-info-container {
-    grid-column: span 2 / span 2;
-  }
-}
-
-.bestseller-badge {
-  background-color: rgba(170, 221, 102, 0.2);
-  color: var(--evergreen);
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-.share-button {
-  padding: 0.5rem;
-  border-radius: 9999px;
-  transition: background-color 0.3s;
-}
-.share-button:hover {
-  background-color: rgba(236, 234, 190, 0.5);
-}
-
-.product-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--evergreen);
-  line-height: 1.2;
-}
-
-.product-description {
-  color: rgba(5, 25, 20, 0.7);
-  font-size: 1.125rem;
-  line-height: 1.6;
-}
-
-.price-section {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-.price-section .price {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--evergreen);
-}
-.price-section .original-price {
-  font-size: 1.125rem;
-  color: rgba(5, 25, 20, 0.5);
-  text-decoration: line-through;
-}
-.price-section .discount-badge {
-  background-color: var(--last-lettuce);
-  color: var(--teal-midnight);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.rating-section {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-.rating-section .stars {
-  color: var(--last-lettuce);
-}
-.rating-section .rating-value {
-  color: var(--evergreen);
-  font-weight: 600;
-}
-.rating-section .review-count {
-  color: rgba(5, 25, 20, 0.6);
-}
-
-.key-highlights {
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(4px);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border: 1px solid var(--white-asparagus);
-}
-
-.section-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--coach-green);
-  margin-bottom: 1rem;
-}
-
-.highlights-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-.highlight-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.highlight-icon {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.highlight-item span {
-  color: var(--teal-midnight);
-  font-weight: 500;
-}
-
-/* --- Rating Bar --- */
-.rating-bar-wrapper {
-  margin-bottom: 0.75rem;
-}
-.rating-bar-labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-.rating-bar-labels .label {
-  color: var(--teal-midnight);
-  font-weight: 500;
-}
-.rating-bar-labels .percentage {
-  color: var(--evergreen);
-  font-weight: 600;
-}
-.rating-bar-track {
-  width: 100%;
-  background-color: var(--white-asparagus);
-  border-radius: 9999px;
-  height: 0.5rem;
-}
-/* This is the magic part. The width is set by the inline style. */
-.rating-bar-fill {
-  height: 0.5rem;
-  border-radius: 9999px;
-  background-color: var(--last-lettuce);
-}
-
-
-/* --- Environmental Impact --- */
-.eco-impact {
-  background-image: linear-gradient(to right, rgba(236, 234, 190, 0.3), var(--dipped-cream));
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border: 1px solid var(--white-asparagus);
-}
-
-.eco-impact-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  text-align: center;
-}
-
-.eco-impact-icon {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 0.5rem auto;
-}
-.eco-impact-icon svg {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-.eco-impact-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--coach-green);
-}
-.eco-impact-label {
-  font-size: 0.875rem;
-  color: rgba(5, 25, 20, 0.7);
-}
-
-.material-exchange {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--white-asparagus);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.material-exchange .value {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.material-exchange .value .text {
-  color: var(--coach-green);
-  font-weight: 600;
-}
-.material-exchange .value .icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  background-color: var(--last-lettuce);
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.material-exchange .value .icon svg {
-  width: 1rem;
-  height: 1rem;
-  color: var(--teal-midnight);
-}
-
-
-/* --- Action Buttons --- */
-.action-buttons {
-  display: flex;
-  gap: 1rem;
-  padding-top: 1rem;
-}
-.action-buttons button {
-  flex: 1;
-  font-weight: 700;
-  padding: 1rem 2rem;
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-.action-buttons button:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: scale(1.05);
-}
-
-.btn-add-to-cart {
-  background-color: var(--last-lettuce);
-  color: var(--teal-midnight);
-  border: none;
-}
-.btn-add-to-cart:hover {
-  background-color: var(--white-asparagus);
-}
-
-.btn-buy-now {
-  background-color: white;
-  color: var(--coach-green);
-  border: 2px solid var(--coach-green);
-}
-.btn-buy-now:hover {
-  background-color: var(--white-asparagus);
-}
-
-
-/* --- Additional Info --- */
-.additional-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding-top: 1rem;
-  font-size: 0.875rem;
-  color: rgba(5, 25, 20, 0.6);
-}
-.additional-info .info-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-/* Loading and Error States */
-.loading-spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--teal-midnight);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-message {
-  text-align: center;
-  padding: 2rem;
-  background-color: #fee;
-  border: 1px solid #fcc;
-  border-radius: 8px;
-  margin: 2rem;
-}
-
-/* Image Gallery */
-.image-gallery-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.thumbnail img {
-  width: 60px;
-  height: 60px;
-}
-
-.main-image-container img {
-  max-width: 100%;
-  max-height: 400px;
-}
-
-/* Reviews */
-.reviews-section {
-  margin-top: 2rem;
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
-}
-
-.review-form {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-}
-
-.review-form textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin: 0.5rem 0;
-}
-
-.review-item {
-  padding: 1rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.stock-info {
-  padding: 1rem 0;
-}
-
-.in-stock {
-  color: green;
-}
-
-.out-of-stock {
-  color: red;
-}
-
-.specifications .specs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.spec-item {
-  display: flex;
-  justify-content: space-between;
-}
-
-/* src/ProductPage.css - Add these styles */
-
-.wishlist-button {
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.wishlist-button:hover {
-  transform: scale(1.1);
-}
-
-.wishlist-button.active .filled {
-  fill: red;
-  color: red;
-}
-
-.cart-badge-detail {
+  height: 1.25rem;
+  transition: transform 0.3s ease-in-out;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+.faq-icon::before,
+.faq-icon::after {
+  content: '';
   position: absolute;
-  top: -8px;
-  right: -8px;
-  background: var(--teal-midnight);
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  animation: pulse 2s infinite;
+  background-color: var(--text-light);
+  transition: transform 0.3s ease-in-out;
 }
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
+.faq-icon::before { /* Horizontal line */
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  margin-top: -1px;
 }
-
-.product-header button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.faq-icon::after { /* Vertical line */
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  margin-left: -1px;
 }
-
-.left-nav h1 {
-  margin: 0;
-  color: var(--teal-midnight);
-  text-decoration: none;
+.faq-button[aria-expanded="true"] .faq-icon {
+  transform: rotate(45deg);
 }
-
-.left-nav a {
-  text-decoration: none;
+.faq-button[aria-expanded="true"] .faq-icon::after {
+  transform: rotate(90deg);
 }
-.product-card {
-    pointer-events: auto;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+.faq-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-in-out, padding-bottom 0.3s ease-in-out;
 }
-
-.product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Ensure buttons are clickable */
-.add-to-cart-button,
-.wishlist-button {
-    pointer-events: auto;
-    position: relative;
-    z-index: 2;
-}
-
-/* Make sure image doesn't interfere with clicks */
-.product-image {
-    pointer-events: none;
-    user-select: none;
-}
-
-/* Prevent text selection on card */
-.product-card * {
-    user-select: none;
-}
-
-/* Allow text selection only for product name if needed */
-.product-name {
-    user-select: text;
+.faq-content p {
+  line-height: 1.6;
+  color: var(--text-medium);
+  padding-bottom: 1rem;
 }
