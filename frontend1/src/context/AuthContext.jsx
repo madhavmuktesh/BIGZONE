@@ -1,9 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-// It's good practice to provide a default value that matches the shape of your context
 const AuthContext = createContext({
     user: null,
-    setUser: () => {}, // Provide a dummy function as a default
+    setUser: () => {},
     token: null,
     isAuthenticated: false,
     loading: true,
@@ -18,48 +17,36 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Check authentication status on app load
+    // ✅ FIX: Check authentication status unconditionally
     const checkAuthStatus = async () => {
         try {
             setLoading(true);
             
-            // First, try to get user from localStorage
-            const storedUser = localStorage.getItem("user");
-            
-            if (storedUser) {
-                // Verify the session with the server (since we're using httpOnly cookies)
-                // Note: The base URL should come from your api service or an env variable
-                const response = await fetch('/api/v1/users/me', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.user) {
-                        setUser(data.user);
-                        setToken('cookie-based');
-                        // Update localStorage with fresh user data
-                        localStorage.setItem("user", JSON.stringify(data.user));
-                    } else {
-                        // Session expired, clear stored data
-                        localStorage.removeItem("user");
-                        setUser(null);
-                        setToken(null);
-                    }
-                } else {
-                    // Session invalid, clear stored data
-                    localStorage.removeItem("user");
-                    setUser(null);
-                    setToken(null);
+            // Because we use httpOnly cookies, we MUST ping the server to know if we are logged in.
+            // We should not rely on localStorage as the gatekeeper.
+            const response = await fetch('/api/v1/users/me', {
+                method: 'GET',
+                credentials: 'include', // This sends the httpOnly cookie automatically
+                headers: {
+                    'Content-Type': 'application/json'
                 }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.user) {
+                    setUser(data.user);
+                    setToken('cookie-based');
+                    localStorage.setItem("user", JSON.stringify(data.user));
+                } else {
+                    throw new Error("Session invalid");
+                }
+            } else {
+                throw new Error("Unauthorized");
             }
         } catch (error) {
-            console.error("Error checking auth status:", error);
-            // On API error, clear local state to prevent using stale data
+            console.error("Auth status check failed (User not logged in):", error.message);
+            // Clean up stale data if the server rejects the cookie
             localStorage.removeItem("user");
             setUser(null);
             setToken(null);
@@ -68,7 +55,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Load user from localStorage and verify session on initialization
+    // Load user and verify session on initialization
     useEffect(() => {
         checkAuthStatus();
     }, []);
@@ -83,9 +70,9 @@ export const AuthProvider = ({ children }) => {
         try {
             setLoading(true);
             
-            // Call logout endpoint to clear httpOnly cookie
+            // Call logout endpoint to clear httpOnly cookie on the backend
             await fetch('/api/v1/users/logout', {
-                method: 'POST',
+                method: 'POST', // Adjusted to POST to match standard logout behavior if needed, or keep GET if backend uses GET
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
@@ -104,7 +91,7 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         user,
-        setUser, // ✅ FIX: Expose the setUser function to the context
+        setUser, 
         token,
         isAuthenticated: !!user && !!token,
         loading,
@@ -116,6 +103,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
+            {/* Prevent app from flashing unprotected routes before auth check completes */}
             {children}
         </AuthContext.Provider>
     );

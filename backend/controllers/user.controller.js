@@ -91,7 +91,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: "Password must be at least 6 characters long." });
     }
 
-    // FIXED: Check if user already exists
+    // Check if user already exists
     const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
     if (existingUser) {
       return res.status(409).json({ 
@@ -109,12 +109,16 @@ export const register = async (req, res) => {
       });
     }
 
+    // ✅ FIX: SECURITY LOCKDOWN - Prevent "admin" privilege escalation.
+    // Only allow client to choose "seller", otherwise default strictly to "user".
+    const assignedRole = role === "seller" ? "seller" : "user";
+
     const newUser = await User.create({
       fullname: fullname.trim(),
       email: email.trim().toLowerCase(),
       phoneNumber,
       password,
-      role: ["seller", "admin"].includes(role) ? role : "user",
+      role: assignedRole,
     });
 
     return sendTokenResponse(newUser, 201, res, "Account created successfully.");

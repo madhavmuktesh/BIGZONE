@@ -33,9 +33,10 @@ import {
 const router = express.Router();
 
 /* ======================
-   📌 PUBLIC ROUTES
+   PUBLIC ROUTES
 ====================== */
 // Anyone can view products
+
 router.get("/search", searchProducts);   // <-- move this up
 router.get("/", getAllProducts);
 router.get("/user/:userId", getUserProducts); // must come before /:id
@@ -44,7 +45,7 @@ router.get('/:id', getSingleProduct);
 router.get("/ecozone/:id",getSingleecoProduct);
 
 /* ======================
-   🔒 AUTHENTICATED ROUTES
+   AUTHENTICATED ROUTES
 ====================== */
 router.use(isAuthenticated);
 
@@ -83,7 +84,7 @@ router.delete("/:id/reviews/:reviewId", deleteProductReview);
 router.post("/:id/reviews/:reviewId/helpful", markReviewHelpful);
 
 /* ======================
-   ⚠️ ERROR HANDLER
+   ERROR HANDLER
 ====================== */
 router.use(handleProductErrors);
 
