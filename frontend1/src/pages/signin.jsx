@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'; // Import useEffect
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/SignIn.css';
 

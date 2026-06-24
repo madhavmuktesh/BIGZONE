@@ -23,6 +23,7 @@ import HomePage from "./pages/HomePage.jsx";
 import CheckoutPage from './pages/CheckoutPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import SellerDashboard from './pages/SellerDashboard';
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
@@ -85,6 +86,7 @@ function App() {
                   <Route path="/address" element={<AddressPage />} />
                   <Route path="/addaddress" element={<AddAddressPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/seller-dashboard" element={<SellerDashboard />} />
                   <Route path="/address/edit/:id" element={<AddAddressPage />} />
                 </Route>
 
