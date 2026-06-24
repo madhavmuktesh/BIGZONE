@@ -21,6 +21,8 @@ import AddAddressPage from "./pages/AddAddress.jsx";
 import AddressPage from "./pages/Addresspage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import CheckoutPage from './pages/CheckoutPage';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
@@ -68,6 +70,9 @@ function App() {
                 {/* Auth-only gates */}
                 <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />
                 <Route path="/register" element={<AuthGate><RegisterPage /></AuthGate>} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/api/v1/users/reset-password/:token" element={<ResetPassword />} />
+
 
                 {/* Protected */}
                 <Route element={<ProtectedRoute />}>

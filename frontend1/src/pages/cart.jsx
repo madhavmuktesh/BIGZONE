@@ -12,7 +12,7 @@ const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
             case 'PRICE_CHANGED': 
                 return (
                     <p className="validation-warning">
-                        Price changed from ${item.priceAtAddition.toFixed(2)} to ${item.productDetails.currentPrice.toFixed(2)}
+                        Price changed from ₹{item.priceAtAddition.toFixed(2)} to ₹{item.productDetails.currentPrice.toFixed(2)}
                     </p>
                 );
             case 'INSUFFICIENT_STOCK': 
@@ -47,16 +47,16 @@ const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
     return (
         <div className="cart-item-card">
             <div className="cart-item-image">
-                <Link to={`/products/${productId}`} className="product-link">
+                <Link to={`/products/₹{productId}`} className="product-link">
                     <img src={imageUrl} alt={productName} />
                 </Link>
             </div>
             <div className="cart-item-details">
                 <div>
-                    <Link to={`/products/${productId}`} className="product-link">
+                    <Link to={`/products/₹{productId}`} className="product-link">
                         <h3>{productName}</h3>
                     </Link>
-                    <p>Price: ${productPrice.toFixed(2)}</p>
+                    <p>Price: ₹{productPrice.toFixed(2)}</p>
                     <div className="validation-message">{renderValidationMessage()}</div>
                 </div>
                 <div className="cart-item-actions">
@@ -79,7 +79,7 @@ const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
                     </div>
                     <div className="cart-item-price-section">
                         <span className="cart-item-price">
-                            ${(productPrice * item.quantity).toFixed(2)}
+                            ₹{(productPrice * item.quantity).toFixed(2)}
                         </span>
                         <button 
                             onClick={() => onRemove(productId)} 
@@ -108,21 +108,21 @@ const OrderSummary = ({ cart, onCheckout, disableCheckout }) => {
             <div className="summary-rows">
                 <div className="summary-row">
                     <span className="label">Subtotal</span>
-                    <span className="value">${subtotal.toFixed(2)}</span>
+                    <span className="value">₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="summary-row">
                     <span className="label">Eco Discount</span>
-                    <span className="value discount">-${ecoDiscount.toFixed(2)}</span>
+                    <span className="value discount">-₹{ecoDiscount.toFixed(2)}</span>
                 </div>
             </div>
             <div className="summary-total summary-row">
                 <span className="label">Total</span>
-                <span className="value">${total.toFixed(2)}</span>
+                <span className="value">₹{total.toFixed(2)}</span>
             </div>
             <button 
                 onClick={onCheckout} 
                 disabled={disableCheckout} 
-                className={`btn ${disableCheckout ? 'btn-disabled' : 'btn-primary'}`}
+                className={`btn ₹{disableCheckout ? 'btn-disabled' : 'btn-primary'}`}
             >
                 {disableCheckout ? 'Cannot Checkout' : 'Proceed to Checkout'}
             </button>

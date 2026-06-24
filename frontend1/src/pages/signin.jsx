@@ -165,9 +165,12 @@ const SignIn = () => {
                   <input type="checkbox" disabled={isLoading}/>
                   <span>Remember me</span>
                 </label>
-                <button type="button" onClick={() => alert('Password reset email sent! (Demo)')} className="forgot-password-button" disabled={isLoading}>
-                  Forgot password?
-                </button>
+                <Link
+                  to="/forgot-password"
+                  className="forgot-password-button"
+                >
+                  Forgot password?
+                </Link>
               </div>
 
               <button type="submit" className="submit-button" disabled={isLoading}>

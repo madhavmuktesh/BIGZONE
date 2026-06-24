@@ -2,6 +2,7 @@ import { Product } from "../models/product.model.js";
 import mongoose from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
+import { getEcoScoresForProduct } from '../services/geminiService.js';
 
 dotenv.config();
 
@@ -86,132 +87,265 @@ const handleAsyncError = (fn) => (req, res, next) => {
 
 // CREATE SINGLE PRODUCT
 export const createProduct = handleAsyncError(async (req, res) => {
-  // 1. Check for files (Mongoose can't validate `req.files`)
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ success: false, message: "At least one image is required" });
-  }
-  if (req.files.length > 10) {
-    return res.status(400).json({ success: false, message: "Maximum 10 images allowed" });
-  }
+// Validate images
+if (!req.files || req.files.length === 0) {
+return res.status(400).json({
+success: false,
+message: "At least one image is required",
+});
+}
 
-  // 2. Prepare data by parsing strings from the form
-  const tags = JSON.parse(req.body.tags || '[]');
-  const stock = JSON.parse(req.body.stock || '{}');
-  const specifications = JSON.parse(req.body.specifications || '{}');
+if (req.files.length > 10) {
+return res.status(400).json({
+success: false,
+message: "Maximum 10 images allowed",
+});
+}
 
-  // 3. Upload images to Cloudinary
-  let uploadedImages = [];
-  try {
-    // Use Promise.all for faster parallel uploads
-    uploadedImages = await Promise.all(
-      req.files.map(file => handleCloudinaryUpload(file))
-    );
-  } catch (e) {
-    // If any upload fails, attempt to delete any that succeeded
-    if (uploadedImages.length > 0) {
-      await deleteCloudinaryPublicIds(uploadedImages.map(img => img.public_id));
-    }
-    // Let the async error handler catch and report the error
-    throw new Error(`Image upload failed: ${e.message}`);
-  }
+// Parse form data
+const tags = JSON.parse(req.body.tags || "[]");
+const stock = JSON.parse(req.body.stock || "{}");
+const specifications = JSON.parse(req.body.specifications || "{}");
 
-  // 4. Create a new product instance
-  // We pass the data directly; Mongoose will validate it on .save()
-  const newProduct = new Product({
-    ...req.body,             // Pass all other fields from the form
-    tags,                    // Overwrite with our parsed versions
-    stock,
-    specifications,
-    images: uploadedImages,  // Add the uploaded image data
-    createdBy: req.id,       // Set the creator from auth middleware
-  });
+// Upload images
+let uploadedImages = [];
 
-  // 5. Save the product to the database
-  // Mongoose automatically runs ALL validation from your schema here.
-  // If it fails, it throws a ValidationError that your global error handler will catch.
-  await newProduct.save();
-  await newProduct.populate("createdBy", "username email");
+try {
+uploadedImages = await Promise.all(
+req.files.map((file) => handleCloudinaryUpload(file))
+);
+} catch (error) {
+if (uploadedImages.length > 0) {
+await deleteCloudinaryPublicIds(
+uploadedImages.map((img) => img.public_id)
+);
+}
 
-  return res.status(201).json({ 
-    success: true, 
-    message: "Product created successfully", 
-    product: newProduct 
-  });
+throw new Error(`Image upload failed: ${error.message}`);
+
+}
+
+// Create product instance
+const newProduct = new Product({
+...req.body,
+tags,
+stock,
+specifications,
+images: uploadedImages,
+createdBy: req.id,
+});
+
+// Generate Eco Score
+try {
+const ecoData = await getEcoScoresForProduct(newProduct);
+
+if (ecoData) {
+  newProduct.ecoScore = ecoData.ecoScore;
+  newProduct.co2SavedKg = ecoData.co2SavedKg;
+}
+
+} catch (error) {
+console.error(
+"Eco-score generation failed during product creation:",
+error.message
+);
+}
+
+// Save product
+await newProduct.save();
+
+// Populate creator details
+await newProduct.populate("createdBy", "username email");
+
+return res.status(201).json({
+success: true,
+message: "Product created successfully",
+product: newProduct,
+});
 });
 
 export const createMultipleProducts = handleAsyncError(async (req, res) => {
-  let productsData;
+let productsData;
+
+// Parse request data
+try {
+productsData = JSON.parse(req.body.products);
+} catch {
+return res.status(400).json({
+success: false,
+message: "Invalid products JSON",
+});
+}
+
+// Validation
+if (!Array.isArray(productsData) || productsData.length === 0) {
+return res.status(400).json({
+success: false,
+message: "Products must be a non-empty array",
+});
+}
+
+if (productsData.length > 50) {
+return res.status(400).json({
+success: false,
+message: "Maximum 50 products allowed per request",
+});
+}
+
+const uploadedProducts = [];
+const errors = [];
+
+for (let i = 0; i < productsData.length; i++) {
+const product = productsData[i];
+
+try {
+  /* -------------------------
+     Required Fields Check
+  ------------------------- */
+  if (
+    !isNonEmptyString(product.productname) ||
+    !isNonEmptyString(product.productdescription) ||
+    !isNonEmptyString(product.category)
+  ) {
+    throw new Error("Missing required fields");
+  }
+
+  /* -------------------------
+     Price Validation
+  ------------------------- */
+  const priceNum = toFiniteNumber(product.productprice);
+
+  if (!Number.isFinite(priceNum) || priceNum < 0) {
+    throw new Error("Invalid product price");
+  }
+
+  const originalPrice =
+    product.originalPrice !== undefined &&
+    product.originalPrice !== null &&
+    product.originalPrice !== ""
+      ? toFiniteNumber(product.originalPrice)
+      : undefined;
+
+  if (
+    originalPrice !== undefined &&
+    (!Number.isFinite(originalPrice) ||
+      originalPrice < priceNum)
+  ) {
+    throw new Error(
+      "Original price must be greater than or equal to current price"
+    );
+  }
+
+  /* -------------------------
+     Product Images
+  ------------------------- */
+  const productFiles = (req.files || []).filter(
+    (file) => file.fieldname === `images_${i}`
+  );
+
+  if (!productFiles.length) {
+    throw new Error("At least one image is required");
+  }
+
+  /* -------------------------
+     Tags Validation
+  ------------------------- */
+  const tags = sanitizeTags(product.tags ?? []);
+
+  if (tags === Symbol.for("TAGS_SHAPE")) {
+    throw new Error("Invalid tags");
+  }
+
+  if (req.role === "user" && !tags.includes("usersold")) {
+    tags.push("usersold");
+  }
+
+  /* -------------------------
+     Stock Validation
+  ------------------------- */
+  const stock = validateStock(product.stock);
+
+  if (stock === Symbol.for("STOCK_SHAPE")) {
+    throw new Error("Invalid stock");
+  }
+
+  /* -------------------------
+     Upload Images
+  ------------------------- */
+  const uploadedImages = [];
+
   try {
-    productsData = JSON.parse(req.body.products);
-  } catch {
-    return res.status(400).json({ success: false, message: "Invalid products JSON" });
-  }
-  if (!Array.isArray(productsData) || productsData.length === 0) {
-    return res.status(400).json({ success: false, message: "Products must be a non-empty array" });
-  }
-  if (productsData.length > 50) {
-    return res.status(400).json({ success: false, message: "Maximum 50 products at a time" });
-  }
-
-  const uploadedProducts = [];
-  const errors = [];
-
-  for (let i = 0; i < productsData.length; i++) {
-    const product = productsData[i];
-    try {
-      if (!isNonEmptyString(product.productname) || !isNonEmptyString(product.productdescription) || !isNonEmptyString(product.category)) {
-        throw new Error("Missing required fields");
-      }
-      const priceNum = toFiniteNumber(product.productprice);
-      if (!Number.isFinite(priceNum) || priceNum < 0) throw new Error("Invalid product price");
-      const origNum = product.originalPrice !== undefined && product.originalPrice !== null && product.originalPrice !== ""
-        ? toFiniteNumber(product.originalPrice)
-        : undefined;
-      if (origNum !== undefined && (!Number.isFinite(origNum) || origNum < priceNum)) {
-        throw new Error("Original price must be >= current price");
-      }
-
-      const productFiles = (req.files || []).filter(f => f.fieldname === `images_${i}`);
-      if (!productFiles.length) throw new Error("At least one image is required");
-
-      // tags/stock
-      const pTags = sanitizeTags(product.tags ?? []);
-      if (pTags === Symbol.for("TAGS_SHAPE")) throw new Error("Invalid tags");
-      if (req.role === "user" && !pTags.includes("usersold")) pTags.push("usersold");
-      const pStock = validateStock(product.stock);
-      if (pStock === Symbol.for("STOCK_SHAPE")) throw new Error("Invalid stock");
-
-      // upload images
-      const uploadedImages = [];
-      try {
-        for (const file of productFiles) uploadedImages.push(await handleCloudinaryUpload(file));
-      } catch (e) {
-        if (uploadedImages.length) await deleteCloudinaryPublicIds(uploadedImages.map(i => i.public_id));
-        throw e;
-      }
-
-      const newProd = await Product.create({
-        productname: product.productname.trim(),
-        productprice: priceNum,
-        originalPrice: origNum,
-        productdescription: product.productdescription.trim(),
-        images: uploadedImages,
-        category: product.category.trim(),
-        subcategory: product.subcategory ? String(product.subcategory).trim() : undefined,
-        tags: pTags,
-        specifications: product.specifications || {},
-        stock: pStock,
-        createdBy: req.id,
-      });
-
-      uploadedProducts.push(newProd);
-    } catch (error) {
-      errors.push({ index: i, error: error.message });
+    for (const file of productFiles) {
+      const image = await handleCloudinaryUpload(file);
+      uploadedImages.push(image);
     }
+  } catch (error) {
+    if (uploadedImages.length > 0) {
+      await deleteCloudinaryPublicIds(
+        uploadedImages.map((img) => img.public_id)
+      );
+    }
+
+    throw new Error(`Image upload failed: ${error.message}`);
   }
 
-  return res.status(201).json({ success: true, products: uploadedProducts, errors: errors.length ? errors : undefined });
-}); [13][3]
+  /* -------------------------
+     Product Data
+  ------------------------- */
+  const productData = {
+    productname: product.productname.trim(),
+    productprice: priceNum,
+    originalPrice,
+    productdescription: product.productdescription.trim(),
+    images: uploadedImages,
+    category: product.category.trim(),
+    subcategory: product.subcategory
+      ? String(product.subcategory).trim()
+      : undefined,
+    tags,
+    specifications: product.specifications || {},
+    stock,
+    createdBy: req.id,
+  };
+
+  /* -------------------------
+     Generate Eco Score
+  ------------------------- */
+  try {
+    const ecoData = await getEcoScoresForProduct(productData);
+
+    if (ecoData) {
+      productData.ecoScore = ecoData.ecoScore;
+      productData.co2SavedKg = ecoData.co2SavedKg;
+    }
+  } catch (error) {
+    console.error(
+      `Eco-score generation failed for product ${i}:`,
+      error.message
+    );
+  }
+
+  /* -------------------------
+     Save Product
+  ------------------------- */
+  const newProduct = await Product.create(productData);
+
+  uploadedProducts.push(newProduct);
+} catch (error) {
+  errors.push({
+    index: i,
+    error: error.message,
+  });
+}
+
+}
+
+return res.status(201).json({
+success: true,
+products: uploadedProducts,
+errors: errors.length ? errors : undefined,
+});
+});
 
 export const getAllProducts = handleAsyncError(async (req, res) => {
   const products = await Product.find().populate("createdBy", "username email");
