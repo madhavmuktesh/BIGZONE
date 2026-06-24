@@ -20,6 +20,7 @@ import SearchResults from "./pages/SearchResults";
 import AddAddressPage from "./pages/AddAddress.jsx";
 import AddressPage from "./pages/Addresspage.jsx";
 import HomePage from "./pages/HomePage.jsx";
+import CheckoutPage from './pages/CheckoutPage';
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
@@ -78,6 +79,7 @@ function App() {
                   <Route path="/editprofile" element={<EditProfile />} />
                   <Route path="/address" element={<AddressPage />} />
                   <Route path="/addaddress" element={<AddAddressPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/address/edit/:id" element={<AddAddressPage />} />
                 </Route>
 

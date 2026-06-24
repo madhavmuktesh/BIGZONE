@@ -201,7 +201,9 @@ const Cart = () => {
             return;
         }
         toast.success('Redirecting to checkout...');
-        // navigate('/checkout');
+        
+        // ✅ FIX: Uncomment this line so the button actually routes the user!
+        navigate('/checkout'); 
     };
     
     // --- 4. DERIVED STATE & RENDER LOGIC ---
