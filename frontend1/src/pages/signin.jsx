@@ -120,10 +120,10 @@ const SignIn = () => {
           </div>
 
           <div className="form-card">
-            <div className="secure-signin-indicator">
-              <div className="indicator-dot"></div>
-              <span>Secure Sign In</span>
-            </div>
+            <div className="secure-signin-indicator" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '15px' }}>
+              <div className="indicator-dot" style={{ backgroundColor: '#10b981', width: '10px', height: '10px', borderRadius: '50%', boxShadow: '0 0 8px rgba(16, 185, 129, 0.6)' }}></div>
+              <span style={{ color: '#10b981', fontWeight: '600', fontSize: '0.9rem' }}>Secure Sign In</span>
+            </div>
             
             <AlertMessage message={error} type="error" />
             <AlertMessage message={success} type="success" />

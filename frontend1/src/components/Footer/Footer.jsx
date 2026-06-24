@@ -43,7 +43,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    <p>&copy; 2024 BIGZONE. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} BIGZONE. All rights reserved.</p>
                 </div>
             </div>
         </footer>
