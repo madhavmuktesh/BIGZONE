@@ -6,24 +6,25 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
-import Onepage from "./pages/onepage";
-import ProductDetailPage from "./pages/ProductDetailPage";
+import Homepage from "./pages/Homepage.jsx";
+import ProductDetailPage from "./pages/ecozone/ProductDetailPage.jsx";
 import ProductUploadForm from "./pages/form";
-import SignIn from "./pages/signin";
-import Cart from "./pages/cart";
-import OrdersPage from "./pages/Orderpage";
+import SignIn from "./pages/user/signin.jsx";
+import Cart from "./pages/orders/cart.jsx";
+import OrdersPage from "./pages/orders/Orderpage.jsx";
 import Productmain from "../src/pages/productdetailmain.jsx";
-import RegisterPage from "./pages/registerpage.jsx";
-import ProfilePage from "./pages/profilepage.jsx";
-import EditProfile from "./pages/profileedit.jsx";
+import RegisterPage from "./pages/user/registerpage.jsx";
+import ProfilePage from "./pages/user/profilepage.jsx";
+import EditProfile from "./pages/user/profileedit.jsx";
 import SearchResults from "./pages/SearchResults";
 import AddAddressPage from "./pages/AddAddress.jsx";
 import AddressPage from "./pages/Addresspage.jsx";
-import HomePage from "./pages/HomePage.jsx";
-import CheckoutPage from './pages/CheckoutPage';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+import EcohomePage from "./pages/ecozone/EcohomePage.jsx";
+import CheckoutPage from './pages/orders/CheckoutPage.jsx';
+import ForgotPassword from './pages/user/ForgotPassword.jsx';
+import ResetPassword from './pages/user/ResetPassword.jsx';
 import SellerDashboard from './pages/SellerDashboard';
+import NotFound from "./pages/NotFound.jsx";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
@@ -62,11 +63,12 @@ function App() {
               <Header />
               <Routes>
                 {/* Public */}
-                <Route path="/" element={<Onepage />} />
-                <Route path="/ecozone" element={<HomePage />} />
+                <Route path="/" element={<Homepage />} />
+                <Route path="/ecozone" element={<EcohomePage />} />
                 <Route path="/products/:id" element={<Productmain />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/ecozone/products/:id" element={<ProductDetailPage/>}/>
+                <Route path="*" element={<NotFound />} />
 
                 {/* Auth-only gates */}
                 <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />

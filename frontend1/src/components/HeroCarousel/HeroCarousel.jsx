@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Slide from './Slide';
+import "../HeroCarousel/herocarousel.css"
 
 const HeroCarousel = () => {
     const slides = [

@@ -38,8 +38,8 @@ router.get("/my-orders", getUserOrders);
 // Search orders by product name
 router.get("/search", searchOrdersByProductName);
 
-// Create order from user’s cart
-router.post("/", createOrderFromCart);
+// Create order from user’s cart (UPDATED ROUTE)
+router.post("/create", createOrderFromCart);
 
 // Cancel user’s own order (specific route BEFORE /:id)
 router.post("/:id/cancel", cancelOrder);

@@ -1,0 +1,62 @@
+.promotions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.promotion-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 1.5rem;
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.promotion-card.orange { background: linear-gradient(135deg, #fb923c, #f97316); }
+.promotion-card.purple { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
+.promotion-card.emerald { background: linear-gradient(135deg, #34d399, #10b981); }
+
+.promotion-header,
+.promotion-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.promotion-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.promotion-badge {
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.promotion-description {
+  margin: 0.9rem 0 1.2rem;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.promotion-time {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.promotion-button {
+  padding: 0.55rem 0.9rem;
+  border-radius: 9999px;
+  background: #fff;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.promotion-button:hover {
+  background: #f8fafc;
+}

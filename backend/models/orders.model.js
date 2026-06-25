@@ -34,14 +34,14 @@ const orderItemSchema = new mongoose.Schema({
 
 // Shipping address schema
 const shippingAddressSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
-  phone: { type: String, required: true },
-  street: { type: String, required: true, trim: true },
+  fullName: { type: String, required: true, trim: true },
+  mobile: { type: String, required: true },
+  house: { type: String, required: true, trim: true },
+  area: { type: String, required: true, trim: true },
   city: { type: String, required: true, trim: true },
-  state: { type: String, trim: true },
-  zip: { type: String, required: true, trim: true },
-  country: { type: String, default: "India", trim: true },
-  landmark: { type: String, trim: true }
+  state: { type: String, required: true, trim: true },
+  pincode: { type: String, required: true, trim: true },
+  country: { type: String, default: "India", trim: true }
 }, { _id: false });
 
 // Cost breakdown schema

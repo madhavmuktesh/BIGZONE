@@ -1,0 +1,560 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap");
+
+:root {
+  --bg: linear-gradient(135deg, #f7f5f0 0%, #e8f0e4 100%);
+  --card: rgba(255, 255, 255, 0.75);
+  --border: rgba(74, 124, 89, 0.14);
+  --text: #173126;
+  --muted: #5e7467;
+  --green: #4a7c59;
+  --green-2: #6aa84f;
+  --shadow: 0 20px 50px rgba(22, 45, 32, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Fraunces", serif;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+.eco-page {
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(138, 180, 105, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(106, 168, 79, 0.05) 0%, transparent 50%);
+}
+
+.eco-container {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.eco-center {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+
+.eco-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(14px);
+  background: rgba(247, 245, 240, 0.72);
+  border-bottom: 1px solid rgba(74, 124, 89, 0.12);
+}
+
+.eco-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  gap: 16px;
+}
+
+.eco-brand {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.eco-header-title {
+  font-size: 1.2rem;
+}
+
+.eco-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(74, 124, 89, 0.1);
+  color: var(--green);
+  font-weight: 700;
+}
+
+.eco-top-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 28px;
+  align-items: start;
+  padding: 32px 0 24px;
+}
+
+.eco-gallery-card,
+.eco-details-card,
+.eco-description-card,
+.eco-error {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+}
+
+.eco-gallery-card {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.eco-main-image-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f2f7ee, #ecf4ea);
+  line-height: 0;
+}
+
+.eco-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  vertical-align: bottom;
+}
+
+.img-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--green);
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+}
+
+.img-nav.left {
+  left: 12px;
+}
+
+.img-nav.right {
+  right: 12px;
+}
+
+.eco-thumbs {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  align-self: flex-start;
+}
+
+.eco-thumb {
+  width: 78px;
+  height: 78px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: transparent;
+  padding: 0;
+  opacity: 0.65;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.eco-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eco-thumb.active {
+  opacity: 1;
+  border-color: var(--green);
+}
+
+.eco-details-card {
+  padding: 28px;
+}
+
+.eco-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.eco-chip {
+  display: inline-flex;
+  margin: 0 8px 10px 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(74, 124, 89, 0.12);
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.eco-chip.muted {
+  background: rgba(94, 116, 103, 0.1);
+  color: var(--muted);
+}
+
+.eco-title {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.05;
+  margin-top: 6px;
+}
+
+.eco-rating-box {
+  min-width: 110px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.eco-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d08b18;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.eco-price-block {
+  margin-top: 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.eco-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--green);
+  margin: 0;
+}
+
+.eco-original-price {
+  margin: 0;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.eco-sustainability-panel {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(106, 168, 79, 0.1), rgba(74, 124, 89, 0.08));
+  border: 1px solid rgba(74, 124, 89, 0.1);
+}
+
+.eco-score-ring {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: conic-gradient(var(--green) 0% 78%, rgba(74, 124, 89, 0.12) 78% 100%);
+}
+
+.eco-score-number {
+  font-size: 2.3rem;
+  font-weight: 700;
+  font-family: "Fraunces", serif;
+}
+
+.eco-score-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: -6px;
+}
+
+.eco-score-meta h3 {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+
+.eco-score-meta p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.eco-impact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.eco-impact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(74, 124, 89, 0.1);
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.eco-impact-item strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.eco-impact-item span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.eco-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.eco-info-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(74, 124, 89, 0.1);
+}
+
+.eco-info-box strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.eco-info-box span {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.eco-specs {
+  margin-top: 22px;
+}
+
+.eco-specs h3 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.eco-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.eco-tag {
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: rgba(74, 124, 89, 0.1);
+  color: var(--green);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.eco-stock-row {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.in-stock,
+.out-stock {
+  font-weight: 700;
+}
+
+.in-stock {
+  color: #2e7d32;
+}
+
+.out-stock {
+  color: #b23b2f;
+}
+
+.eco-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(74, 124, 89, 0.14);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  padding: 6px 8px;
+}
+
+.eco-qty button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(74, 124, 89, 0.12);
+  color: var(--green);
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.eco-qty span {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.eco-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.eco-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.eco-btn.primary {
+  background: linear-gradient(135deg, var(--green), var(--green-2));
+  color: white;
+}
+
+.eco-btn.secondary {
+  background: rgba(74, 124, 89, 0.1);
+  color: var(--green);
+}
+
+.eco-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(22, 45, 32, 0.12);
+}
+
+.eco-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.eco-features {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(74, 124, 89, 0.12);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.eco-features div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--green);
+  font-size: 0.9rem;
+}
+
+.eco-description-card {
+  margin: 0 0 60px;
+  padding: 24px 28px;
+  line-height: 1.8;
+  color: #264438;
+}
+
+.eco-description-card h3 {
+  margin-bottom: 12px;
+  font-size: 1.3rem;
+}
+
+.eco-error,
+.eco-loader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  color: var(--text);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 980px) {
+  .eco-top-grid,
+  .eco-info-grid,
+  .eco-features,
+  .eco-impact-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .eco-details-card,
+  .eco-description-card {
+    padding: 18px;
+  }
+
+  .eco-title-row,
+  .eco-stock-row,
+  .eco-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .eco-rating-box {
+    text-align: left;
+  }
+
+  .eco-sustainability-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .eco-score-ring {
+    margin: 0 auto;
+  }
+
+  .eco-actions {
+    grid-template-columns: 1fr;
+  }
+}

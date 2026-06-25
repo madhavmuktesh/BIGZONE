@@ -23,11 +23,20 @@ export const createOrderFromCart = handleAsyncError(async (req, res) => {
   const userId = req.id;
   const { shippingAddress, paymentMethod = "COD" } = req.body;
 
-  // Validate shipping address
-  if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.zip) {
+  // Validate shipping address (UPDATED)
+  if (
+    !shippingAddress || 
+    !shippingAddress.fullName || 
+    !shippingAddress.mobile || 
+    !shippingAddress.house || 
+    !shippingAddress.area || 
+    !shippingAddress.city || 
+    !shippingAddress.state || 
+    !shippingAddress.pincode
+  ) {
     return res.status(400).json({
       success: false,
-      message: "Complete shipping address is required"
+      message: "Complete shipping address is required (including fullName, mobile, house, area, city, state, pincode)"
     });
   }
 

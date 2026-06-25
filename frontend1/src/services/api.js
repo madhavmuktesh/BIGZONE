@@ -121,7 +121,7 @@ class ApiService {
     return this.request("/products/ecozone"); // GET /api/v1/products/ecozone
   }
   async getEcoZoneProduct(productId){
-    return this.request(`products/ecozone/${productId}`)
+    return this.request(`/products/ecozone/${productId}`)
   }
 
 

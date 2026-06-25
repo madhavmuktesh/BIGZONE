@@ -20,6 +20,7 @@ const FormField = ({ id, label, value, onChange, onFocus, onBlur, isFocused, chi
         onFocus={() => onFocus(id)}
         onBlur={onBlur}
         className="address-form-input"
+        placeholder=" "
         {...props}
       />
       <label htmlFor={id} className="address-floating-label">{label}</label>
@@ -218,7 +219,11 @@ const AddAddressPage = () => {
 
         <div className="address-page-header">
           <h1 className="address-page-title">{isEditMode ? 'Edit Address' : 'Add New Address'}</h1>
-          <p className="address-page-subtitle">Fill in the details below to add a new delivery address.</p>
+          <p className="address-page-subtitle">
+            {isEditMode
+              ? 'Update the details below for your delivery address.'
+              : 'Fill in the details below to add a new delivery address.'}
+          </p>
         </div>
 
         <div className="address-progress-container">

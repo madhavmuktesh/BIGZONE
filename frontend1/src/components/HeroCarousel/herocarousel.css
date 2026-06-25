@@ -1,0 +1,127 @@
+.hero-carousel-wrapper {
+  position: relative;
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding:  1rem 1rem -1rem;
+}
+
+.hero-carousel-track {
+  display: flex;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.hero-carousel-perspective-wrapper {
+  flex: 0 0 100%;
+  perspective: 1200px;
+}
+
+.hero-carousel-slide {
+  width: 100%;
+  min-height: 30rem;
+  display: flex;
+  align-items: stretch;
+}
+
+.hero-carousel-slide-inner {
+  position: relative;
+  width: 100%;
+  min-height: 22rem;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-out;
+}
+
+.hero-carousel-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-carousel-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.18));
+}
+
+.hero-carousel-article {
+  position: relative;
+  z-index: 2;
+  min-height: 22rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 2rem;
+  color: #fff;
+}
+
+.hero-carousel-title {
+  max-width: 32rem;
+  font-size: clamp(1.8rem, 3vw, 3.5rem);
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0;
+}
+
+.hero-carousel-button-wrapper {
+  margin-top: 1.25rem;
+}
+
+.hero-carousel-button {
+  padding: 0.85rem 1.15rem;
+  border-radius: 9999px;
+  background: #fff;
+  color: #0f172a;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.hero-carousel-button:hover {
+  background: #f8fafc;
+}
+
+.hero-carousel-controls {
+  position: absolute;
+  left: 50%;
+  bottom: 0.25rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.75rem;
+}
+
+.hero-carousel-control {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+}
+
+.hero-carousel-control:hover {
+  transform: translateY(-2px);
+  border-color: #0f766e;
+  color: #0f766e;
+}
+
+@media (max-width: 768px) {
+  .hero-carousel-wrapper {
+    padding: 0.75rem 1rem 2.5rem;
+  }
+
+  .hero-carousel-slide-inner,
+  .hero-carousel-article {
+    min-height: 18rem;
+  }
+
+  .hero-carousel-title {
+    font-size: 1.6rem;
+  }
+}

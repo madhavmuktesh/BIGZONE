@@ -1,6 +1,6 @@
 import React from 'react';
 import { trustItems } from './trustItemsData';
-
+import "../TrustSignals/TrustSignals.css"
 const TrustSignals = () => {
     return (
         <section className="section bg-gray">

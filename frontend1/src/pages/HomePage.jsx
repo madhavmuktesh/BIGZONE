@@ -1,143 +1,124 @@
-// src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Dashboard from '../components/Dashboard';
-import ProductGrid from '../components/ProductGrid';
-import '../styles/Homepage.css';
-import ApiService from "../services/api";
+import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
+import { useCart } from '../context/CartContext.jsx';
+import "../styles/bigzone1.css";
 
-const HomePage = () => {
-  const [allProducts, setAllProducts] = useState([]);
+import Header from '../components/Header/Headermain.jsx';
+import HeroCarousel from '../components/HeroCarousel/HeroCarousel.jsx';
+import Categories from '../components/Categories/Categories.jsx';
+import Promotions from '../components/Promotions/Promotions.jsx';
+import ProductsSection from '../components/ProductsSection/ProductsSectionmain.jsx';
+import TrustSignals from '../components/TrustSignals/TrustSignals.jsx';
+import Footer from '../components/Footer/Footer.jsx';
+
+function Homepage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [wishlist, setWishlist] = useState(new Set());
+  const { error: cartError, clearError } = useCart();
 
   useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/v1/products`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const list = data.products || [];
+          setProducts(list);
+          setCategories([...new Set(list.map((p) => p.category).filter(Boolean))]);
+        } else {
+          throw new Error(data.message || 'Failed to load products.');
+        }
+      } catch (err) {
+        setError(err.message);
+        toast.error(`API Error: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/v1/products/ecozone');
-      const data = await response.json();
-      
-      if (data.success) {
-        setAllProducts(data.products);
-      } else {
-        setError(data.message || 'Failed to fetch products');
-      }
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      setError('Failed to connect to server');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (cartError) {
+      toast.error(cartError);
+      clearError();
     }
+  }, [cartError, clearError]);
+
+  const handleToggleWishlist = (productId) => {
+    const product = products.find((p) => p._id === productId);
+    if (!product) return;
+
+    setWishlist((prevWishlist) => {
+      const next = new Set(prevWishlist);
+      if (next.has(productId)) {
+        next.delete(productId);
+        toast.success(`Removed "${product.productname}" from wishlist!`);
+      } else {
+        next.add(productId);
+        toast.success(`Added "${product.productname}" to wishlist!`, { icon: '❤️' });
+      }
+      return next;
+    });
   };
 
-  // Filter products by category for different sections
-  const featuredProducts = allProducts.slice(0, 10);
-  const beautyProducts = allProducts.filter(p => p.category === 'Beauty').slice(0, 6);
-  const homeProducts = allProducts.filter(p => p.category === 'Home & Kitchen').slice(0, 6);
-  const electronicsProducts = allProducts.filter(p => p.category === 'Electronics').slice(0, 6);
+  if (loading) {
+    return (
+      <div className="home-state">
+        Loading your products...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="home-state home-state-error">
+        Error: {error}. Please check the API connection.
+      </div>
+    );
+  }
 
   return (
-    <>
-      <Header />
-      <main className="container app-container">
-        <Dashboard />
-        
-        {/* Featured Products Section */}
-        <ProductGrid 
-          products={featuredProducts}
-          loading={loading}
-          error={error}
-          title="🌟 Featured Eco-Friendly Products"
-          maxDisplay={10}
-          showViewAll={true}
-        />
-
-        {/* Category-based Product Sections */}
-        {!loading && !error && allProducts.length > 0 && (
-          <>
-            {/* Beauty Products */}
-            {beautyProducts.length > 0 && (
-              <ProductGrid 
-                products={beautyProducts}
-                title="🌸 Eco Beauty & Personal Care"
-                maxDisplay={6}
-                showViewAll={true}
+    <div className="home-page">
+      <Toaster position="top-center" reverseOrder={false} />
+      <main className="home-main">
+        <HeroCarousel />
+        <Categories categories={categories} />
+        <Promotions />
+        <section className="section section-surface">
+          <div className="container">
+            <ProductsSection
+              title="Our Products"
+              products={products}
+              onToggleWishlist={handleToggleWishlist}
+              wishlist={wishlist}
+              viewAllHref="/search"
+            />
+            {products.length > 8 && (
+              <ProductsSection
+                title="Recommended for You"
+                products={[...products].slice(0, 8)}
+                onToggleWishlist={handleToggleWishlist}
+                wishlist={wishlist}
+                viewAllHref="/search"
               />
             )}
-
-            {/* Home & Kitchen Products */}
-            {homeProducts.length > 0 && (
-              <ProductGrid 
-                products={homeProducts}
-                title="🏠 Sustainable Home Essentials"
-                maxDisplay={6}
-                showViewAll={true}
-              />
-            )}
-
-            {/* Electronics Products */}
-            {electronicsProducts.length > 0 && (
-              <ProductGrid 
-                products={electronicsProducts}
-                title="⚡ Green Technology"
-                maxDisplay={6}
-                showViewAll={true}
-              />
-            )}
-          </>
-        )}
-
-        {/* Eco Highlights Section */}
-        <section className="eco-highlights">
-          <h2 className="section-title">🌍 Why Choose Eco-Friendly?</h2>
-          <div className="eco-benefits">
-            <div className="benefit-card">
-              <div className="benefit-icon">🌱</div>
-              <h3>Sustainable Materials</h3>
-              <p>Products made from renewable and biodegradable materials that protect our planet</p>
-            </div>
-            <div className="benefit-card">
-              <div className="benefit-icon">♻️</div>
-              <h3>Recyclable Packaging</h3>
-              <p>Minimal plastic, maximum recyclability in all our packaging solutions</p>
-            </div>
-            <div className="benefit-card">
-              <div className="benefit-icon">🌍</div>
-              <h3>Carbon Neutral</h3>
-              <p>We offset our carbon footprint with every purchase you make</p>
-            </div>
           </div>
         </section>
-
-        {/* Sustainability Stats */}
-        <section className="sustainability-stats">
-          <h2 className="section-title">📊 Our Impact Together</h2>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <div className="stat-number">25,000+</div>
-              <div className="stat-label">Plastic Items Avoided</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">500+</div>
-              <div className="stat-label">Trees Saved</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">10,000+</div>
-              <div className="stat-label">Happy Customers</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">100%</div>
-              <div className="stat-label">Carbon Neutral</div>
-            </div>
-          </div>
-        </section>
+        <TrustSignals />
       </main>
-    </>
+      <Footer />
+    </div>
   );
-};
+}
 
-export default HomePage;
+export default Homepage;

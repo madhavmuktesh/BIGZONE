@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { promotionsData } from './promotionsData';
-
+import "../Promotions/Promotions.css"
 // NEW: Live ticking countdown timer component
 const LiveCountdown = ({ hours, minutes }) => {
     const [secondsLeft, setSecondsLeft] = useState((hours * 3600) + (minutes * 60));

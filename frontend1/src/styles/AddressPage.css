@@ -1,437 +1,549 @@
-/* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
-/* Define custom colors as CSS variables - Keep these global */
 :root {
-    --teal-midnight: #051914;
-    --dipped-cream: #FCF6EB;
-    --evergreen: #125849;
-    --coach-green: #003527;
-    --white-asparagus: #ECEABE;
-    --last-lettuce: #AADD66;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --address-list-bg: #f8fafc;
+  --address-list-bg-soft: #eef6f5;
+  --address-list-surface: #ffffff;
+  --address-list-surface-alt: #f1f5f9;
+  --address-list-text: #0f172a;
+  --address-list-text-muted: #64748b;
+  --address-list-text-soft: #94a3b8;
+  --address-list-border: #dbe3ec;
+  --address-list-border-strong: #cbd5e1;
+  --address-list-primary: #0d9488;
+  --address-list-primary-dark: #0f766e;
+  --address-list-primary-soft: #ccfbf1;
+  --address-list-danger: #ef4444;
+  --address-list-shadow-sm: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --address-list-shadow-md: 0 18px 45px rgba(15, 23, 42, 0.1);
+  --address-list-radius-sm: 12px;
+  --address-list-radius-md: 18px;
+  --address-list-radius-lg: 24px;
+  --address-list-transition: all 0.22s ease;
 }
 
-/* Address List Page Specific Styles */
-.address-list-body {
-    font-family: 'Inter', sans-serif;
-    margin: 0;
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--address-list-bg);
+  color: var(--address-list-text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
 }
 
 .address-list-page-background {
-    background-color: var(--dipped-cream);
-    min-height: 100vh;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, var(--address-list-bg) 0%, var(--address-list-bg-soft) 100%);
 }
 
 .address-list-container {
-    max-width: 56rem; /* Corresponds to max-w-4xl */
-    margin: 0 auto;
-    padding: 0 1rem;
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
 }
 
-.address-list-main-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
-
-/* Header Styles */
 .address-list-header-nav {
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(4px);
-    box-shadow: var(--shadow-sm);
-    border-bottom: 1px solid rgba(236, 234, 190, 0.5);
-    height: 4rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(248, 250, 252, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(203, 213, 225, 0.6);
 }
 
 .address-list-header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 100%;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.address-list-header-left, 
+.address-list-header-left,
 .address-list-header-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .address-list-header-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--last-lettuce);
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--address-list-text);
 }
 
 .address-list-header-right span {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: rgba(5, 25, 20, 0.6);
+  font-size: 0.95rem;
+  color: var(--address-list-text-muted);
 }
 
 .address-list-icon-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--evergreen);
-    transition: color 0.2s;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--address-list-surface);
+  border: 1px solid var(--address-list-border);
+  box-shadow: var(--address-list-shadow-sm);
+  transition: var(--address-list-transition);
 }
 
-.address-list-icon-button:hover { 
-    color: var(--coach-green); 
+.address-list-icon-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--address-list-primary);
+  color: var(--address-list-primary);
 }
 
-.address-list-icon-button svg { 
-    width: 1.5rem; 
-    height: 1.5rem; 
+.address-list-icon-button svg {
+  width: 18px;
+  height: 18px;
 }
 
-/* Breadcrumb Styles */
+.address-list-main-container {
+  padding: 32px 0 56px;
+}
+
 .address-list-breadcrumb {
-    display: flex; 
-    align-items: center; 
-    gap: 0.5rem;
-    font-size: 0.875rem; 
-    color: rgba(5, 25, 20, 0.6);
-    margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  color: var(--address-list-text-muted);
+  font-size: 0.92rem;
 }
 
-.address-list-breadcrumb a { 
-    color: inherit; 
-    text-decoration: none; 
-    transition: color 0.2s; 
+.address-list-breadcrumb a {
+  transition: color 0.18s ease;
 }
 
-.address-list-breadcrumb a:hover { 
-    color: var(--evergreen); 
+.address-list-breadcrumb a:hover {
+  color: var(--address-list-primary);
 }
 
-.address-list-breadcrumb span { 
-    color: var(--evergreen); 
-    font-weight: 500; 
+.address-list-breadcrumb svg {
+  width: 15px;
+  height: 15px;
+  color: var(--address-list-text-soft);
 }
 
-.address-list-breadcrumb svg { 
-    width: 1rem; 
-    height: 1rem; 
-}
-
-/* Page Header & Search Styles */
 .address-list-page-header {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 2rem;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 26px;
 }
 
 .address-list-page-title {
-    font-size: 1.875rem; 
-    font-weight: 700;
-    color: var(--teal-midnight); 
-    margin: 0 0 0.5rem 0;
+  margin: 0 0 6px;
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--address-list-text);
 }
 
 .address-list-page-subtitle {
-    color: rgba(5, 25, 20, 0.7); 
-    margin: 0;
+  margin: 0;
+  color: var(--address-list-text-muted);
+  font-size: 1rem;
 }
 
-.address-list-search-wrapper { 
-    position: relative; 
-    margin-top: 1rem; 
+.address-list-search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  flex-shrink: 0;
 }
 
 .address-list-search-input {
-    width: 100%;
-    padding: 0.5rem 2.5rem 0.5rem 1rem;
-    background-color: rgba(255, 255, 255, 0.7);
-    border: 1px solid var(--white-asparagus);
-    border-radius: 0.75rem;
-    transition: all 0.2s;
+  width: 100%;
+  height: 50px;
+  padding: 0 46px 0 16px;
+  border: 1.5px solid var(--address-list-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--address-list-text);
+  outline: none;
+  transition: var(--address-list-transition);
+}
+
+.address-list-search-input::placeholder {
+  color: var(--address-list-text-soft);
 }
 
 .address-list-search-input:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(18, 88, 73, 0.2);
-    border-color: var(--evergreen);
+  border-color: var(--address-list-primary);
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
+  background: #fff;
 }
 
 .address-list-search-icon {
-    position: absolute; 
-    right: 0.75rem; 
-    top: 0.65rem;
-    width: 1rem; 
-    height: 1rem; 
-    color: rgba(5, 25, 20, 0.4);
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--address-list-text-muted);
+  pointer-events: none;
 }
 
-/* Button Styles */
-.address-list-add-button-container { 
-    margin-bottom: 2rem; 
+.address-list-add-button-container {
+  margin-bottom: 24px;
 }
 
 .address-list-btn {
-    display: inline-flex; 
-    align-items: center; 
-    gap: 0.5rem;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--address-list-transition);
 }
 
-.address-list-btn:hover { 
-    transform: translateY(-1px); 
+.address-list-btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .address-list-btn-primary {
-    background-color: var(--evergreen); 
-    color: white;
-    box-shadow: var(--shadow-lg);
-    padding: 0.75rem 1.5rem;
+  background: var(--address-list-primary);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(13, 148, 136, 0.18);
 }
 
-.address-list-btn-primary:hover { 
-    background-color: var(--coach-green); 
-    box-shadow: var(--shadow-xl); 
+.address-list-btn-primary:hover {
+  background: var(--address-list-primary-dark);
+  transform: translateY(-1px);
 }
 
-.address-list-btn-dark { 
-    background-color: var(--teal-midnight); 
-    color: white; 
+.address-list-btn-dark {
+  background: var(--address-list-text);
+  color: #fff;
 }
 
-.address-list-btn-dark:hover { 
-    background-color: var(--coach-green); 
+.address-list-btn-dark:hover {
+  background: #1e293b;
 }
 
-.address-list-btn-light { 
-    background-color: var(--last-lettuce); 
-    color: var(--teal-midnight); 
+.address-list-btn-light {
+  background: #fff;
+  color: var(--address-list-text);
+  border: 1px solid var(--address-list-border);
 }
 
-.address-list-btn-light:hover { 
-    background-color: var(--white-asparagus); 
+.address-list-btn-light:hover {
+  border-color: #fca5a5;
+  color: var(--address-list-danger);
+  background: #fff5f5;
 }
 
-.address-list-btn-icon { 
-    width: 1.25rem; 
-    height: 1.25rem; 
-}
-
-.address-list-btn .address-list-btn-icon { 
-    width: 1rem; 
-    height: 1rem; 
-}
-
-/* Address List & Cards */
-.address-list { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 1.5rem; 
+.address-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
 
 .address-list-card {
-    background-color: rgba(236, 234, 190, 0.6);
-    backdrop-filter: blur(4px);
-    border-radius: 1rem;
-    box-shadow: var(--shadow-lg);
-    padding: 1.5rem;
-    border: 1px solid var(--white-asparagus);
-    display: flex; 
-    flex-direction: column;
-    transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--address-list-border);
+  border-radius: var(--address-list-radius-lg);
+  box-shadow: var(--address-list-shadow-sm);
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  transition: var(--address-list-transition);
 }
 
 .address-list-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-xl);
+  transform: translateY(-3px);
+  box-shadow: var(--address-list-shadow-md);
+  border-color: rgba(13, 148, 136, 0.25);
 }
 
-.address-list-card-main-content { 
-    flex: 1; 
-    margin-bottom: 1rem; 
+.address-list-card-main-content {
+  flex: 1;
+  min-width: 0;
 }
 
-.address-list-card-header { 
-    display: flex; 
-    align-items: center; 
-    gap: 0.75rem; 
-    margin-bottom: 1rem; 
+.address-list-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
 .address-list-card-icon-wrapper {
-    width: 2.5rem; 
-    height: 2.5rem;
-    background-color: rgba(18, 88, 73, 0.1);
-    border-radius: 9999px;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--address-list-primary-soft);
+  color: var(--address-list-primary-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.address-list-card-icon { 
-    width: 1.25rem; 
-    height: 1.25rem; 
-    color: var(--evergreen); 
+.address-list-card-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .address-list-card-name {
-    font-size: 1.125rem; 
-    font-weight: 700; 
-    margin: 0;
-    color: var(--teal-midnight); 
-    display: flex; 
-    align-items: center;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 1.12rem;
+  line-height: 1.25;
+  color: var(--address-list-text);
 }
 
-.address-list-star-icon { 
-    width: 1rem; 
-    height: 1rem; 
-    color: var(--last-lettuce); 
-    margin-left: 0.5rem; 
+.address-list-star-icon {
+  width: 16px;
+  height: 16px;
+  color: #f59e0b;
 }
 
 .address-list-default-badge {
-    font-size: 0.75rem; 
-    font-weight: 500;
-    background-color: rgba(170, 221, 102, 0.2);
-    color: var(--evergreen);
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-    margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fffbeb;
+  color: #b45309;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
-.address-list-card-address-type { 
-    font-size: 0.875rem; 
-    color: rgba(5, 25, 20, 0.6); 
-    margin: 0; 
+.address-list-card-address-type {
+  margin: 0;
+  color: var(--address-list-text-muted);
+  font-size: 0.92rem;
 }
 
 .address-list-address-details-box {
-    background-color: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(4px);
-    border-radius: 0.75rem;
-    padding: 1rem;
-    display: flex; 
-    flex-direction: column; 
-    gap: 0.5rem;
+  background: var(--address-list-surface-alt);
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  border-radius: var(--address-list-radius-md);
+  padding: 16px 18px;
 }
 
-.address-list-address-line { 
-    margin: 0; 
-    color: rgba(5, 25, 20, 0.8); 
+.address-list-address-line {
+  margin: 0 0 6px;
+  color: var(--address-list-text);
+  line-height: 1.6;
+  word-break: break-word;
 }
 
-.address-list-address-line.font-medium { 
-    font-weight: 500; 
-    color: var(--teal-midnight); 
+.address-list-address-line:last-of-type {
+  margin-bottom: 0;
 }
 
 .address-list-address-phone {
-    display: flex; 
-    align-items: center; 
-    gap: 0.5rem;
-    margin-top: 0.75rem; 
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--white-asparagus);
-    font-size: 0.875rem; 
-    color: rgba(5, 25, 20, 0.7);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--address-list-text-muted);
+  font-size: 0.95rem;
 }
 
-.address-list-phone-icon { 
-    width: 1rem; 
-    height: 1rem; 
-    color: var(--evergreen); 
+.address-list-phone-icon {
+  width: 16px;
+  height: 16px;
 }
 
-.address-list-card-actions { 
-    display: flex; 
-    flex-direction: row; 
-    gap: 0.75rem; 
+.address-list-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 150px;
+  flex-shrink: 0;
 }
 
-/* Info Box Styles */
+.address-list-empty-state {
+  border: 1px dashed var(--address-list-border-strong);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--address-list-radius-lg);
+  padding: 44px 20px;
+  text-align: center;
+  color: var(--address-list-text-muted);
+}
+
+.address-list-empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+
 .address-list-info-box {
-    margin-top: 3rem;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 1rem; 
-    border: 1px solid var(--white-asparagus);
-    padding: 1.5rem; 
-    display: flex; 
-    align-items: flex-start; 
-    gap: 1rem;
+  margin-top: 28px;
+  background: linear-gradient(135deg, #ecfeff 0%, #f8fafc 100%);
+  border: 1px solid #c7f0ec;
+  border-radius: var(--address-list-radius-lg);
+  padding: 22px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
 }
 
 .address-list-info-icon-wrapper {
-    width: 2rem; 
-    height: 2rem; 
-    background-color: rgba(170, 221, 102, 0.2);
-    border-radius: 9999px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(13, 148, 136, 0.12);
+  color: var(--address-list-primary-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.address-list-info-icon { 
-    width: 1rem; 
-    height: 1rem; 
-    color: var(--evergreen); 
+.address-list-info-icon {
+  width: 20px;
+  height: 20px;
 }
 
-.address-list-info-title { 
-    font-weight: 600; 
-    color: var(--teal-midnight); 
-    margin: 0 0 0.5rem 0; 
+.address-list-info-title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  color: var(--address-list-text);
 }
 
 .address-list-info-list {
-    list-style: none; 
-    padding: 0; 
-    margin: 0;
-    font-size: 0.875rem; 
-    color: rgba(5, 25, 20, 0.7);
-    display: flex; 
-    flex-direction: column; 
-    gap: 0.25rem;
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  color: var(--address-list-text-muted);
+  line-height: 1.75;
 }
 
-/* Responsive Styles */
-@media (min-width: 640px) { /* sm breakpoint */
-    .address-list-container { 
-        padding: 0 1.5rem; 
-    }
-    .address-list-page-header {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .address-list-search-wrapper { 
-        margin-top: 0; 
-    }
-    .address-list-search-input { 
-        width: 16rem; 
-    }
+.font-medium {
+  font-weight: 600;
 }
 
-@media (min-width: 1024px) { /* lg breakpoint */
-    .address-list-container { 
-        padding: 0 2rem; 
-    }
-    .address-list-card { 
-        flex-direction: row; 
-        align-items: flex-start; 
-    }
-    .address-list-card-main-content { 
-        margin-bottom: 0; 
-    }
-    .address-list-card-actions {
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-left: 1.5rem;
-    }
+@media (max-width: 900px) {
+  .address-list-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .address-list-search-wrapper {
+    max-width: 100%;
+  }
+
+  .address-list-card {
+    flex-direction: column;
+  }
+
+  .address-list-card-actions {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .address-list-card-actions .address-list-btn {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 640px) {
+  .address-list-container {
+    width: min(100%, calc(100% - 20px));
+  }
+
+  .address-list-header-content {
+    min-height: 68px;
+  }
+
+  .address-list-header-title {
+    font-size: 1.15rem;
+  }
+
+  .address-list-header-right {
+    display: none;
+  }
+
+  .address-list-main-container {
+    padding: 22px 0 40px;
+  }
+
+  .address-list-breadcrumb {
+    margin-bottom: 18px;
+    font-size: 0.85rem;
+  }
+
+  .address-list-page-title {
+    font-size: 1.7rem;
+  }
+
+  .address-list-page-subtitle {
+    font-size: 0.94rem;
+  }
+
+  .address-list-search-input {
+    height: 46px;
+    padding-left: 14px;
+  }
+
+  .address-list-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .address-list-card-header {
+    gap: 12px;
+  }
+
+  .address-list-card-icon-wrapper {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+
+  .address-list-address-details-box {
+    padding: 14px;
+  }
+
+  .address-list-card-actions {
+    flex-direction: column;
+  }
+
+  .address-list-card-actions .address-list-btn {
+    width: 100%;
+  }
+
+  .address-list-info-box {
+    padding: 18px;
+    flex-direction: column;
+  }
 }

@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../context/CartContext.jsx';
 import { renderStars } from '../../utils/starRating.jsx';
+import "../ProductCard/ProductCard.css"
+
 
 const ProductCard = ({ product, onToggleWishlist, isWishlisted }) => {
   const { addItemToCart, loading } = useCart();

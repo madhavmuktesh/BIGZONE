@@ -641,81 +641,51 @@ export const handleProductErrors = (error, req, res, next) => {
 
 export const searchProducts = handleAsyncError(async (req, res) => {
   try {
-    const { query, page = 1, limit = 20 } = req.query;
+    const { query = "", category = "", page = 1, limit = 20 } = req.query;
 
-    if (!query || query.trim().length === 0) {
-      return res.status(400).json({ success: false, message: "Search query is required" });
+    const pageNum = Math.max(parseInt(page) || 1, 1);
+    const limitNum = Math.min(parseInt(limit) || 20, 50);
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter = {};
+
+    if (category.trim()) {
+      filter.category = { $regex: category.trim(), $options: "i" };
     }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const limitNum = Math.min(parseInt(limit), 50); // Max 50 results per page
+    if (query.trim()) {
+      filter.$or = [
+        { productname: { $regex: query.trim(), $options: "i" } },
+        { category: { $regex: query.trim(), $options: "i" } },
+        { subcategory: { $regex: query.trim(), $options: "i" } },
+        { "specifications.brand": { $regex: query.trim(), $options: "i" } },
+        { "specifications.model": { $regex: query.trim(), $options: "i" } },
+        { "specifications.color": { $regex: query.trim(), $options: "i" } }
+      ];
+    }
 
-    // Method 1: Text search (if text index exists)
-    let textResults = [];
-    try {
-      textResults = await Product.find(
-        { $text: { $search: query } },
-        { score: { $meta: "textScore" } }
-      )
+    const totalCount = await Product.countDocuments(filter);
+
+    const products = await Product.find(filter)
       .populate("createdBy", "username email")
-      .sort({ score: { $meta: "textScore" } })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum);
-    } catch (textError) {
-      console.log('Text search not available, using regex only');
-    }
 
-    // Method 2: Regex search on individual fields
-    const regexResults = await Product.find({
-      $or: [
-        { productname: { $regex: query, $options: "i" } },
-        { category: { $regex: query, $options: "i" } },
-        { subcategory: { $regex: query, $options: "i" } },
-        { "specifications.brand": { $regex: query, $options: "i" } },
-        { "specifications.model": { $regex: query, $options: "i" } },
-        { "specifications.color": { $regex: query, $options: "i" } }
-      ]
-    })
-    .populate("createdBy", "username email")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limitNum);
-
-    // Combine results and remove duplicates
-    const allResults = [...textResults, ...regexResults];
-    const uniqueResults = allResults.filter((product, index, self) => 
-      index === self.findIndex(p => p._id.toString() === product._id.toString())
-    );
-
-    // Get total count for pagination (approximate)
-    const totalCount = await Product.countDocuments({
-      $or: [
-        { productname: { $regex: query, $options: "i" } },
-        { category: { $regex: query, $options: "i" } },
-        { subcategory: { $regex: query, $options: "i" } },
-        { "specifications.brand": { $regex: query, $options: "i" } },
-        { "specifications.model": { $regex: query, $options: "i" } },
-        { "specifications.color": { $regex: query, $options: "i" } }
-      ]
-    });
-
-    return res.status(200).json({ 
-      success: true, 
-      count: uniqueResults.length, 
+    return res.status(200).json({
+      success: true,
+      count: products.length,
       totalCount,
-      currentPage: parseInt(page),
+      currentPage: pageNum,
       totalPages: Math.ceil(totalCount / limitNum),
-      products: uniqueResults 
+      products
     });
-
   } catch (error) {
-    console.error('Search Error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: "Search failed" 
-    });
+    console.error("Search Error:", error);
+    return res.status(500).json({ success: false, message: "Search failed" });
   }
 });
+
 export const getEcoZoneProducts = handleAsyncError(async (req, res) => {
   // Find products where the ecoScore is greater than 60.
   const ecoFriendlyProducts = await Product.find({ ecoScore: { $gt: 60 } })
@@ -735,17 +705,15 @@ export const getSingleecoProduct = handleAsyncError(async (req, res) => {
   const { id } = req.params;
   validateObjectId(id, "product ID");
 
-  // ===== MODIFIED: Find by ID AND check the ecoScore =====
-  const product = await Product.findOne({
-    _id: id,
-    ecoScore: { $gt: 60 } // Only find the product if its score is > 60
-  })
+  const product = await Product.findById(id)
     .populate("createdBy", "username email")
     .populate("productreviews.user", "username");
-  // =======================================================
 
-  // If no product matches BOTH conditions, send a 404 error
   if (!product) {
+    return res.status(404).json({ success: false, message: "Product not found" });
+  }
+
+  if ((product.ecoScore || 0) <= 60) {
     return res.status(404).json({ success: false, message: "Eco-friendly product not found" });
   }
 

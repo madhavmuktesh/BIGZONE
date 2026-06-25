@@ -3,7 +3,7 @@ export const categoryDetails = {
         icon: "fas fa-mobile-alt", color: "blue",
         imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&h=200&fit=crop" 
     },
-    "Electronics": { 
+    "electronics": { 
         icon: "fas fa-laptop", color: "blue",
         imageUrl: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=200&h=200&fit=crop" 
     },

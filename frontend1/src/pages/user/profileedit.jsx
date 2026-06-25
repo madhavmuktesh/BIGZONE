@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext'; // For real user data
+import { useAuth } from '../../context/AuthContext.jsx'; // For real user data
 import { useNavigate } from 'react-router-dom';   // For navigation
-import ApiService from '../services/api.js';     // For real API calls
-import '../styles/profileedit.css'; // Assuming you have this CSS file
-import Header from '../components/Header/Headermain.jsx';
+import ApiService from '../../services/api.js';     // For real API calls
+import "../../styles/profileedit.css"; // Assuming you have this CSS file
+import Header from '../../components/Header/Headermain.jsx';
 
 const EditProfile = () => {
     const { user, setUser, logout } = useAuth();
