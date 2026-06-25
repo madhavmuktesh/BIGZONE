@@ -1,24 +1,22 @@
 import mongoose from "mongoose";
-import { Product } from "./product.model.js"; // Ensure this path is correct
 
 const cartItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
-    required: true,
+    required: true
   },
   quantity: {
     type: Number,
     required: true,
     min: 1,
-    default: 1,
+    default: 1
   },
-  // --- REAL E-COMMERCE ADDITION: Price Snapshot ---
-  // Stores the price of the product at the time it was added to the cart.
   priceAtAddition: {
     type: Number,
     required: true,
-  },
+    min: 0
+  }
 }, { _id: false });
 
 const cartSchema = new mongoose.Schema({
@@ -27,30 +25,28 @@ const cartSchema = new mongoose.Schema({
     ref: "User",
     required: true,
     unique: true,
+    index: true
   },
-  items: [cartItemSchema],
+  items: {
+    type: [cartItemSchema],
+    default: []
+  },
   totalPrice: {
     type: Number,
-    required: true,
     default: 0,
-  },
+    min: 0
+  }
 }, { timestamps: true });
 
-// --- Mongoose Middleware to Calculate Total Price ---
-// This hook now uses the saved 'priceAtAddition' for a consistent total.
-cartSchema.pre("save", function (next) {
-  try {
-    const total = this.items.reduce((acc, item) => {
-      // Calculation is now based on the price when the item was added
-      return acc + (item.quantity * item.priceAtAddition);
-    }, 0);
-
-    this.totalPrice = total;
-    next();
-  } catch (error) {
-    next(error);
-  }
+cartSchema.pre("save", function(next) {
+  this.totalPrice = this.items.reduce((acc, item) => {
+    return acc + (item.quantity * item.priceAtAddition);
+  }, 0);
+  next();
 });
 
-export const Cart = mongoose.model("Cart", cartSchema);
+cartSchema.methods.calculateTotal = function() {
+  return this.items.reduce((acc, item) => acc + (item.quantity * item.priceAtAddition), 0);
+};
 
+export const Cart = mongoose.model("Cart", cartSchema);

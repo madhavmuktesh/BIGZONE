@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
-import { getEcoScoresForProduct } from '../services/geminiService.js';
+import { getEcoScoresForProduct } from "../services/geminiService.js";
 
-// ===== IMAGE SCHEMA =====
 const imageSchema = new mongoose.Schema({
   url: {
     type: String,
@@ -19,7 +18,6 @@ const imageSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// ===== REVIEW SCHEMA =====
 const reviewSchema = new mongoose.Schema({
   review: {
     type: String,
@@ -31,24 +29,23 @@ const reviewSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Rating is required"],
     min: [1, "Rating must be at least 1"],
-    max: [5, "Rating cannot exceed 5"],
+    max: [5, "Rating cannot exceed 5"]
   },
   images: [imageSchema],
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: [true, "User reference is required"]
-  },
+  }
 }, { timestamps: true });
 
-// ===== PRODUCT SCHEMA =====
 const productSchema = new mongoose.Schema({
   productname: {
     type: String,
     required: [true, "Product name is required"],
     trim: true,
     minlength: [3, "Product name must be at least 3 characters long"],
-    maxlength: [100, "Product name cannot exceed 100 characters"],
+    maxlength: [100, "Product name cannot exceed 100 characters"]
   },
   slug: {
     type: String,
@@ -64,13 +61,13 @@ const productSchema = new mongoose.Schema({
   productprice: {
     type: Number,
     required: [true, "Product price is required"],
-    min: [0, "Product price cannot be negative"],
+    min: [0, "Product price cannot be negative"]
   },
   originalPrice: {
     type: Number,
     validate: {
       validator: function(v) {
-        return !v || (v >= this.productprice);
+        return !v || v >= this.productprice;
       },
       message: "Original price should be greater than or equal to current price"
     }
@@ -104,7 +101,7 @@ const productSchema = new mongoose.Schema({
   productreviews: [reviewSchema],
   reviewStats: {
     averageRating: { type: Number, default: 0, min: 0, max: 5 },
-    totalReviews: { type: Number, default: 0, min: 0 },
+    totalReviews: { type: Number, default: 0, min: 0 }
   },
   category: {
     type: String,
@@ -123,7 +120,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     trim: true,
     lowercase: true,
-    maxlength: 20,
+    maxlength: 20
   }],
   stock: {
     quantity: { type: Number, default: 1, min: 0 }
@@ -134,7 +131,6 @@ const productSchema = new mongoose.Schema({
     required: [true, "Creator reference is required"],
     index: true
   },
-  // --- ECO-SCORE FIELDS ---
   ecoScore: {
     type: Number,
     default: 0,
@@ -156,16 +152,20 @@ const productSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// --- PRE-SAVE HOOKS ---
-productSchema.pre('save', function(next) {
-  if (this.isModified('productname')) {
+productSchema.pre("save", function(next) {
+  if (this.isModified("productname")) {
     this.slug = slugify(this.productname, { lower: true, strict: true, trim: true });
   }
   next();
 });
 
-productSchema.pre('save', async function(next) {
-  if (this.isModified('productname') || this.isModified('productdescription') || this.isModified('category') || this.isModified('tags')) {
+productSchema.pre("save", async function() {
+  if (
+    this.isModified("productname") ||
+    this.isModified("productdescription") ||
+    this.isModified("category") ||
+    this.isModified("tags")
+  ) {
     const scores = await getEcoScoresForProduct(this);
     if (scores) {
       this.ecoScore = scores.ecoScore;
@@ -173,10 +173,8 @@ productSchema.pre('save', async function(next) {
       this.ecoAnalysisJustification = scores.justification;
     }
   }
-  next();
 });
 
-// --- INDEXES ---
 productSchema.index({
   productname: "text",
   productdescription: "text",
@@ -186,38 +184,40 @@ productSchema.index({
   tags: "text"
 });
 
-// --- VIRTUALS ---
 productSchema.virtual("isInStock").get(function() {
   return this.stock.quantity > 0;
 });
 
-productSchema.virtual("discountPercentage").get(function () {
+productSchema.virtual("discountPercentage").get(function() {
   if (!this.originalPrice || this.originalPrice === 0 || this.originalPrice <= this.productprice) {
     return 0;
   }
   return Math.round(((this.originalPrice - this.productprice) / this.originalPrice) * 100);
 });
 
-// ===== METHODS ===== (unchanged)
-productSchema.methods.calculateReviewStats = function () {
+productSchema.methods.calculateReviewStats = function() {
   const reviews = this.productreviews;
   const totalReviews = reviews.length;
+
   if (totalReviews === 0) {
     this.reviewStats = {
       averageRating: 0,
       totalReviews: 0,
-      ratingDistribution: { '5': 0, '4': 0, '3': 0, '2': 0, '1': 0 }
+      ratingDistribution: { "5": 0, "4": 0, "3": 0, "2": 0, "1": 0 }
     };
     return;
   }
+
   const ratingSum = reviews.reduce((sum, review) => sum + review.rating, 0);
   const averageRating = Math.round((ratingSum / totalReviews) * 10) / 10;
-  const ratingDistribution = { '5': 0, '4': 0, '3': 0, '2': 0, '1': 0 };
+  const ratingDistribution = { "5": 0, "4": 0, "3": 0, "2": 0, "1": 0 };
+
   reviews.forEach(r => {
     if (ratingDistribution.hasOwnProperty(r.rating)) {
-        ratingDistribution[r.rating]++;
+      ratingDistribution[r.rating]++;
     }
   });
+
   this.reviewStats = { averageRating, totalReviews, ratingDistribution };
 };
 

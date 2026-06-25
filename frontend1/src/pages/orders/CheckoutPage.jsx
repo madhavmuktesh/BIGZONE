@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
-import '../../styles/CheckoutPage.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
+import "../../styles/CheckoutPage.css";
 
 const CheckoutPage = () => {
   const { cart, clearCart } = useCart();
@@ -13,7 +13,7 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState("");
-  
+
   const [shippingAddress, setShippingAddress] = useState({
     fullName: "",
     mobile: "",
@@ -22,15 +22,12 @@ const CheckoutPage = () => {
     area: "",
     city: "",
     state: "",
-    pincode: "",
+    pincode: ""
   });
 
   const fetchAddresses = async () => {
     try {
-      const res = await fetch("/api/v1/addresses", {
-        credentials: "include",
-      });
-
+      const res = await fetch("/api/v1/addresses", { credentials: "include" });
       const data = await res.json();
 
       if (data.success) {
@@ -38,11 +35,19 @@ const CheckoutPage = () => {
 
         if (data.addresses.length > 0) {
           const defaultAddress =
-            data.addresses.find((a) => a.makeDefault) ||
-            data.addresses[0];
+            data.addresses.find((a) => a.makeDefault) || data.addresses[0];
 
           setSelectedAddressId(defaultAddress._id);
-          setShippingAddress(defaultAddress);
+          setShippingAddress({
+            fullName: defaultAddress.fullName || "",
+            mobile: defaultAddress.mobile || "",
+            country: defaultAddress.country || "India",
+            house: defaultAddress.house || "",
+            area: defaultAddress.area || "",
+            city: defaultAddress.city || "",
+            state: defaultAddress.state || "",
+            pincode: defaultAddress.pincode || ""
+          });
         }
       }
     } catch (err) {
@@ -54,14 +59,14 @@ const CheckoutPage = () => {
     if (user === undefined) return;
 
     if (!user || !token) {
-      toast.error('Please sign in to checkout');
-      navigate('/signin');
+      toast.error("Please sign in to checkout");
+      navigate("/signin");
       return;
     }
 
     if (cart && (!cart.items || cart.items.length === 0)) {
-      toast.error('Your cart is empty');
-      navigate('/cart');
+      toast.error("Your cart is empty");
+      navigate("/cart");
       return;
     }
 
@@ -78,7 +83,7 @@ const CheckoutPage = () => {
       area: address.area || "",
       city: address.city || "",
       state: address.state || "",
-      pincode: address.pincode || "",
+      pincode: address.pincode || ""
     });
   };
 
@@ -86,7 +91,7 @@ const CheckoutPage = () => {
     const { name, value } = e.target;
     setShippingAddress((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
     setSelectedAddressId("");
   };
@@ -95,7 +100,7 @@ const CheckoutPage = () => {
     if (e) e.preventDefault();
     if (loading) return;
 
-    if(
+    if (
       !shippingAddress.fullName?.trim() ||
       !shippingAddress.mobile?.trim() ||
       !shippingAddress.house?.trim() ||
@@ -104,29 +109,20 @@ const CheckoutPage = () => {
       !shippingAddress.state?.trim() ||
       !shippingAddress.pincode?.trim()
     ) {
-      toast.error('Please fill in all required shipping fields.');
+      toast.error("Please fill in all required shipping fields.");
       return;
     }
 
     if (!cart?.items || cart.items.length === 0) {
-      toast.error('Your cart is empty.');
-      navigate('/cart');
+      toast.error("Your cart is empty.");
+      navigate("/cart");
       return;
     }
 
     setLoading(true);
 
     try {
-      const subtotal = cart?.totalPrice || 0;
-      const ecoDiscount = 2.0;
-      const totalCost = Math.max(0, subtotal - ecoDiscount);
-
       const orderPayload = {
-        items: cart.items.map((item) => ({
-          product: item.product?._id || item.product,
-          quantity: item.quantity,
-          priceAtPurchase: item.productDetails?.currentPrice || item.priceAtAddition,
-        })),
         shippingAddress: {
           fullName: shippingAddress.fullName.trim(),
           mobile: shippingAddress.mobile.trim(),
@@ -135,50 +131,41 @@ const CheckoutPage = () => {
           area: shippingAddress.area.trim(),
           city: shippingAddress.city.trim(),
           state: shippingAddress.state.trim(),
-          pincode: shippingAddress.pincode.trim(),
+          pincode: shippingAddress.pincode.trim()
         },
-        costBreakdown: {
-          subtotal,
-          shipping: 0,
-          tax: 0,
-          discount: ecoDiscount,
-        },
-        totalCost,
-        paymentMethod: 'Cash On Delivery',
+        paymentMethod: "COD"
       };
 
-      const response = await fetch('/api/v1/orders/create', {
-        method: 'POST',
-        credentials: 'include',
+      const response = await fetch("/api/v1/orders/create", {
+        method: "POST",
+        credentials: "include",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(orderPayload),
+        body: JSON.stringify(orderPayload)
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Failed to place order');
+        throw new Error(data.message || "Failed to place order");
       }
 
-      toast.success('Order placed successfully!');
+      toast.success("Order placed successfully!");
       await clearCart();
 
       setTimeout(() => {
-        navigate('/orders');
+        navigate("/orders");
       }, 1500);
     } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error(error.message || 'Something went wrong during checkout');
+      console.error("Checkout error:", error);
+      toast.error(error.message || "Something went wrong during checkout");
     } finally {
       setLoading(false);
     }
   };
 
   const subtotal = cart?.totalPrice || 0;
-  const ecoDiscount = 2.0;
-  const total = Math.max(0, subtotal - ecoDiscount);
 
   return (
     <div className="cart-page-body">
@@ -186,11 +173,7 @@ const CheckoutPage = () => {
 
       <main className="cart-container">
         <div className="breadcrumbs">
-          <button
-            type="button"
-            onClick={() => navigate('/cart')}
-            className="breadcrumb-link"
-          >
+          <button type="button" onClick={() => navigate("/cart")} className="breadcrumb-link">
             Cart
           </button>
           <span>&gt;</span>
@@ -213,17 +196,13 @@ const CheckoutPage = () => {
 
         <div className="cart-layout">
           <div className="cart-items-list checkout-form-card">
-            
-            {/* SAVED ADDRESSES SECTION */}
             {savedAddresses.length > 0 && (
               <div className="saved-addresses">
                 <h2>Saved Addresses</h2>
                 {savedAddresses.map((address) => (
                   <div
                     key={address._id}
-                    className={`address-card ${
-                      selectedAddressId === address._id ? "selected-address" : ""
-                    }`}
+                    className={`address-card ${selectedAddressId === address._id ? "selected-address" : ""}`}
                     onClick={() => handleSelectAddress(address)}
                   >
                     <input
@@ -252,109 +231,46 @@ const CheckoutPage = () => {
               <div className="checkout-form-grid">
                 <div className="checkout-field">
                   <label htmlFor="fullName">Full Name *</label>
-                  <input
-                    id="fullName"
-                    type="text"
-                    name="fullName"
-                    placeholder="Enter full name"
-                    value={shippingAddress.fullName}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <input id="fullName" type="text" name="fullName" value={shippingAddress.fullName} onChange={handleInputChange} required />
                 </div>
 
                 <div className="checkout-field">
                   <label htmlFor="mobile">Mobile Number *</label>
-                  <input
-                    id="mobile"
-                    type="text"
-                    name="mobile"
-                    placeholder="Enter mobile number"
-                    value={shippingAddress.mobile}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <input id="mobile" type="text" name="mobile" value={shippingAddress.mobile} onChange={handleInputChange} required />
                 </div>
               </div>
 
               <div className="checkout-field">
                 <label htmlFor="house">House / Flat *</label>
-                <input
-                  id="house"
-                  type="text"
-                  name="house"
-                  placeholder="House No., Building, Apartment"
-                  value={shippingAddress.house}
-                  onChange={handleInputChange}
-                  required
-                />
+                <input id="house" type="text" name="house" value={shippingAddress.house} onChange={handleInputChange} required />
               </div>
 
               <div className="checkout-field">
                 <label htmlFor="area">Area / Street *</label>
-                <input
-                  id="area"
-                  type="text"
-                  name="area"
-                  placeholder="Street, Sector, Area"
-                  value={shippingAddress.area}
-                  onChange={handleInputChange}
-                  required
-                />
+                <input id="area" type="text" name="area" value={shippingAddress.area} onChange={handleInputChange} required />
               </div>
 
               <div className="checkout-form-grid">
                 <div className="checkout-field">
                   <label htmlFor="city">City *</label>
-                  <input
-                    id="city"
-                    type="text"
-                    name="city"
-                    placeholder="Enter city"
-                    value={shippingAddress.city}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <input id="city" type="text" name="city" value={shippingAddress.city} onChange={handleInputChange} required />
                 </div>
 
                 <div className="checkout-field">
                   <label htmlFor="state">State *</label>
-                  <input
-                    id="state"
-                    type="text"
-                    name="state"
-                    placeholder="Enter state"
-                    value={shippingAddress.state}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <input id="state" type="text" name="state" value={shippingAddress.state} onChange={handleInputChange} required />
                 </div>
               </div>
 
               <div className="checkout-form-grid">
                 <div className="checkout-field">
                   <label htmlFor="pincode">Pincode *</label>
-                  <input
-                    id="pincode"
-                    type="text"
-                    name="pincode"
-                    placeholder="Enter pincode"
-                    value={shippingAddress.pincode}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <input id="pincode" type="text" name="pincode" value={shippingAddress.pincode} onChange={handleInputChange} required />
                 </div>
-                
+
                 <div className="checkout-field">
                   <label htmlFor="country">Country *</label>
-                  <input
-                    id="country"
-                    type="text"
-                    name="country"
-                    value={shippingAddress.country}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <input id="country" type="text" name="country" value={shippingAddress.country} onChange={handleInputChange} required />
                 </div>
               </div>
 
@@ -362,12 +278,8 @@ const CheckoutPage = () => {
                 Payment method: Cash on Delivery.
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className={`btn ${loading ? 'btn-disabled' : 'btn-primary'}`}
-              >
-                {loading ? 'Processing...' : 'Place Order'}
+              <button type="submit" disabled={loading} className={`btn ${loading ? "btn-disabled" : "btn-primary"}`}>
+                {loading ? "Processing..." : "Place Order"}
               </button>
             </form>
           </div>
@@ -380,21 +292,11 @@ const CheckoutPage = () => {
                 <span className="label">Items ({cart?.items?.length || 0})</span>
                 <span className="value">₹{subtotal.toFixed(2)}</span>
               </div>
-
-              <div className="summary-row">
-                <span className="label">Eco Discount</span>
-                <span className="value discount">-₹{ecoDiscount.toFixed(2)}</span>
-              </div>
-
-              <div className="summary-row">
-                <span className="label">Shipping</span>
-                <span className="value discount">FREE</span>
-              </div>
             </div>
 
             <div className="summary-total summary-row">
               <span className="label">Total to Pay</span>
-              <span className="value">₹{total.toFixed(2)}</span>
+              <span className="value">COD</span>
             </div>
 
             <p className="checkout-warning">

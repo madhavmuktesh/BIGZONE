@@ -1,45 +1,45 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import '../../styles/OrdersPage.css';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../../styles/OrdersPage.css";
 
-const API_BASE = '/api/v1';
+const API_BASE = "/api/v1";
 const API_ENDPOINTS = {
   MY_ORDERS: `${API_BASE}/orders/my-orders`,
   SEARCH_ORDERS: `${API_BASE}/orders/search`,
   CANCEL_ORDER: (id) => `${API_BASE}/orders/${id}/cancel`,
+  INVOICE: (id) => `${API_BASE}/orders/${id}/invoice`,
 };
 
 const currency = (n) => `₹${Number(n || 0).toFixed(2)}`;
-
-const normalizeStatus = (status) => (status || '').toLowerCase().trim();
+const normalizeStatus = (status) => (status || "").toLowerCase().trim();
 
 const getItemImage = (item) => {
   const firstImage = item?.product?.images?.[0];
-
-  if (!firstImage) return '';
-  if (typeof firstImage === 'string') return firstImage;
-  if (typeof firstImage === 'object') return firstImage.url || '';
-  return '';
+  if (!firstImage) return "";
+  if (typeof firstImage === "string") return firstImage;
+  if (typeof firstImage === "object") return firstImage.url || "";
+  return "";
 };
 
 const getItemKey = (item, idx) =>
   item?._id ||
   item?.id ||
   item?.product?._id ||
-  `${item?.product?.productname || 'item'}-${idx}`;
+  `${item?.product?.productname || "item"}-${idx}`;
 
 const StatusBadge = ({ status }) => {
   const normalized = normalizeStatus(status);
-  const cls = normalized.replace(/\s+/g, '-');
+  const cls = normalized.replace(/\s+/g, "-");
 
   return (
-    <span className={`status-badge status--${cls || 'unknown'}`}>
-      {status || 'Unknown'}
+    <span className={`status-badge status--${cls || "unknown"}`}>
+      {status || "Unknown"}
     </span>
   );
 };
 
 const OrderItemRow = ({ item, index }) => {
-  const name = item?.product?.productname ?? item?.name ?? 'Product';
+  const name = item?.product?.productname ?? item?.name ?? "Product";
   const price = item?.priceAtPurchase ?? item?.product?.productprice ?? 0;
   const image = getItemImage(item);
 
@@ -69,22 +69,22 @@ const OrderItemRow = ({ item, index }) => {
 
 const canCancel = (status) => {
   const s = normalizeStatus(status);
-  return s === 'pending' || s === 'confirmed';
+  return s === "pending" || s === "confirmed";
 };
 
 const actionButtonsConfig = {
-  delivered: ['View Details', 'Reorder'],
-  shipped: ['Track Order'],
-  'in transit': ['Track Order', 'Cancel'],
-  processing: ['View Details', 'Cancel'],
-  confirmed: ['View Details', 'Cancel'],
-  pending: ['View Details', 'Cancel'],
+  delivered: ["View Details", "Invoice"],
+  shipped: ["Track Order", "Invoice"],
+  "in transit": ["Track Order", "Cancel", "Invoice"],
+  processing: ["View Details", "Cancel", "Invoice"],
+  confirmed: ["View Details", "Cancel", "Invoice"],
+  pending: ["View Details", "Cancel", "Invoice"],
 };
 
-const OrderCard = ({ order, onCancel, onView, onTrack, onReorder }) => {
+const OrderCard = ({ order, onCancel, onView, onTrack, onInvoice }) => {
   const status = normalizeStatus(order.orderStatus || order.status);
   const placedAt = order.orderPlacedAt || order.date;
-  const orderId = order._id || order.id || '—';
+  const orderId = order._id || order.id || "—";
 
   const subtotal = order?.costBreakdown?.subtotal ?? null;
   const tax = order?.costBreakdown?.tax ?? null;
@@ -95,30 +95,30 @@ const OrderCard = ({ order, onCancel, onView, onTrack, onReorder }) => {
 
   const renderButton = (label) => {
     switch (label) {
-      case 'View Details':
+      case "View Details":
         return (
           <button key={label} className="btn btn--primary" onClick={() => onView(order)}>
             View Details
           </button>
         );
-      case 'Reorder':
-        return (
-          <button key={label} className="btn btn--secondary" onClick={() => onReorder(order)}>
-            Reorder
-          </button>
-        );
-      case 'Track Order':
+      case "Track Order":
         return (
           <button key={label} className="btn btn--primary" onClick={() => onTrack(order)}>
             Track Order
           </button>
         );
-      case 'Cancel':
+      case "Cancel":
         return canCancel(status) ? (
           <button key={label} className="btn btn--danger" onClick={() => onCancel(order)}>
             Cancel
           </button>
         ) : null;
+      case "Invoice":
+        return (
+          <button key={label} className="btn btn--secondary" onClick={() => onInvoice(order)}>
+            Download Invoice
+          </button>
+        );
       default:
         return null;
     }
@@ -130,7 +130,7 @@ const OrderCard = ({ order, onCancel, onView, onTrack, onReorder }) => {
         <div>
           <h3 className="order-id">Order #{orderId}</h3>
           <p className="order-date">
-            Placed on {placedAt ? new Date(placedAt).toLocaleDateString() : '—'}
+            Placed on {placedAt ? new Date(placedAt).toLocaleDateString() : "—"}
           </p>
         </div>
 
@@ -139,11 +139,7 @@ const OrderCard = ({ order, onCancel, onView, onTrack, onReorder }) => {
 
       <div className="order-items">
         {items.map((item, idx) => (
-          <OrderItemRow
-            key={getItemKey(item, idx)}
-            item={item}
-            index={idx}
-          />
+          <OrderItemRow key={getItemKey(item, idx)} item={item} index={idx} />
         ))}
       </div>
 
@@ -185,16 +181,16 @@ const useQuery = () => {
   const [params, setParams] = useState({
     page: 1,
     limit: 10,
-    status: '',
-    name: '',
+    status: "",
+    name: "",
   });
 
   const queryString = useMemo(() => {
     const q = new URLSearchParams();
-    q.set('page', String(params.page));
-    q.set('limit', String(params.limit));
-    if (params.status) q.set('status', params.status);
-    if (params.name) q.set('name', params.name);
+    q.set("page", String(params.page));
+    q.set("limit", String(params.limit));
+    if (params.status) q.set("status", params.status);
+    if (params.name) q.set("name", params.name);
     return q.toString();
   }, [params]);
 
@@ -202,6 +198,7 @@ const useQuery = () => {
 };
 
 const OrdersPage = () => {
+  const navigate = useNavigate();
   const { params, setParams, queryString } = useQuery();
 
   const [orders, setOrders] = useState([]);
@@ -213,11 +210,11 @@ const OrdersPage = () => {
     hasPrevPage: false,
   });
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState('');
+  const [err, setErr] = useState("");
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
-    setErr('');
+    setErr("");
 
     try {
       const isSearch = params.name.trim().length >= 2;
@@ -226,13 +223,13 @@ const OrdersPage = () => {
         : `${API_ENDPOINTS.MY_ORDERS}?${queryString}`;
 
       const res = await fetch(url, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { Accept: 'application/json' },
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => '');
+        const text = await res.text().catch(() => "");
         throw new Error(text || `Failed to load orders (${res.status})`);
       }
 
@@ -250,7 +247,7 @@ const OrdersPage = () => {
         }
       );
     } catch (e) {
-      setErr(e.message || 'Failed to load orders');
+      setErr(e.message || "Failed to load orders");
       setOrders([]);
     } finally {
       setLoading(false);
@@ -265,59 +262,58 @@ const OrdersPage = () => {
     const status = order?.orderStatus || order?.status;
 
     if (!canCancel(status)) {
-      alert('This order cannot be cancelled at its current status.');
+      alert("This order cannot be cancelled at its current status.");
       return;
     }
 
-    const reason = window.prompt('Provide a cancellation reason (optional):');
+    const reason = window.prompt("Provide a cancellation reason (optional):");
     if (reason === null) return;
 
-    const confirmed = window.confirm('Are you sure you want to cancel this order?');
+    const confirmed = window.confirm("Are you sure you want to cancel this order?");
     if (!confirmed) return;
 
     try {
       const res = await fetch(API_ENDPOINTS.CANCEL_ORDER(order._id), {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({ reason }),
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => '');
+        const text = await res.text().catch(() => "");
         throw new Error(text || `Cancel failed (${res.status})`);
       }
 
       await fetchOrders();
-      alert('Order cancelled successfully');
+      alert("Order cancelled successfully");
     } catch (e) {
-      alert(e.message || 'Cancel failed');
+      alert(e.message || "Cancel failed");
     }
   };
 
   const onView = (order) => {
-    window.location.href = `/orders/${order._id}`;
+    navigate(`/orders/${order._id}`);
   };
 
   const onTrack = (order) => {
     const trackingNumber = order?.trackingNumber;
-
     if (trackingNumber) {
       window.open(
         `https://track.aftership.com/${encodeURIComponent(trackingNumber)}`,
-        '_blank',
-        'noopener,noreferrer'
+        "_blank",
+        "noopener,noreferrer"
       );
     } else {
-      alert('Tracking number not available yet.');
+      alert("Tracking number not available yet.");
     }
   };
 
-  const onReorder = () => {
-    alert('Reorder flow not implemented.');
+  const onInvoice = (order) => {
+    window.open(API_ENDPOINTS.INVOICE(order._id), "_blank", "noopener,noreferrer");
   };
 
   const handleSearchChange = (e) => {
@@ -393,7 +389,7 @@ const OrdersPage = () => {
               onCancel={onCancel}
               onView={onView}
               onTrack={onTrack}
-              onReorder={onReorder}
+              onInvoice={onInvoice}
             />
           ))}
 

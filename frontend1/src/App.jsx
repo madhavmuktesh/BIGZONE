@@ -12,6 +12,7 @@ import ProductUploadForm from "./pages/form";
 import SignIn from "./pages/user/signin.jsx";
 import Cart from "./pages/orders/cart.jsx";
 import OrdersPage from "./pages/orders/Orderpage.jsx";
+import OrderDetailsPage from "./pages/orders/OrderDetailsPage";
 import Productmain from "../src/pages/productdetailmain.jsx";
 import RegisterPage from "./pages/user/registerpage.jsx";
 import ProfilePage from "./pages/user/profilepage.jsx";
@@ -84,6 +85,7 @@ function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/orders/:id" element={<OrderDetailsPage />} />
                   <Route path="/editprofile" element={<EditProfile />} />
                   <Route path="/address" element={<AddressPage />} />
                   <Route path="/addaddress" element={<AddAddressPage />} />
