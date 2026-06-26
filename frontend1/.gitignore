@@ -35,3 +35,4 @@ dist-ssr/
 
 # User uploads
 backend/uploads/
+output/
