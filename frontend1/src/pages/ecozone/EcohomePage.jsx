@@ -42,7 +42,7 @@ const EcohomePage = () => {
 
   return (
     <>
-      <Header />
+      
       <main className="container app-container">
         <Dashboard />
         

@@ -1,4 +1,3 @@
-// ===== PRODUCT ROUTES (product.route.js) =====
 import express from "express";
 import {
   createProduct,
@@ -15,9 +14,9 @@ import {
   handleProductErrors,
   getEcoZoneProducts,
   getSingleecoProduct,
+  searchProducts,
+  getMyProducts,
 } from "../controllers/product.controller.js";
-import { searchProducts } from "../controllers/product.controller.js";
-
 
 import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 import {
@@ -35,21 +34,19 @@ const router = express.Router();
 /* ======================
    PUBLIC ROUTES
 ====================== */
-// Anyone can view products
-
-router.get("/search", searchProducts);   // <-- move this up
+router.get("/search", searchProducts);
+router.get("/ecozone", getEcoZoneProducts);
+router.get("/ecozone/:id", getSingleecoProduct);
 router.get("/", getAllProducts);
-router.get("/user/:userId", getUserProducts); // must come before /:id
-router.get('/ecozone', getEcoZoneProducts); 
-router.get('/:id', getSingleProduct);
-router.get("/ecozone/:id",getSingleecoProduct);
 
 /* ======================
    AUTHENTICATED ROUTES
 ====================== */
 router.use(isAuthenticated);
 
-// --- Product CRUD ---
+router.get("/my-products", getMyProducts);
+router.get("/user/:userId", getUserProducts);
+
 router.post(
   "/create",
   productImageUpload.array("images", 10),
@@ -67,6 +64,11 @@ router.post(
   createMultipleProducts
 );
 
+router.post("/:id/reviews", validateReviewInput, addProductReview);
+router.put("/:id/reviews/:reviewId", validateReviewInput, updateProductReview);
+router.delete("/:id/reviews/:reviewId", deleteProductReview);
+router.post("/:id/reviews/:reviewId/helpful", markReviewHelpful);
+
 router.put(
   "/:id",
   productImageUpload.array("images", 10),
@@ -76,12 +78,7 @@ router.put(
 );
 
 router.delete("/:id", deleteProduct);
-
-// --- Product Reviews ---
-router.post("/:id/reviews", validateReviewInput, addProductReview);
-router.put("/:id/reviews/:reviewId", validateReviewInput, updateProductReview);
-router.delete("/:id/reviews/:reviewId", deleteProductReview);
-router.post("/:id/reviews/:reviewId/helpful", markReviewHelpful);
+router.get("/:id", getSingleProduct);
 
 /* ======================
    ERROR HANDLER

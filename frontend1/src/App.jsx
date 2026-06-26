@@ -21,15 +21,16 @@ import SearchResults from "./pages/SearchResults";
 import AddAddressPage from "./pages/AddAddress.jsx";
 import AddressPage from "./pages/Addresspage.jsx";
 import EcohomePage from "./pages/ecozone/EcohomePage.jsx";
-import CheckoutPage from './pages/orders/CheckoutPage.jsx';
-import ForgotPassword from './pages/user/ForgotPassword.jsx';
-import ResetPassword from './pages/user/ResetPassword.jsx';
-import SellerDashboard from './pages/SellerDashboard';
+import CheckoutPage from "./pages/orders/CheckoutPage.jsx";
+import ForgotPassword from "./pages/user/ForgotPassword.jsx";
+import ResetPassword from "./pages/user/ResetPassword.jsx";
+import SellerDashboard from "./pages/SellerDashboard";
 import NotFound from "./pages/NotFound.jsx";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import "../src/index.css";
 import Header from "./components/Header/Headermain.jsx";
+import Footer from "./components/Footer/Footer.jsx";
 
 const DashboardPage = () => (
   <div style={{ padding: "50px", textAlign: "center", fontSize: "2rem" }}>
@@ -59,26 +60,21 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <div className="App">
-              {/* Global toaster for popups */}
               <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
               <Header />
+
               <Routes>
-                {/* Public */}
                 <Route path="/" element={<Homepage />} />
                 <Route path="/ecozone" element={<EcohomePage />} />
                 <Route path="/products/:id" element={<Productmain />} />
                 <Route path="/search" element={<SearchResults />} />
-                <Route path="/ecozone/products/:id" element={<ProductDetailPage/>}/>
-                <Route path="*" element={<NotFound />} />
+                <Route path="/ecozone/products/:id" element={<ProductDetailPage />} />
 
-                {/* Auth-only gates */}
                 <Route path="/signin" element={<AuthGate><SignIn /></AuthGate>} />
                 <Route path="/register" element={<AuthGate><RegisterPage /></AuthGate>} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/api/v1/users/reset-password/:token" element={<ResetPassword />} />
 
-
-                {/* Protected */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/form" element={<ProductUploadForm />} />
@@ -90,13 +86,14 @@ function App() {
                   <Route path="/address" element={<AddressPage />} />
                   <Route path="/addaddress" element={<AddAddressPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/seller-dashboard" element={<SellerDashboard />} />
+                  <Route path="/sellerdashboard" element={<SellerDashboard />} />
                   <Route path="/address/edit/:id" element={<AddAddressPage />} />
                 </Route>
 
-                {/* Fallback */}
+                <Route path="*" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              <Footer/>
             </div>
           </CartProvider>
         </AuthProvider>

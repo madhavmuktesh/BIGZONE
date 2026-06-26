@@ -116,7 +116,6 @@ function Homepage() {
         </section>
         <TrustSignals />
       </main>
-      <Footer />
     </div>
   );
 }

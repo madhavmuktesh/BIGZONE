@@ -48,6 +48,10 @@ const Header = () => {
     navigate('/signin');
   };
 
+  const handleSellerDashboard = () => {
+    handleProtectedAction('/sellerdashboard');
+  };
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim().length > 2) {
@@ -192,7 +196,11 @@ const Header = () => {
                   }
                 />
                 <button type="submit" className="bz-search-button" aria-label="Search">
-                  {loading ? <span className="bz-search-spinner" aria-hidden="true" /> : <i className="fas fa-search" aria-hidden="true" />}
+                  {loading ? (
+                    <span className="bz-search-spinner" aria-hidden="true" />
+                  ) : (
+                    <i className="fas fa-search" aria-hidden="true" />
+                  )}
                 </button>
               </form>
 
@@ -258,6 +266,13 @@ const Header = () => {
                 <span className="bz-badge">{cartCount}</span>
               </button>
 
+              {isAuthenticated && (
+                <button type="button" className="bz-action-button" onClick={handleSellerDashboard}>
+                  <i className="fas fa-store" aria-hidden="true" />
+                  <span>Seller Dashboard</span>
+                </button>
+              )}
+
               {isAuthenticated ? (
                 <div className="bz-user-pill">
                   <div className="bz-user-pill-main">
@@ -302,6 +317,7 @@ const Header = () => {
               <span>Returns & Orders</span>
             </button>
 
+
             <button type="button" className="bz-nav-link">
               <i className="fas fa-globe" aria-hidden="true" />
               <span>Language</span>
@@ -312,10 +328,7 @@ const Header = () => {
               <span>Customer Service</span>
             </button>
 
-            <button type="button" className="bz-nav-link" onClick={() => handleProtectedAction('/form')}>
-              <i className="fas fa-store" aria-hidden="true" />
-              <span>Sell A Product</span>
-            </button>
+
           </div>
         </div>
       </nav>

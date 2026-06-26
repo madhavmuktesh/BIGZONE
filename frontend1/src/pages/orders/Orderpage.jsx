@@ -313,8 +313,8 @@ const OrdersPage = () => {
   };
 
   const onInvoice = (order) => {
-    window.open(API_ENDPOINTS.INVOICE(order._id), "_blank", "noopener,noreferrer");
-  };
+  window.open(`/api/v1/orders/${order._id}/invoice`, "_blank", "noopener,noreferrer");
+};
 
   const handleSearchChange = (e) => {
     setParams((prev) => ({

@@ -11,9 +11,9 @@ import connectDB from "./config/db.js";
 
 import userRoutes from "./routes/user.route.js";
 import productRoutes from "./routes/product.route.js";
-import orderRoutes from "./routes/order.route.js";
+import orderRoutes from "./routes/orders.route.js";
 import cartRoutes from "./routes/cart.route.js";
-import router from "./routes/address.route.js";
+import addressRoutes from "./routes/address.route.js";
 
 dotenv.config();
 
@@ -43,14 +43,13 @@ const corsOptions =
           "http://localhost:3000",
           "http://localhost:5173",
           "http://127.0.0.1:5173",
-          "http://localhost:4173",   // 👈 add this
-          "http://127.0.0.1:4173"    // 👈 and this (sometimes Vite preview uses 127.0.0.1)
+          "http://localhost:4173",
+          "http://127.0.0.1:4173",
         ],
         credentials: true,
       };
 
 app.use(cors(corsOptions));
-
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
@@ -63,19 +62,19 @@ app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
-app.use("/api/v1/addresses", router);
+app.use(`${API_PREFIX}/addresses`, addressRoutes);
 
-app.get(`${API_PREFIX}/health`, (req, res) => {
+app.get(`${API_PREFIX}/health`, (_req, res) => {
   res.status(200).json({ success: true, message: "Server is healthy" });
 });
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
-  app.get("/*", (req, res) => {
+  app.get("*", (_req, res) => {
     res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
   });
 } else {
-  app.get("/", (req, res) => {
+  app.get("/", (_req, res) => {
     res.json({ success: true, message: "API running in dev mode" });
   });
 }
@@ -84,14 +83,19 @@ app.all("/api/*splat", (req, res) => {
   res.status(404).json({ success: false, message: `API endpoint ${req.originalUrl} not found` });
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error("Global Error:", err);
+
   let status = err.status || 500;
   let message = process.env.NODE_ENV === "production" ? "Internal server error" : err.message || "Something went wrong";
 
   if (err.name === "ValidationError") {
     status = 400;
-    return res.status(status).json({ success: false, message: "Validation Error", errors: Object.values(err.errors).map(e => e.message) });
+    return res.status(status).json({
+      success: false,
+      message: "Validation Error",
+      errors: Object.values(err.errors).map((e) => e.message),
+    });
   }
 
   if (err.name === "CastError") {
