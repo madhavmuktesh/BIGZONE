@@ -4,6 +4,9 @@ import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import "../styles/SellerDashboard.css";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+
 const ORDER_STATUSES = [
   "pending",
   "confirmed",
@@ -25,7 +28,9 @@ const STATUS_COLORS = {
 const LOW_STOCK_LIMIT = 5;
 
 const getStockQty = (product) => {
-  if (product?.stock?.quantity !== undefined) return Number(product.stock.quantity) || 0;
+  if (product?.stock?.quantity !== undefined) {
+    return Number(product.stock.quantity) || 0;
+  }
   return Number(product?.stock) || 0;
 };
 
@@ -40,6 +45,17 @@ const formatDate = (value) => {
     month: "short",
     year: "numeric",
   });
+};
+
+const StatCard = ({ label, value, color = "#111827" }) => {
+  return (
+    <div className="seller-dashboard-stat-card">
+      <p className="seller-dashboard-stat-label">{label}</p>
+      <h3 className="seller-dashboard-stat-value" style={{ color }}>
+        {value}
+      </h3>
+    </div>
+  );
 };
 
 const SellerDashboard = () => {
@@ -60,8 +76,8 @@ const SellerDashboard = () => {
     orders: "",
   });
 
-  const fetchJSON = useCallback(async (url, options = {}) => {
-    const response = await fetch(url, {
+  const fetchJSON = useCallback(async (endpoint, options = {}) => {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       credentials: "include",
       headers: {
         Accept: "application/json",
@@ -75,7 +91,7 @@ const SellerDashboard = () => {
 
     if (!response.ok || !data.success) {
       console.error("API Error:", {
-        url,
+        url: `${API_BASE_URL}${endpoint}`,
         status: response.status,
         response: data,
         requestBody: options.body,
@@ -85,7 +101,9 @@ const SellerDashboard = () => {
         data.message ||
           (Array.isArray(data.errors)
             ? data.errors
-                .map((err) => (typeof err === "string" ? err : `${err.path}: ${err.message}`))
+                .map((err) =>
+                  typeof err === "string" ? err : `${err.path}: ${err.message}`
+                )
                 .join(", ")
             : "Request failed")
       );
@@ -99,7 +117,7 @@ const SellerDashboard = () => {
     setErrorState((prev) => ({ ...prev, products: "" }));
 
     try {
-      const data = await fetchJSON("/api/v1/products/my-products");
+      const data = await fetchJSON("/products/my-products");
       setProducts(Array.isArray(data.products) ? data.products : []);
     } catch (error) {
       setErrorState((prev) => ({
@@ -116,7 +134,7 @@ const SellerDashboard = () => {
     setErrorState((prev) => ({ ...prev, orders: "" }));
 
     try {
-      const data = await fetchJSON("/api/v1/orders/seller-orders");
+      const data = await fetchJSON("/orders/seller-orders");
       setOrders(Array.isArray(data.orders) ? data.orders : []);
     } catch (error) {
       setErrorState((prev) => ({
@@ -156,7 +174,7 @@ const SellerDashboard = () => {
     if (!confirmed) return;
 
     try {
-      await fetchJSON(`/api/v1/products/${productId}`, {
+      await fetchJSON(`/products/${productId}`, {
         method: "DELETE",
       });
 
@@ -204,7 +222,7 @@ const SellerDashboard = () => {
         payload.note = cancellationReason.trim();
       }
 
-      const data = await fetchJSON(`/api/v1/orders/${orderId}/status`, {
+      const data = await fetchJSON(`/orders/${orderId}/status`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
@@ -265,11 +283,17 @@ const SellerDashboard = () => {
 
   const stats = useMemo(() => {
     const totalProducts = products.length;
-    const lowStockProducts = products.filter((p) => getStockQty(p) <= LOW_STOCK_LIMIT).length;
+    const lowStockProducts = products.filter(
+      (p) => getStockQty(p) <= LOW_STOCK_LIMIT
+    ).length;
     const totalOrders = orders.length;
-    const pendingOrders = orders.filter((o) => (o.orderStatus || "pending") === "pending").length;
+    const pendingOrders = orders.filter(
+      (o) => (o.orderStatus || "pending") === "pending"
+    ).length;
     const activeOrders = orders.filter((o) =>
-      ["pending", "confirmed", "processing", "shipped"].includes(o.orderStatus || "pending")
+      ["pending", "confirmed", "processing", "shipped"].includes(
+        o.orderStatus || "pending"
+      )
     ).length;
 
     return {
@@ -370,13 +394,18 @@ const SellerDashboard = () => {
                 <div key={product._id} className="seller-dashboard-product-card">
                   <div className="seller-dashboard-product-info">
                     <img
-                      src={product.images?.[0]?.url || "https://placehold.co/100x100?text=No+Image"}
+                      src={
+                        product.images?.[0]?.url ||
+                        "https://placehold.co/100x100?text=No+Image"
+                      }
                       alt={product.productname || "Product"}
                       className="seller-dashboard-product-image"
                     />
 
                     <div style={{ flex: 1 }}>
-                      <h3 className="seller-dashboard-product-name">{product.productname}</h3>
+                      <h3 className="seller-dashboard-product-name">
+                        {product.productname}
+                      </h3>
                       <p className="seller-dashboard-meta-text">
                         Category: {product.category || "—"}
                       </p>
@@ -469,8 +498,8 @@ const SellerDashboard = () => {
                         Order #{order._id?.slice(-8).toUpperCase()}
                       </h3>
                       <p className="seller-dashboard-meta-text">
-                        Date: {formatDate(order.createdAt || order.orderPlacedAt)} | Payment:{" "}
-                        {order.paymentMethod || "—"}
+                        Date: {formatDate(order.createdAt || order.orderPlacedAt)} |
+                        {" "}Payment: {order.paymentMethod || "—"}
                       </p>
                       <p className="seller-dashboard-meta-text">
                         Total: {formatCurrency(order.totalAmount || order.totalCost)}
@@ -543,17 +572,6 @@ const SellerDashboard = () => {
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-const StatCard = ({ label, value, color = "#111827" }) => {
-  return (
-    <div className="seller-dashboard-stat-card">
-      <p className="seller-dashboard-stat-label">{label}</p>
-      <h3 className="seller-dashboard-stat-value" style={{ color }}>
-        {value}
-      </h3>
     </div>
   );
 };
