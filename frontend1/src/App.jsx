@@ -12,7 +12,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
-import Homepage from "./pages/Homepage.jsx";
+import Homepage from "./pages/HomePage.jsx";
 import ProductDetailPage from "./pages/ecozone/ProductDetailPage.jsx";
 import ProductUploadForm from "./pages/form";
 import SignIn from "./pages/user/signin.jsx";
