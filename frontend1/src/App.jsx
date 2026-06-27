@@ -96,7 +96,7 @@ function Layout() {
 
         {/* Auth Routes */}
         <Route
-          path="/signin"
+          path="/login"
           element={
             <AuthGate>
               <SignIn />
