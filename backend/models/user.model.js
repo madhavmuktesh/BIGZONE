@@ -85,6 +85,13 @@ const userSchema = new mongoose.Schema({
             validate: [arrayLimit, 'Maximum 5 addresses allowed']
         }
     },
+    // backend/models/user.model.js — add inside userSchema fields
+    ecoStats: {
+        totalEcoScore: { type: Number, default: 0, min: 0 },
+        totalCo2SavedKg: { type: Number, default: 0, min: 0 },
+        ecoOrderCount: { type: Number, default: 0, min: 0 },
+        lastUpdated: { type: Date, default: null },
+    },
     resetPasswordToken: String,
     resetPasswordExpires: Date
 }, { timestamps: true });

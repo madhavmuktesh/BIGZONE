@@ -690,7 +690,7 @@ export const getCurrentUser = async (req, res, next) => {
     }
 
     // Fetch user from database (adjust the model import as needed)
-    const user = await User.findById(userId).select('-password');
+    const user = await User.findById(req.id).select("-password -resetPasswordToken -resetPasswordExpires");
     
     if (!user) {
       return res.status(404).json({ 

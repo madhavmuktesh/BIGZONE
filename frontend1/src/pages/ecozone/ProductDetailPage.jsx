@@ -1,36 +1,35 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import ApiService from "../../services/api";
+import { fetchEcoProductByIdAPI } from "../../services/api";
+import { useCart } from "../../context/CartContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import {
-  Leaf,
-  ShoppingCart,
-  Truck,
-  ShieldCheck,
-  Heart,
-  Star,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-  Recycle,
+  Leaf, ShoppingCart, Truck, ShieldCheck,
+  Heart, Star, ChevronLeft, ChevronRight,
+  Loader2, AlertCircle, Recycle,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import "../../styles/EcoProductDetail.css";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const { addItemToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [cartLoading, setCartLoading] = useState(false);
 
   const fetchProduct = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await ApiService.getEcoZoneProduct(id);
+      const data = await fetchEcoProductByIdAPI(id);
       const item = data?.product || data;
       setProduct(item);
       setActiveImage(0);
@@ -59,20 +58,15 @@ const ProductDetailPage = () => {
   const ecoScore = Number(product?.ecoScore ?? 0);
   const co2SavedKg = Number(product?.co2SavedKg ?? 0);
   const reviewCount =
-    product?.reviewStats?.totalReviews ??
-    product?.productreviews?.length ??
-    0;
+    product?.reviewStats?.totalReviews ?? product?.productreviews?.length ?? 0;
   const averageRating = product?.reviewStats?.averageRating ?? 0;
   const inStock = (product?.stock?.quantity ?? 0) > 0;
 
   const ecoLabel =
-    ecoScore >= 80
-      ? "Excellent eco choice"
-      : ecoScore >= 60
-      ? "Strong eco choice"
-      : ecoScore >= 40
-      ? "Moderate eco impact"
-      : "Lower eco score";
+    ecoScore >= 80 ? "Excellent eco choice"
+    : ecoScore >= 60 ? "Strong eco choice"
+    : ecoScore >= 40 ? "Moderate eco impact"
+    : "Lower eco score";
 
   const handlePrev = () => {
     if (!images.length) return;
@@ -89,34 +83,41 @@ const ProductDetailPage = () => {
     setQuantity((prev) => Math.max(1, Math.min(prev + delta, maxQty)));
   };
 
+  // ✅ Now uses CartContext instead of direct API call
   const handleAddToCart = async () => {
     if (!product) return;
+
+    if (!isAuthenticated) {
+      toast.error("Please sign in to add items to cart");
+      navigate("/signin");
+      return;
+    }
+
     try {
-      await ApiService.addToCart(product._id, quantity, {
-        productname: product.productname,
-        productprice: product.productprice,
-        image: product?.images?.[0]?.url || "",
-        ecoScore: product.ecoScore,
-      });
-      navigate("/cart");
+      setCartLoading(true);
+      await addItemToCart(product._id, quantity);
+      toast.success(`${product.productname} added to cart`);
     } catch (err) {
-      alert(err.message || "Failed to add to cart");
+      toast.error(err.message || "Failed to add to cart");
+    } finally {
+      setCartLoading(false);
     }
   };
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = () => {
     if (!product) return;
-    try {
-      await ApiService.addToCart(product._id, quantity, {
-        productname: product.productname,
-        productprice: product.productprice,
-        image: product?.images?.[0]?.url || "",
-        ecoScore: product.ecoScore,
-      });
-      navigate("/checkout");
-    } catch (err) {
-      alert(err.message || "Failed to proceed");
-    }
+    navigate("/checkout", {
+      state: {
+        buyNowItem: {
+          productId: product._id,
+          productname: product.productname,
+          productprice: product.productprice,
+          image: product?.images?.[0]?.url || "",
+          ecoScore: product.ecoScore,
+          quantity,
+        },
+      },
+    });
   };
 
   if (loading) {
@@ -163,7 +164,6 @@ const ProductDetailPage = () => {
             <p className="eco-brand">EcoZone</p>
             <h2 className="eco-header-title">Product details</h2>
           </div>
-
           <div className="eco-header-badge">
             <Leaf size={16} />
             <span>{ecoLabel}</span>
@@ -175,11 +175,7 @@ const ProductDetailPage = () => {
         <section className="eco-top-grid">
           <section className="eco-gallery-card">
             <div className="eco-main-image-wrap">
-              <button
-                className="img-nav left"
-                onClick={handlePrev}
-                aria-label="Previous image"
-              >
+              <button className="img-nav left" onClick={handlePrev} aria-label="Previous image">
                 <ChevronLeft size={20} />
               </button>
 
@@ -189,11 +185,7 @@ const ProductDetailPage = () => {
                 className="eco-main-image"
               />
 
-              <button
-                className="img-nav right"
-                onClick={handleNext}
-                aria-label="Next image"
-              >
+              <button className="img-nav right" onClick={handleNext} aria-label="Next image">
                 <ChevronRight size={20} />
               </button>
             </div>
@@ -235,11 +227,11 @@ const ProductDetailPage = () => {
               <p className="eco-price">
                 ₹{Number(product.productprice).toLocaleString("en-IN")}
               </p>
-              {product.originalPrice ? (
+              {product.originalPrice && (
                 <p className="eco-original-price">
                   ₹{Number(product.originalPrice).toLocaleString("en-IN")}
                 </p>
-              ) : null}
+              )}
             </div>
 
             <div className="eco-sustainability-panel">
@@ -252,7 +244,7 @@ const ProductDetailPage = () => {
                 <h3>{ecoLabel}</h3>
                 <p>
                   {product.ecoAnalysisJustification ||
-                    "This product was scored based on material, purpose, category, and sustainability keywords."}
+                    "Scored based on material, purpose, category, and sustainability keywords."}
                 </p>
 
                 <div className="eco-impact-row">
@@ -263,7 +255,6 @@ const ProductDetailPage = () => {
                       <span>EcoScore</span>
                     </div>
                   </div>
-
                   <div className="eco-impact-item">
                     <Leaf size={18} />
                     <div>
@@ -283,7 +274,6 @@ const ProductDetailPage = () => {
                   <span>{product?.createdBy?.username || "Seller"}</span>
                 </div>
               </div>
-
               <div className="eco-info-box">
                 <Truck size={18} />
                 <div>
@@ -291,7 +281,6 @@ const ProductDetailPage = () => {
                   <span>Shipping available at checkout</span>
                 </div>
               </div>
-
               <div className="eco-info-box">
                 <Heart size={18} />
                 <div>
@@ -305,28 +294,20 @@ const ProductDetailPage = () => {
               <h3>Highlights</h3>
               <div className="eco-tags">
                 {(product.tags || []).map((tag) => (
-                  <span key={tag} className="eco-tag">
-                    {tag}
-                  </span>
+                  <span key={tag} className="eco-tag">{tag}</span>
                 ))}
               </div>
             </div>
 
             <div className="eco-stock-row">
               <span className={inStock ? "in-stock" : "out-stock"}>
-                {inStock
-                  ? `In stock (${product.stock.quantity})`
-                  : "Out of stock"}
+                {inStock ? `In stock (${product.stock.quantity})` : "Out of stock"}
               </span>
 
               <div className="eco-qty">
-                <button type="button" onClick={() => handleQtyChange(-1)}>
-                  −
-                </button>
+                <button type="button" onClick={() => handleQtyChange(-1)}>−</button>
                 <span>{quantity}</span>
-                <button type="button" onClick={() => handleQtyChange(1)}>
-                  +
-                </button>
+                <button type="button" onClick={() => handleQtyChange(1)}>+</button>
               </div>
             </div>
 
@@ -335,10 +316,10 @@ const ProductDetailPage = () => {
                 type="button"
                 className="eco-btn secondary"
                 onClick={handleAddToCart}
-                disabled={!inStock}
+                disabled={!inStock || cartLoading}
               >
                 <ShoppingCart size={18} />
-                Add to cart
+                {cartLoading ? "Adding..." : "Add to cart"}
               </button>
 
               <button
@@ -352,18 +333,9 @@ const ProductDetailPage = () => {
             </div>
 
             <div className="eco-features">
-              <div>
-                <Recycle size={18} />
-                <span>Eco-friendly materials</span>
-              </div>
-              <div>
-                <Truck size={18} />
-                <span>Fast delivery support</span>
-              </div>
-              <div>
-                <Heart size={18} />
-                <span>Made for conscious buyers</span>
-              </div>
+              <div><Recycle size={18} /><span>Eco-friendly materials</span></div>
+              <div><Truck size={18} /><span>Fast delivery support</span></div>
+              <div><Heart size={18} /><span>Made for conscious buyers</span></div>
             </div>
           </section>
         </section>

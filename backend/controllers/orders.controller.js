@@ -7,6 +7,33 @@ import fs from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
 
+const updateUserEcoStats = async (userId, orderProducts) => {
+  try {
+    const ecoItems = orderProducts.filter((item) => (item.ecoScore || 0) > 0);
+    if (ecoItems.length === 0) return;
+
+    const totalScore = ecoItems.reduce((sum, item) => sum + (item.ecoScore || 0), 0);
+    const avgScore = Math.round(totalScore / ecoItems.length);
+
+    // ✅ Multiply co2 by quantity — this was also wrong before
+    const totalCo2 = ecoItems.reduce(
+      (sum, item) => sum + (item.co2SavedKg || 0) * (item.quantity || 1),
+      0
+    );
+
+    await User.findByIdAndUpdate(userId, {
+      $inc: {
+        "ecoStats.totalEcoScore":   avgScore,
+        "ecoStats.totalCo2SavedKg": parseFloat(totalCo2.toFixed(2)),
+        "ecoStats.ecoOrderCount":   1,
+      },
+      $set: { "ecoStats.lastUpdated": new Date() },
+    });
+  } catch (err) {
+    console.error("Failed to update user eco stats:", err.message);
+  }
+};
+
 const ALLOWED_STATUSES = [
   "pending",
   "confirmed",
@@ -91,9 +118,7 @@ const generateInvoicePdf = (order) => {
     });
 
     doc.moveDown();
-    doc.fontSize(12).text(
-      `Subtotal: ₹${(order.costBreakdown?.subtotal || 0).toFixed(2)}`
-    );
+    doc.fontSize(12).text(`Subtotal: ₹${(order.costBreakdown?.subtotal || 0).toFixed(2)}`);
     doc.text(`Tax: ₹${(order.costBreakdown?.tax || 0).toFixed(2)}`);
     doc.text(`Shipping: ₹${(order.costBreakdown?.shipping || 0).toFixed(2)}`);
     doc.text(`Discount: ₹${(order.costBreakdown?.discount || 0).toFixed(2)}`);
@@ -156,7 +181,7 @@ const getSellerScopedOrderView = (orderDoc, sellerId) => {
   if (sellerItems.length === 0) return null;
 
   const sellerSubtotal = sellerItems.reduce((sum, item) => {
-    return sum + (Number(item.priceAtPurchase || 0) * Number(item.quantity || 0));
+    return sum + Number(item.priceAtPurchase || 0) * Number(item.quantity || 0);
   }, 0);
 
   const totalOrderSubtotal = Number(order.costBreakdown?.subtotal || 0);
@@ -189,31 +214,27 @@ const getSellerScopedOrderView = (orderDoc, sellerId) => {
   };
 };
 
+
+// ─── Controllers ────────────────────────────────────────────────────────────
+
 export const createOrderFromCart = handleAsyncError(async (req, res) => {
   const userId = req.id;
   const { shippingAddress, paymentMethod = "COD" } = req.body;
 
   if (paymentMethod !== "COD") {
-    return res.status(400).json({
-      success: false,
-      message: "Only COD is supported",
-    });
+    return res.status(400).json({ success: false, message: "Only COD is supported" });
   }
 
   if (
-    !shippingAddress ||
-    !shippingAddress.fullName ||
-    !shippingAddress.mobile ||
-    !shippingAddress.house ||
-    !shippingAddress.area ||
-    !shippingAddress.city ||
-    !shippingAddress.state ||
-    !shippingAddress.pincode
+    !shippingAddress?.fullName ||
+    !shippingAddress?.mobile ||
+    !shippingAddress?.house ||
+    !shippingAddress?.area ||
+    !shippingAddress?.city ||
+    !shippingAddress?.state ||
+    !shippingAddress?.pincode
   ) {
-    return res.status(400).json({
-      success: false,
-      message: "Complete shipping address is required",
-    });
+    return res.status(400).json({ success: false, message: "Complete shipping address is required" });
   }
 
   const session = await mongoose.startSession();
@@ -225,25 +246,21 @@ export const createOrderFromCart = handleAsyncError(async (req, res) => {
         .populate("items.product")
         .session(session);
 
-      if (!cart || cart.items.length === 0) {
-        throw new Error("Cart is empty");
-      }
+      if (!cart || cart.items.length === 0) throw new Error("Cart is empty");
 
       const orderItems = [];
       let subtotal = 0;
       const stockUpdates = [];
 
+      // In createOrderFromCart, update the orderItems loop:
+
       for (const item of cart.items) {
         const product = item.product;
 
-        if (!product) {
-          throw new Error("One or more products in cart no longer exist");
-        }
+        if (!product) throw new Error("One or more products in cart no longer exist");
 
         const currentStock =
-          product.stock?.quantity !== undefined
-            ? product.stock.quantity
-            : product.stock;
+          product.stock?.quantity !== undefined ? product.stock.quantity : product.stock;
 
         if (currentStock < item.quantity) {
           throw new Error(
@@ -258,6 +275,8 @@ export const createOrderFromCart = handleAsyncError(async (req, res) => {
           product: product._id,
           quantity: item.quantity,
           priceAtPurchase: price,
+          ecoScore: product.ecoScore || 0,        // ✅ snapshot
+          co2SavedKg: product.co2SavedKg || 0,   // ✅ snapshot
         });
 
         stockUpdates.push({
@@ -324,12 +343,128 @@ export const createOrderFromCart = handleAsyncError(async (req, res) => {
   createdOrder.invoicePath = invoice.filePath;
   createdOrder.invoiceGeneratedAt = new Date();
   await createdOrder.save();
+  // After createdOrder.save() (after invoice generation), add:
+  await updateUserEcoStats(userId, createdOrder.products);
 
   await populateOrder(createdOrder);
 
   return res.status(201).json({
     success: true,
     message: "Order created successfully",
+    order: createdOrder,
+  });
+});
+
+export const createOrderFromBuyNow = handleAsyncError(async (req, res) => {
+  const userId = req.id;
+  const { shippingAddress, paymentMethod = "COD", buyNowItem } = req.body;
+
+  if (paymentMethod !== "COD") {
+    return res.status(400).json({ success: false, message: "Only COD is supported" });
+  }
+
+  if (
+    !shippingAddress?.fullName ||
+    !shippingAddress?.mobile ||
+    !shippingAddress?.house ||
+    !shippingAddress?.area ||
+    !shippingAddress?.city ||
+    !shippingAddress?.state ||
+    !shippingAddress?.pincode
+  ) {
+    return res.status(400).json({ success: false, message: "Complete shipping address is required" });
+  }
+
+  if (!buyNowItem?.productId || !buyNowItem?.quantity) {
+    return res.status(400).json({ success: false, message: "Product and quantity are required" });
+  }
+
+  validateObjectId(buyNowItem.productId, "product ID");
+
+  const session = await mongoose.startSession();
+  let createdOrder = null;
+
+  try {
+    await session.withTransaction(async () => {
+      const product = await Product.findById(buyNowItem.productId).session(session);
+
+      if (!product) throw new Error("Product not found");
+
+      const currentStock =
+        product.stock?.quantity !== undefined ? product.stock.quantity : product.stock;
+
+      if (currentStock < buyNowItem.quantity) {
+        throw new Error(
+          `Insufficient stock for ${product.productname}. Only ${currentStock} available.`
+        );
+      }
+
+      const price = buyNowItem.priceAtPurchase ?? product.productprice;
+      const subtotal = price * buyNowItem.quantity;
+      const tax = Math.round(subtotal * 0.18 * 100) / 100;
+      const shipping = subtotal > 500 ? 0 : 50;
+      const discount = 0;
+      const totalCost = subtotal + tax + shipping - discount;
+
+      const orderDocs = await Order.create(
+        [
+          {
+            userId,
+            products: [
+              {
+                product: product._id,
+                quantity: buyNowItem.quantity,
+                priceAtPurchase: price,
+              },
+            ],
+            totalCost,
+            costBreakdown: { subtotal, tax, shipping, discount },
+            shippingAddress: {
+              ...shippingAddress,
+              country: shippingAddress.country || "India",
+            },
+            paymentMethod: "COD",
+            paymentStatus: "pending",
+            orderStatus: "pending",
+            statusHistory: [
+              {
+                previousStatus: null,
+                status: "pending",
+                updatedAt: new Date(),
+                updatedBy: userId,
+                note: "Order placed via Buy Now",
+              },
+            ],
+          },
+        ],
+        { session }
+      );
+
+      createdOrder = orderDocs[0];
+
+      await Product.updateOne(
+        { _id: product._id },
+        { $inc: { "stock.quantity": -buyNowItem.quantity } },
+        { session }
+      );
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  await populateOrder(createdOrder);
+
+  const invoice = await generateInvoicePdf(createdOrder);
+  createdOrder.invoiceNumber = invoice.invoiceNumber;
+  createdOrder.invoicePath = invoice.filePath;
+  createdOrder.invoiceGeneratedAt = new Date();
+  await createdOrder.save();
+
+  await populateOrder(createdOrder);
+
+  return res.status(201).json({
+    success: true,
+    message: "Order placed successfully",
     order: createdOrder,
   });
 });
@@ -442,23 +577,14 @@ export const getSingleOrder = handleAsyncError(async (req, res) => {
   const order = await findOrderById(id);
 
   if (!order) {
-    return res.status(404).json({
-      success: false,
-      message: "Order not found",
-    });
+    return res.status(404).json({ success: false, message: "Order not found" });
   }
 
   if (!canAccessOrder(order, requesterId)) {
-    return res.status(403).json({
-      success: false,
-      message: "Not authorized to view this order",
-    });
+    return res.status(403).json({ success: false, message: "Not authorized to view this order" });
   }
 
-  return res.status(200).json({
-    success: true,
-    order,
-  });
+  return res.status(200).json({ success: true, order });
 });
 
 export const cancelOrder = handleAsyncError(async (req, res) => {
@@ -473,17 +599,11 @@ export const cancelOrder = handleAsyncError(async (req, res) => {
     .populate("products.product", "productname productprice images createdBy");
 
   if (!order) {
-    return res.status(404).json({
-      success: false,
-      message: "Order not found",
-    });
+    return res.status(404).json({ success: false, message: "Order not found" });
   }
 
   if (!canAccessOrder(order, requesterId)) {
-    return res.status(403).json({
-      success: false,
-      message: "Not authorized to cancel this order",
-    });
+    return res.status(403).json({ success: false, message: "Not authorized to cancel this order" });
   }
 
   if (["shipped", "delivered", "cancelled"].includes(order.orderStatus)) {
@@ -497,6 +617,9 @@ export const cancelOrder = handleAsyncError(async (req, res) => {
 
   try {
     await session.withTransaction(async () => {
+      // ✅ Capture BEFORE mutating
+      const previousStatus = order.orderStatus;
+
       order.orderStatus = "cancelled";
       order.cancellationReason = reason?.trim() || "Order cancelled";
       order.cancelledAt = new Date();
@@ -504,7 +627,7 @@ export const cancelOrder = handleAsyncError(async (req, res) => {
 
       order.statusHistory = order.statusHistory || [];
       order.statusHistory.push({
-        previousStatus: order.orderStatus === "cancelled" ? "cancelled" : order.orderStatus,
+        previousStatus,
         status: "cancelled",
         updatedAt: new Date(),
         updatedBy: requesterId,
@@ -627,9 +750,6 @@ export const getOrderAnalytics = handleAsyncError(async (req, res) => {
     case "7d":
       startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       break;
-    case "30d":
-      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      break;
     case "90d":
       startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
       break;
@@ -711,25 +831,17 @@ export const downloadInvoice = handleAsyncError(async (req, res) => {
   validateObjectId(id, "order ID");
 
   const order = await Order.findById(id).populate("products.product", "createdBy");
+
   if (!order) {
-    return res.status(404).json({
-      success: false,
-      message: "Order not found",
-    });
+    return res.status(404).json({ success: false, message: "Order not found" });
   }
 
   if (!canAccessOrder(order, requesterId)) {
-    return res.status(403).json({
-      success: false,
-      message: "Not authorized",
-    });
+    return res.status(403).json({ success: false, message: "Not authorized" });
   }
 
   if (!order.invoicePath || !fs.existsSync(order.invoicePath)) {
-    return res.status(404).json({
-      success: false,
-      message: "Invoice not found",
-    });
+    return res.status(404).json({ success: false, message: "Invoice not found" });
   }
 
   return res.download(order.invoicePath);
@@ -747,26 +859,21 @@ export const handleOrderErrors = (error, req, res, next) => {
   }
 
   if (error.name === "ValidationError") {
-  const errors = Object.values(error.errors).map((err) => ({
-    path: err.path,
-    message: err.message,
-    value: err.value,
-  }));
+    const errors = Object.values(error.errors).map((err) => ({
+      path: err.path,
+      message: err.message,
+      value: err.value,
+    }));
 
-  console.error("Validation Error Details:", errors);
-
-  return res.status(400).json({
-    success: false,
-    message: "Validation Error",
-    errors,
-  });
-}
-
-  if (error.name === "CastError") {
     return res.status(400).json({
       success: false,
-      message: "Invalid ID format",
+      message: "Validation Error",
+      errors,
     });
+  }
+
+  if (error.name === "CastError") {
+    return res.status(400).json({ success: false, message: "Invalid ID format" });
   }
 
   return res.status(500).json({
@@ -797,17 +904,12 @@ export const getSellerDashboardData = handleAsyncError(async (req, res) => {
     .slice(0, 5);
 
   const totalProducts = sellerProducts.length;
-  const totalOrders = await Order.countDocuments({
-    "products.product": { $in: sellerProductIds },
-  });
-  const pendingOrders = await Order.countDocuments({
-    "products.product": { $in: sellerProductIds },
-    orderStatus: "pending",
-  });
-  const deliveredOrders = await Order.countDocuments({
-    "products.product": { $in: sellerProductIds },
-    orderStatus: "delivered",
-  });
+
+  const [totalOrders, pendingOrders, deliveredOrders] = await Promise.all([
+    Order.countDocuments({ "products.product": { $in: sellerProductIds } }),
+    Order.countDocuments({ "products.product": { $in: sellerProductIds }, orderStatus: "pending" }),
+    Order.countDocuments({ "products.product": { $in: sellerProductIds }, orderStatus: "delivered" }),
+  ]);
 
   const ordersForRevenue = await Order.find({
     "products.product": { $in: sellerProductIds },
@@ -815,7 +917,6 @@ export const getSellerDashboardData = handleAsyncError(async (req, res) => {
   }).select("products costBreakdown");
 
   let totalRevenue = 0;
-
   for (const order of ordersForRevenue) {
     const scoped = getSellerScopedOrderView(order, userId);
     if (scoped) totalRevenue += Number(scoped.totalAmount || 0);
@@ -839,20 +940,14 @@ export const getMyProducts = handleAsyncError(async (req, res) => {
   const userId = req.id;
 
   if (!userId) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
+    return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   const products = await Product.find({ createdBy: userId })
     .sort({ createdAt: -1 })
     .select("productname productprice category stock images createdAt createdBy");
 
-  return res.status(200).json({
-    success: true,
-    products,
-  });
+  return res.status(200).json({ success: true, products });
 });
 
 export const getSellerOrders = handleAsyncError(async (req, res) => {
@@ -875,13 +970,8 @@ export const getSellerOrders = handleAsyncError(async (req, res) => {
     });
   }
 
-  const filter = {
-    "products.product": { $in: sellerProductIds },
-  };
-
-  if (status) {
-    filter.orderStatus = status;
-  }
+  const filter = { "products.product": { $in: sellerProductIds } };
+  if (status) filter.orderStatus = status;
 
   const { pageNumber, pageSize, skip } = getPagination(page, limit, 100);
 
@@ -934,14 +1024,10 @@ export const updateOrderStatus = handleAsyncError(async (req, res) => {
     .populate("products.product", "productname productprice images createdBy");
 
   if (!order) {
-    return res.status(404).json({
-      success: false,
-      message: "Order not found",
-    });
+    return res.status(404).json({ success: false, message: "Order not found" });
   }
 
-  const isSellerForOrder = isSellerOfAnyProductInOrder(order, requesterId);
-  if (!isSellerForOrder) {
+  if (!isSellerOfAnyProductInOrder(order, requesterId)) {
     return res.status(403).json({
       success: false,
       message: "Only the seller of products in this order can update the status",
@@ -951,10 +1037,7 @@ export const updateOrderStatus = handleAsyncError(async (req, res) => {
   const currentStatus = order.orderStatus || "pending";
 
   if (currentStatus === status) {
-    return res.status(400).json({
-      success: false,
-      message: `Order is already ${status}`,
-    });
+    return res.status(400).json({ success: false, message: `Order is already ${status}` });
   }
 
   const nextAllowedStatuses = STATUS_FLOW[currentStatus] || [];
@@ -985,28 +1068,15 @@ export const updateOrderStatus = handleAsyncError(async (req, res) => {
 
   order.orderStatus = status;
 
-  if (trackingNumber?.trim()) {
-    order.trackingNumber = trackingNumber.trim();
-  }
-
-  if (status === "confirmed" && !order.confirmedAt) {
-    order.confirmedAt = now;
-  }
-
-  if (status === "processing") {
-    order.processingAt = now;
-  }
-
-  if (status === "shipped" && !order.shippedAt) {
-    order.shippedAt = now;
-  }
+  if (trackingNumber?.trim()) order.trackingNumber = trackingNumber.trim();
+  if (status === "confirmed" && !order.confirmedAt) order.confirmedAt = now;
+  if (status === "processing") order.processingAt = now;
+  if (status === "shipped" && !order.shippedAt) order.shippedAt = now;
 
   if (status === "delivered") {
     if (!order.deliveredAt) order.deliveredAt = now;
     if (!order.actualDelivery) order.actualDelivery = now;
-    if (order.paymentMethod === "COD") {
-      order.paymentStatus = "completed";
-    }
+    if (order.paymentMethod === "COD") order.paymentStatus = "completed";
   }
 
   if (status === "cancelled") {

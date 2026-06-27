@@ -1,182 +1,167 @@
 // src/services/api.js
-const API_BASE_URL = '/api/v1'; // Relative path for frontend proxy
 
-class ApiService {
-  /**
-   * Core request method. Handles JSON and FormData automatically.
-   */
-  async request(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const config = {
-      headers: {},
-      credentials: "include", // Include cookies for auth
+const API_BASE_URL = '/api/v1';
+
+const authenticatedFetch = async (url, options = {}) => {
+  try {
+    const headers = { ...options.headers };
+
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await fetch(url, {
       ...options,
-    };
+      credentials: 'include',
+      headers,
+    });
 
-    // Set headers unless body is FormData
-    if (!(config.body instanceof FormData)) {
-      config.headers["Content-Type"] = "application/json";
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : {};
+
+    if (!response.ok) {
+      throw new Error(data.message || `Request failed with status ${response.status}`);
     }
 
-    try {
-      const response = await fetch(url, config);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "API request failed");
-      }
-
-      return data;
-    } catch (error) {
-      console.error(`API Error on ${endpoint}:`, error.message);
-      throw error;
-    }
+    return data;
+  } catch (error) {
+    console.error(`API Error on ${options.method || 'GET'} ${url}:`, error.message);
+    throw error;
   }
+};
 
-  // ------------------ AUTH & USER ------------------
-  async login(credentials) {
-    return this.request("/users/login", {
-      method: "POST",
-      body: JSON.stringify(credentials),
-    });
-  }
+// ─────────────────────────────────────────
+// AUTH & USER
+// ─────────────────────────────────────────
 
-  async register(userData) {
-    return this.request("/users/register", {
-      method: "POST",
-      body: JSON.stringify(userData),
-    });
-  }
+export const loginAPI = (credentials) =>
+  authenticatedFetch(`${API_BASE_URL}/users/login`, {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  });
 
-  async logout() {
-    return this.request("/users/logout", { method: "POST" });
-  }
+export const registerAPI = (userData) =>
+  authenticatedFetch(`${API_BASE_URL}/users/register`, {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  });
 
-  async getCurrentUser() {
-    return this.request("/users/profile");
-  }
+export const logoutAPI = () =>
+  authenticatedFetch(`${API_BASE_URL}/users/logout`, { method: 'POST' });
 
-  async updateUserProfile(profileData) {
-    return this.request("/users/profile", {
-      method: "PUT",
-      body: JSON.stringify(profileData),
-    });
-  }
+export const getCurrentUserAPI = () =>
+  authenticatedFetch(`${API_BASE_URL}/users/profile`);
 
-  async addUserAddress(addressData) {
-    return this.request("/users/address", {
-      method: "POST",
-      body: JSON.stringify(addressData),
-    });
-  }
+export const updateUserProfileAPI = (profileData) =>
+  authenticatedFetch(`${API_BASE_URL}/users/profile`, {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  });
 
-  async updateUserAddress(addressId, addressData) {
-    return this.request(`/users/address/${addressId}`, {
-      method: "PUT",
-      body: JSON.stringify(addressData),
-    });
-  }
+export const uploadProfilePhotoAPI = (formData) =>
+  authenticatedFetch(`${API_BASE_URL}/users/profile-photo`, {
+    method: 'PUT',
+    body: formData,
+  });
 
-  async uploadProfilePhoto(formData) {
-    return this.request("/users/profile-photo", {
-      method: "PUT",
-      body: formData,
-    });
-  }
+export const addUserAddressAPI = (addressData) =>
+  authenticatedFetch(`${API_BASE_URL}/users/address`, {
+    method: 'POST',
+    body: JSON.stringify(addressData),
+  });
 
-  // ------------------ PRODUCTS ------------------
-  async getAllProducts() {
-    return this.request("/products"); // GET /api/v1/products
-  }
+export const updateUserAddressAPI = (addressId, addressData) =>
+  authenticatedFetch(`${API_BASE_URL}/users/address/${addressId}`, {
+    method: 'PUT',
+    body: JSON.stringify(addressData),
+  });
 
-  async getProduct(productId) {
-    return this.request(`/products/${productId}`); // GET /api/v1/products/:id
-  }
+// ─────────────────────────────────────────
+// PRODUCTS
+// ─────────────────────────────────────────
 
-  async createProduct(productData) {
-    return this.request("/products", {
-      method: "POST",
-      body: JSON.stringify(productData),
-    });
-  }
+export const fetchAllProductsAPI = () =>
+  authenticatedFetch(`${API_BASE_URL}/products/`);
 
-  async updateProduct(productId, productData) {
-    return this.request(`/products/${productId}`, {
-      method: "PUT",
-      body: JSON.stringify(productData),
-    });
-  }
+export const fetchProductByIdAPI = (id) =>
+  authenticatedFetch(`${API_BASE_URL}/products/${id}`);
 
-  async deleteProduct(productId) {
-    return this.request(`/products/${productId}`, {
-      method: "DELETE",
-    });
-  }
+export const createProductAPI = (productData) =>
+  authenticatedFetch(`${API_BASE_URL}/products`, {
+    method: 'POST',
+    body: JSON.stringify(productData),
+  });
 
-  async getUserProducts(userId) {
-    return this.request(`/products/user/${userId}`);
-  }
-  // ----------- ECO -------------
-  async getALLEcoZoneProducts() {
-    return this.request("/products/ecozone"); // GET /api/v1/products/ecozone
-  }
-  async getEcoZoneProduct(productId){
-    return this.request(`/products/ecozone/${productId}`)
-  }
+export const updateProductAPI = (productId, productData) =>
+  authenticatedFetch(`${API_BASE_URL}/products/${productId}`, {
+    method: 'PUT',
+    body: JSON.stringify(productData),
+  });
 
+export const deleteProductAPI = (productId) =>
+  authenticatedFetch(`${API_BASE_URL}/products/${productId}`, {
+    method: 'DELETE',
+  });
 
+export const fetchUserProductsAPI = (userId) =>
+  authenticatedFetch(`${API_BASE_URL}/products/user/${userId}`);
 
-  // ------------------ CART ------------------
-  async getCart() {
-    return this.request("/cart"); // GET /api/v1/cart
-  }
+// ─────────────────────────────────────────
+// ECOZONE
+// ─────────────────────────────────────────
 
-  async addToCart(productId, quantity = 1, productDetails = {}) {
-    return this.request("/cart", {
-      method: "POST",
-      body: JSON.stringify({ productId, quantity, productDetails }),
-    });
-  }
+export const fetchEcoProductsAPI = () =>
+  authenticatedFetch(`${API_BASE_URL}/products/ecozone`);
 
-  async updateCartItem(cartItemId, quantity) {
-    return this.request(`/cart/${cartItemId}`, {
-      method: "PUT",
-      body: JSON.stringify({ quantity }),
-    });
-  }
+export const fetchEcoProductByIdAPI = (productId) =>
+  authenticatedFetch(`${API_BASE_URL}/products/ecozone/${productId}`);
 
-  async removeCartItem(cartItemId) {
-    return this.request(`/cart/${cartItemId}`, {
-      method: "DELETE",
-    });
-  }
+// ─────────────────────────────────────────
+// CART
+// ─────────────────────────────────────────
 
-  async clearCart() {
-    return this.request("/cart", {
-      method: "DELETE",
-    });
-  }
+export const fetchCartAPI = () =>
+  authenticatedFetch(`${API_BASE_URL}/cart/`);
 
-  // ------------------ REVIEWS ------------------
-  async addProductReview(productId, reviewData) {
-    return this.request(`/products/${productId}/reviews`, {
-      method: "POST",
-      body: JSON.stringify(reviewData),
-    });
-  }
+export const addItemToCartAPI = (productId, quantity = 1) =>
+  authenticatedFetch(`${API_BASE_URL}/cart/items`, {
+    method: 'POST',
+    body: JSON.stringify({ productId, quantity }),
+  });
 
-  async updateProductReview(productId, reviewId, reviewData) {
-    return this.request(`/products/${productId}/reviews/${reviewId}`, {
-      method: "PUT",
-      body: JSON.stringify(reviewData),
-    });
-  }
+export const updateItemQuantityAPI = (productId, quantity) =>
+  authenticatedFetch(`${API_BASE_URL}/cart/items/${productId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ quantity }),
+  });
 
-  async deleteProductReview(productId, reviewId) {
-    return this.request(`/products/${productId}/reviews/${reviewId}`, {
-      method: "DELETE",
-    });
-  }
-}
+export const removeItemFromCartAPI = (productId) =>
+  authenticatedFetch(`${API_BASE_URL}/cart/items/${productId}`, {
+    method: 'DELETE',
+  });
 
-export default new ApiService();
+export const clearCartAPI = () =>
+  authenticatedFetch(`${API_BASE_URL}/cart/`, {
+    method: 'DELETE',
+  });
+
+// ─────────────────────────────────────────
+// REVIEWS
+// ─────────────────────────────────────────
+
+export const addProductReviewAPI = (productId, reviewData) =>
+  authenticatedFetch(`${API_BASE_URL}/products/${productId}/reviews`, {
+    method: 'POST',
+    body: JSON.stringify(reviewData),
+  });
+
+export const updateProductReviewAPI = (productId, reviewId, reviewData) =>
+  authenticatedFetch(`${API_BASE_URL}/products/${productId}/reviews/${reviewId}`, {
+    method: 'PUT',
+    body: JSON.stringify(reviewData),
+  });
+
+export const deleteProductReviewAPI = (productId, reviewId) =>
+  authenticatedFetch(`${API_BASE_URL}/products/${productId}/reviews/${reviewId}`, {
+    method: 'DELETE',
+  });

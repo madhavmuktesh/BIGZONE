@@ -160,7 +160,6 @@ const ProductInfo = ({ product }) => {
         </div>
 
         <h1 className="product-title">{productname}</h1>
-        <p className="product-description">{productdescription}</p>
 
         <div className="price-section">
           <span className="price">₹{Number(productprice).toFixed(2)}</span>

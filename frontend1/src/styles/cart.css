@@ -458,6 +458,94 @@ input:focus-visible {
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
 }
 
+/* In your global CSS or Cart.module.css */
+.eco-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1a3c2e;
+  color: #fff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999;
+  min-width: 280px;
+}
+
+.eco-toast--show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.eco-toast__icon { font-size: 24px; }
+
+.eco-toast__title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.eco-toast__body {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.eco-summary {
+  background: linear-gradient(135deg, #0f2d1f, #1a4a2e);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  color: #fff;
+}
+
+.eco-summary__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 14px;
+  opacity: 0.9;
+}
+
+.eco-summary__stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.eco-summary__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.eco-summary__value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #6ee7a0;
+}
+
+.eco-summary__label {
+  font-size: 11px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.eco-summary__divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.15);
+}
+
 @media (max-width: 1024px) {
   .cart-layout {
     grid-template-columns: 1fr;

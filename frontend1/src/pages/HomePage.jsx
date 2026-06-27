@@ -18,6 +18,8 @@ function Homepage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [wishlist, setWishlist] = useState(new Set());
+
+  // ✅ clearError now exists in context — no more crash
   const { error: cartError, clearError } = useCart();
 
   useEffect(() => {
@@ -38,7 +40,7 @@ function Homepage() {
         }
       } catch (err) {
         setError(err.message);
-        toast.error(`API Error: ${err.message}`);
+        toast.error(`Error: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -50,7 +52,7 @@ function Homepage() {
   useEffect(() => {
     if (cartError) {
       toast.error(cartError);
-      clearError();
+      clearError?.(); // ✅ optional chaining as safety net
     }
   }, [cartError, clearError]);
 

@@ -1,312 +1,351 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
-import { useCart } from "../../context/CartContext";
-import { useAuth } from "../../context/AuthContext";
-import "../../styles/CheckoutPage.css";
+import React, { useEffect, useState, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import EcoCartSummary from '../../components/EcoCartSummary';
+import EcoToast from '../../components/EcoToast';
+import '../../styles/cart.css';
 
-const CheckoutPage = () => {
-  const { cart, clearCart } = useCart();
-  const { user, token } = useAuth();
+
+// ─── CartItem ─────────────────────────────────────────────────────────────────
+const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
+  const renderValidationMessage = () => {
+    switch (item.validationStatus) {
+      case 'PRICE_CHANGED':
+        return (
+          <p className="validation-warning">
+            Price changed from ₹{item.priceAtAddition.toFixed(2)} to ₹
+            {item.productDetails.currentPrice.toFixed(2)}
+          </p>
+        );
+      case 'INSUFFICIENT_STOCK':
+        return (
+          <p className="validation-error">
+            Only {item.productDetails.currentStock} left in stock. Please adjust quantity.
+          </p>
+        );
+      case 'OUT_OF_STOCK':
+        return (
+          <p className="validation-error">
+            This item is now out of stock and will be removed at checkout.
+          </p>
+        );
+      case 'PRODUCT_REMOVED':
+        return (
+          <p className="validation-error">
+            This product is no longer available.
+          </p>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const productId = item.product?._id || item.product;
+  const productName = item.productDetails?.productname || 'Product name unavailable';
+  const productPrice = item.productDetails?.currentPrice || item.priceAtAddition || 0;
+  const imageUrl =
+    item.productDetails?.images?.[0]?.url ||
+    'https://placehold.co/300x300?text=No+Image';
+  const maxStock = item.productDetails?.currentStock || 999;
+  const isEco = (item.productDetails?.ecoScore ?? 0) > 0;
+
+  return (
+    <div className="cart-item-card">
+      <div className="cart-item-image">
+        <Link to={`/products/${productId}`} className="product-link">
+          <img src={imageUrl} alt={productName} />
+        </Link>
+      </div>
+
+      <div className="cart-item-details">
+        <div>
+          <Link to={`/products/${productId}`} className="product-link">
+            <h3>
+              {productName}
+              {isEco && <span className="eco-badge">🌿 Eco</span>}
+            </h3>
+          </Link>
+          <p>Price: ₹{productPrice.toFixed(2)}</p>
+          <div className="validation-message">{renderValidationMessage()}</div>
+        </div>
+
+        <div className="cart-item-actions">
+          <div className="quantity-selector">
+            <div className="controls">
+              <button
+                type="button"
+                onClick={() => onQuantityChange(productId, item.quantity - 1)}
+                disabled={loading || item.quantity <= 1}
+                aria-label={`Decrease quantity of ${productName}`}
+              >
+                -
+              </button>
+              <span className="value">{item.quantity}</span>
+              <button
+                type="button"
+                onClick={() => onQuantityChange(productId, item.quantity + 1)}
+                disabled={loading || item.quantity >= maxStock}
+                aria-label={`Increase quantity of ${productName}`}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className="cart-item-price-section">
+            <span className="cart-item-price">
+              ₹{(productPrice * item.quantity).toFixed(2)}
+            </span>
+            <button
+              type="button"
+              onClick={() => onRemove(productId)}
+              className="remove-item-button"
+              disabled={loading}
+              aria-label={`Remove ${productName} from cart`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+// ─── OrderSummary ─────────────────────────────────────────────────────────────
+const OrderSummary = ({ cart, onCheckout, disableCheckout }) => {
+  const subtotal = cart?.totalPrice || 0;
+  const ecoDiscount = 2.0;
+  const total = Math.max(0, subtotal - ecoDiscount);
+
+  return (
+    <aside className="order-summary-card">
+      <h2>Order Summary</h2>
+      <div className="summary-rows">
+        <div className="summary-row">
+          <span className="label">Subtotal</span>
+          <span className="value">₹{subtotal.toFixed(2)}</span>
+        </div>
+        <div className="summary-row">
+          <span className="label">Eco Discount</span>
+          <span className="value discount">-₹{ecoDiscount.toFixed(2)}</span>
+        </div>
+      </div>
+      <div className="summary-total summary-row">
+        <span className="label">Total</span>
+        <span className="value">₹{total.toFixed(2)}</span>
+      </div>
+      <button
+        type="button"
+        onClick={onCheckout}
+        disabled={disableCheckout}
+        className={`btn ${disableCheckout ? 'btn-disabled' : 'btn-primary'}`}
+      >
+        {disableCheckout ? 'Cannot Checkout' : 'Proceed to Checkout'}
+      </button>
+      {cart?.validationIssues > 0 && (
+        <p className="checkout-warning">
+          Please resolve {cart.validationIssues} issue(s) before checkout
+        </p>
+      )}
+    </aside>
+  );
+};
+
+
+// ─── Cart (Main) ──────────────────────────────────────────────────────────────
+const Cart = () => {
+  const { isAuthenticated } = useAuth();
+  const {
+    cart, loading, error,
+    fetchCart, updateItemQuantity, removeItemFromCart, clearCart,
+  } = useCart();
+
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [savedAddresses, setSavedAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState("");
-
-  const [shippingAddress, setShippingAddress] = useState({
-    fullName: "",
-    mobile: "",
-    country: "India",
-    house: "",
-    area: "",
-    city: "",
-    state: "",
-    pincode: ""
-  });
-
-  const fetchAddresses = async () => {
-    try {
-      const res = await fetch("/api/v1/addresses", { credentials: "include" });
-      const data = await res.json();
-
-      if (data.success) {
-        setSavedAddresses(data.addresses);
-
-        if (data.addresses.length > 0) {
-          const defaultAddress =
-            data.addresses.find((a) => a.makeDefault) || data.addresses[0];
-
-          setSelectedAddressId(defaultAddress._id);
-          setShippingAddress({
-            fullName: defaultAddress.fullName || "",
-            mobile: defaultAddress.mobile || "",
-            country: defaultAddress.country || "India",
-            house: defaultAddress.house || "",
-            area: defaultAddress.area || "",
-            city: defaultAddress.city || "",
-            state: defaultAddress.state || "",
-            pincode: defaultAddress.pincode || ""
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching addresses:", err);
-    }
-  };
+  // ── Eco toast state ──
+  const [lastEcoProduct, setLastEcoProduct] = useState(null);
+  const prevItemsRef = useRef([]);
 
   useEffect(() => {
-    if (user === undefined) return;
+    if (isAuthenticated) fetchCart();
+  }, [fetchCart, isAuthenticated]);
 
-    if (!user || !token) {
-      toast.error("Please sign in to checkout");
-      navigate("/signin");
-      return;
+  useEffect(() => {
+    if (!loading && isAuthenticated === false) {
+      toast.error('Please sign in to access your cart');
+      navigate('/signin');
     }
+  }, [isAuthenticated, loading, navigate]);
 
-    if (cart && (!cart.items || cart.items.length === 0)) {
-      toast.error("Your cart is empty");
-      navigate("/cart");
-      return;
-    }
+  // ── Detect newly added eco item → trigger toast ──
+  useEffect(() => {
+    const prevIds = new Set(
+      prevItemsRef.current.map(i => i.product?._id || i.product)
+    );
+    const currentItems = cart?.items || [];
 
-    fetchAddresses();
-  }, [user, token, cart, navigate]);
-
-  const handleSelectAddress = (address) => {
-    setSelectedAddressId(address._id);
-    setShippingAddress({
-      fullName: address.fullName || "",
-      mobile: address.mobile || "",
-      country: address.country || "India",
-      house: address.house || "",
-      area: address.area || "",
-      city: address.city || "",
-      state: address.state || "",
-      pincode: address.pincode || ""
+    const newEcoItem = currentItems.find(item => {
+      const id = item.product?._id || item.product;
+      return !prevIds.has(id) && (item.productDetails?.ecoScore ?? 0) > 0;
     });
-  };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setShippingAddress((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-    setSelectedAddressId("");
-  };
-
-  const handlePlaceOrder = async (e) => {
-    if (e) e.preventDefault();
-    if (loading) return;
-
-    if (
-      !shippingAddress.fullName?.trim() ||
-      !shippingAddress.mobile?.trim() ||
-      !shippingAddress.house?.trim() ||
-      !shippingAddress.area?.trim() ||
-      !shippingAddress.city?.trim() ||
-      !shippingAddress.state?.trim() ||
-      !shippingAddress.pincode?.trim()
-    ) {
-      toast.error("Please fill in all required shipping fields.");
-      return;
+    if (newEcoItem) {
+      setLastEcoProduct(newEcoItem.productDetails);
     }
 
-    if (!cart?.items || cart.items.length === 0) {
-      toast.error("Your cart is empty.");
-      navigate("/cart");
-      return;
-    }
+    prevItemsRef.current = currentItems;
+  }, [cart?.items]);
 
-    setLoading(true);
-
+  const handleQuantityChange = async (productId, newQuantity) => {
+    if (newQuantity < 1) return;
     try {
-      const orderPayload = {
-        shippingAddress: {
-          fullName: shippingAddress.fullName.trim(),
-          mobile: shippingAddress.mobile.trim(),
-          country: shippingAddress.country.trim(),
-          house: shippingAddress.house.trim(),
-          area: shippingAddress.area.trim(),
-          city: shippingAddress.city.trim(),
-          state: shippingAddress.state.trim(),
-          pincode: shippingAddress.pincode.trim()
-        },
-        paymentMethod: "COD"
-      };
-
-      const response = await fetch("/api/v1/orders/create", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(orderPayload)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to place order");
-      }
-
-      toast.success("Order placed successfully!");
-      await clearCart();
-
-      setTimeout(() => {
-        navigate("/orders");
-      }, 1500);
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error(error.message || "Something went wrong during checkout");
-    } finally {
-      setLoading(false);
+      await updateItemQuantity(productId, newQuantity);
+    } catch (err) {
+      toast.error(err.message || 'Failed to update quantity');
     }
   };
 
-  const subtotal = cart?.totalPrice || 0;
+  const handleRemoveItem = async (productId) => {
+    try {
+      await removeItemFromCart(productId);
+      toast.success('Item removed from cart');
+    } catch (err) {
+      toast.error(err.message || 'Failed to remove item');
+    }
+  };
+
+  const handleClearCart = async () => {
+    if (window.confirm('Are you sure you want to clear your entire cart?')) {
+      try {
+        await clearCart();
+        toast.success('Cart cleared');
+      } catch (err) {
+        toast.error(err.message || 'Failed to clear cart');
+      }
+    }
+  };
+
+  const handleCheckout = () => {
+    if (!cart?.items || cart.items.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+    if (cart.validationIssues > 0) {
+      toast.error('Please resolve cart issues before checkout');
+      return;
+    }
+    toast.success('Redirecting to checkout...');
+    navigate('/checkout');
+  };
+
+  const hasStockIssues =
+    cart?.items?.some(item =>
+      ['INSUFFICIENT_STOCK', 'OUT_OF_STOCK', 'PRODUCT_REMOVED'].includes(
+        item.validationStatus
+      )
+    ) || false;
+
+  const disableCheckout = !cart?.items || cart.items.length === 0 || hasStockIssues;
+
+  const renderContent = () => {
+    if (loading && (!cart?.items || cart.items.length === 0)) {
+      return <div className="loading-state">Loading your cart...</div>;
+    }
+    if (error) {
+      return (
+        <div className="error-state">
+          <p>Error: {error}</p>
+          <button type="button" onClick={() => fetchCart()} className="btn-primary">
+            Retry
+          </button>
+        </div>
+      );
+    }
+    if (!cart?.items || cart.items.length === 0) {
+      return (
+        <div className="empty-cart-state">
+          <h2>Your cart is empty</h2>
+          <p>Let&apos;s find something great for you!</p>
+          <button type="button" onClick={() => navigate('/')} className="btn-primary">
+            Continue Shopping
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="cart-layout">
+        <div className="cart-items-list">
+          {cart.items.map(item => (
+            <CartItem
+              key={item.product?._id || item.product}
+              item={item}
+              onQuantityChange={handleQuantityChange}
+              onRemove={handleRemoveItem}
+              loading={loading}
+            />
+          ))}
+
+          {/* ✅ Eco Impact Summary — imported from EcoCartSummary.jsx */}
+          <EcoCartSummary items={cart.items} />
+
+          <button
+            type="button"
+            onClick={handleClearCart}
+            className="btn-secondary"
+            disabled={loading}
+          >
+            Clear Cart
+          </button>
+        </div>
+
+        <OrderSummary
+          cart={cart}
+          onCheckout={handleCheckout}
+          disableCheckout={disableCheckout}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="cart-page-body">
       <Toaster position="top-center" reverseOrder={false} />
 
+      {/* ✅ Eco Toast — imported from EcoToast.jsx */}
+      <EcoToast product={lastEcoProduct} />
+
       <main className="cart-container">
         <div className="breadcrumbs">
-          <button type="button" onClick={() => navigate("/cart")} className="breadcrumb-link">
-            Cart
+          <button type="button" onClick={() => navigate('/')} className="breadcrumb-link">
+            Home
           </button>
           <span>&gt;</span>
-          <span className="current-page">Checkout</span>
+          <span className="current-page">Cart</span>
         </div>
 
         <div className="page-title">
           <div className="icon-wrapper">
             <svg viewBox="0 0 24 24">
-              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-              <path d="M9 12l2 2 4-4" />
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
             </svg>
           </div>
-
           <div>
-            <h1>Secure Checkout</h1>
-            <p>Review your delivery details and confirm your order.</p>
+            <h1>Shopping Cart</h1>
+            <p>{cart?.items?.length || 0} items in your cart</p>
           </div>
         </div>
 
-        <div className="cart-layout">
-          <div className="cart-items-list checkout-form-card">
-            {savedAddresses.length > 0 && (
-              <div className="saved-addresses">
-                <h2>Saved Addresses</h2>
-                {savedAddresses.map((address) => (
-                  <div
-                    key={address._id}
-                    className={`address-card ${selectedAddressId === address._id ? "selected-address" : ""}`}
-                    onClick={() => handleSelectAddress(address)}
-                  >
-                    <input
-                      type="radio"
-                      checked={selectedAddressId === address._id}
-                      readOnly
-                    />
-                    <div>
-                      <h4>{address.fullName}</h4>
-                      <p>{address.mobile}</p>
-                      <p>{address.house}</p>
-                      <p>{address.area}</p>
-                      <p>{address.city}, {address.state} - {address.pincode}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="checkout-section-header">
-              <h2>Shipping Details</h2>
-              <p>Enter the address where your order should be delivered.</p>
-            </div>
-
-            <form onSubmit={handlePlaceOrder} className="checkout-form">
-              <div className="checkout-form-grid">
-                <div className="checkout-field">
-                  <label htmlFor="fullName">Full Name *</label>
-                  <input id="fullName" type="text" name="fullName" value={shippingAddress.fullName} onChange={handleInputChange} required />
-                </div>
-
-                <div className="checkout-field">
-                  <label htmlFor="mobile">Mobile Number *</label>
-                  <input id="mobile" type="text" name="mobile" value={shippingAddress.mobile} onChange={handleInputChange} required />
-                </div>
-              </div>
-
-              <div className="checkout-field">
-                <label htmlFor="house">House / Flat *</label>
-                <input id="house" type="text" name="house" value={shippingAddress.house} onChange={handleInputChange} required />
-              </div>
-
-              <div className="checkout-field">
-                <label htmlFor="area">Area / Street *</label>
-                <input id="area" type="text" name="area" value={shippingAddress.area} onChange={handleInputChange} required />
-              </div>
-
-              <div className="checkout-form-grid">
-                <div className="checkout-field">
-                  <label htmlFor="city">City *</label>
-                  <input id="city" type="text" name="city" value={shippingAddress.city} onChange={handleInputChange} required />
-                </div>
-
-                <div className="checkout-field">
-                  <label htmlFor="state">State *</label>
-                  <input id="state" type="text" name="state" value={shippingAddress.state} onChange={handleInputChange} required />
-                </div>
-              </div>
-
-              <div className="checkout-form-grid">
-                <div className="checkout-field">
-                  <label htmlFor="pincode">Pincode *</label>
-                  <input id="pincode" type="text" name="pincode" value={shippingAddress.pincode} onChange={handleInputChange} required />
-                </div>
-
-                <div className="checkout-field">
-                  <label htmlFor="country">Country *</label>
-                  <input id="country" type="text" name="country" value={shippingAddress.country} onChange={handleInputChange} required />
-                </div>
-              </div>
-
-              <div className="checkout-note">
-                Payment method: Cash on Delivery.
-              </div>
-
-              <button type="submit" disabled={loading} className={`btn ${loading ? "btn-disabled" : "btn-primary"}`}>
-                {loading ? "Processing..." : "Place Order"}
-              </button>
-            </form>
-          </div>
-
-          <aside className="order-summary-card">
-            <h2>Final Summary</h2>
-
-            <div className="summary-rows">
-              <div className="summary-row">
-                <span className="label">Items ({cart?.items?.length || 0})</span>
-                <span className="value">₹{subtotal.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="summary-total summary-row">
-              <span className="label">Total to Pay</span>
-              <span className="value">COD</span>
-            </div>
-
-            <p className="checkout-warning">
-              Orders will be placed using Cash on Delivery.
-            </p>
-          </aside>
-        </div>
+        {renderContent()}
       </main>
     </div>
   );
 };
 
-export default CheckoutPage;
+export default Cart;

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createOrderFromCart,
+  createOrderFromBuyNow,      
   getUserOrders,
   getAllOrders,
   getSingleOrder,
@@ -26,7 +27,9 @@ router.get("/seller-orders", getSellerOrders);
 router.get("/analytics/summary", getOrderAnalytics);
 router.get("/my-orders", getUserOrders);
 router.get("/search", searchOrdersByProductName);
+
 router.post("/create", createOrderFromCart);
+router.post("/buy-now", createOrderFromBuyNow); 
 
 router.get("/", getAllOrders);
 

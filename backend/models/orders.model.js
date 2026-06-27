@@ -42,6 +42,7 @@ const statusHistorySchema = new mongoose.Schema(
   { _id: false }
 );
 
+// backend/models/orders.model.js
 const orderItemSchema = new mongoose.Schema(
   {
     product: {
@@ -51,15 +52,18 @@ const orderItemSchema = new mongoose.Schema(
     },
     quantity: {
       type: Number,
-      required: [true, "Quantity is required"],
+      required: true,
       min: [1, "Quantity must be at least 1"],
       max: [100, "Quantity cannot exceed 100"],
     },
     priceAtPurchase: {
       type: Number,
-      required: [true, "Price at purchase is required"],
+      required: true,
       min: [0, "Price cannot be negative"],
     },
+    // ✅ Snapshot eco data at time of purchase
+    ecoScore: { type: Number, default: 0, min: 0, max: 100 },
+    co2SavedKg: { type: Number, default: 0, min: 0 },
   },
   { _id: false }
 );
