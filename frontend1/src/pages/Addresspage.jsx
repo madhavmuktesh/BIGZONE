@@ -3,18 +3,37 @@ import '../styles/AddressPage.css';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+
 const Icon = ({ name, className }) => {
   const icons = {
     home: (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"
+      />
     ),
     office: (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+      />
     ),
     phone: (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+      />
     ),
   };
+
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       {icons[name]}
@@ -44,9 +63,14 @@ const AddressCard = ({ address, onRemove }) => (
           <p className="address-list-card-address-type">{address.type || 'Address'}</p>
         </div>
       </div>
+
       <div className="address-list-address-details-box">
-        <p className="address-list-address-line font-medium">{address.house}, {address.area}</p>
-        <p className="address-list-address-line">{address.city}, {address.state} - {address.pincode}</p>
+        <p className="address-list-address-line font-medium">
+          {address.house}, {address.area}
+        </p>
+        <p className="address-list-address-line">
+          {address.city}, {address.state} - {address.pincode}
+        </p>
         <p className="address-list-address-line">{address.country}</p>
         <div className="address-list-address-phone">
           <Icon name="phone" className="address-list-phone-icon" />
@@ -54,16 +78,31 @@ const AddressCard = ({ address, onRemove }) => (
         </div>
       </div>
     </div>
+
     <div className="address-list-card-actions">
       <Link to={`/address/edit/${address._id}`} className="address-list-btn address-list-btn-dark">
         <svg className="address-list-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          />
         </svg>
         <span>Edit</span>
       </Link>
-      <button className="address-list-btn address-list-btn-light" onClick={() => onRemove(address._id)}>
+
+      <button
+        className="address-list-btn address-list-btn-light"
+        onClick={() => onRemove(address._id)}
+      >
         <svg className="address-list-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
         </svg>
         <span>Remove</span>
       </button>
@@ -74,19 +113,30 @@ const AddressCard = ({ address, onRemove }) => (
 const AddressPage = () => {
   const [addresses, setAddresses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // Fetch addresses from backend
   useEffect(() => {
-    axios.get("http://localhost:5000/api/v1/addresses", { withCredentials: true })
-      .then((res) => setAddresses(res.data.addresses))
-      .catch((err) => console.error("Error fetching addresses:", err));
+    const fetchAddresses = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/addresses`, {
+          withCredentials: true,
+        });
+        setAddresses(res.data.addresses || []);
+      } catch (err) {
+        console.error('Error fetching addresses:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAddresses();
   }, []);
 
   const handleRemoveAddress = async (id) => {
     if (window.confirm('Are you sure you want to remove this address?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/v1/addresses/${id}`, { 
-          withCredentials: true 
+        await axios.delete(`${API_BASE_URL}/addresses/${id}`, {
+          withCredentials: true,
         });
         setAddresses((prev) => prev.filter((addr) => addr._id !== id));
         alert('Address removed successfully!');
@@ -105,12 +155,16 @@ const AddressPage = () => {
 
   return (
     <div className="address-list-page-background">
-
       <main className="address-list-container address-list-main-container">
         <div className="address-list-breadcrumb">
           <Link to="/profile">Account</Link>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
           <span>Addresses</span>
         </div>
@@ -120,6 +174,7 @@ const AddressPage = () => {
             <h1 className="address-list-page-title">Your Addresses</h1>
             <p className="address-list-page-subtitle">Manage your delivery addresses</p>
           </div>
+
           <div className="address-list-search-wrapper">
             <input
               type="text"
@@ -129,7 +184,12 @@ const AddressPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <svg className="address-list-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
         </div>
@@ -137,16 +197,29 @@ const AddressPage = () => {
         <div className="address-list-add-button-container">
           <Link to="/addaddress" className="address-list-btn address-list-btn-primary">
             <svg className="address-list-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             <span>Add New Address</span>
           </Link>
         </div>
 
         <div className="address-list">
-          {filteredAddresses.length > 0 ? (
+          {loading ? (
+            <div className="address-list-empty-state">
+              <p>Loading addresses...</p>
+            </div>
+          ) : filteredAddresses.length > 0 ? (
             filteredAddresses.map((address) => (
-              <AddressCard key={address._id} address={address} onRemove={handleRemoveAddress} />
+              <AddressCard
+                key={address._id}
+                address={address}
+                onRemove={handleRemoveAddress}
+              />
             ))
           ) : (
             <div className="address-list-empty-state">

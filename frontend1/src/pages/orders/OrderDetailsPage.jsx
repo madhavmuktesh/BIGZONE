@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../../styles/OrderDetailsPage.css"
+import "../../styles/OrderDetailsPage.css";
 
-const API_BASE = "/api/v1";
+const API_BASE =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+
 const API_ENDPOINTS = {
   ORDER: (id) => `${API_BASE}/orders/${id}`,
   INVOICE: (id) => `${API_BASE}/orders/${id}/invoice`,
@@ -50,7 +52,11 @@ const OrderDetailsPage = () => {
   };
 
   if (loading) {
-    return <div className="page-background" style={{ padding: 20 }}>Loading order...</div>;
+    return (
+      <div className="page-background" style={{ padding: 20 }}>
+        Loading order...
+      </div>
+    );
   }
 
   if (err) {
@@ -74,7 +80,10 @@ const OrderDetailsPage = () => {
         <p><strong>Status:</strong> {order.orderStatus}</p>
         <p><strong>Payment:</strong> {order.paymentMethod}</p>
         <p><strong>Payment Status:</strong> {order.paymentStatus}</p>
-        <p><strong>Placed At:</strong> {new Date(order.orderPlacedAt).toLocaleString()}</p>
+        <p>
+          <strong>Placed At:</strong>{" "}
+          {order.orderPlacedAt ? new Date(order.orderPlacedAt).toLocaleString() : "—"}
+        </p>
 
         <h2>Shipping Address</h2>
         <p>{order.shippingAddress?.fullName}</p>
@@ -82,7 +91,8 @@ const OrderDetailsPage = () => {
         <p>{order.shippingAddress?.house}</p>
         <p>{order.shippingAddress?.area}</p>
         <p>
-          {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}
+          {order.shippingAddress?.city}, {order.shippingAddress?.state} -{" "}
+          {order.shippingAddress?.pincode}
         </p>
         <p>{order.shippingAddress?.country}</p>
 
@@ -92,7 +102,9 @@ const OrderDetailsPage = () => {
             <p><strong>Product:</strong> {item.product?.productname || "Product"}</p>
             <p><strong>Quantity:</strong> {item.quantity}</p>
             <p><strong>Price:</strong> {currency(item.priceAtPurchase)}</p>
-            <p><strong>Line Total:</strong> {currency(item.priceAtPurchase * item.quantity)}</p>
+            <p>
+              <strong>Line Total:</strong> {currency(item.priceAtPurchase * item.quantity)}
+            </p>
           </div>
         ))}
 
@@ -113,7 +125,10 @@ const OrderDetailsPage = () => {
             {order.statusHistory.map((entry, idx) => (
               <div key={idx} className="order-item-box">
                 <p><strong>Status:</strong> {entry.status}</p>
-                <p><strong>Updated At:</strong> {new Date(entry.updatedAt).toLocaleString()}</p>
+                <p>
+                  <strong>Updated At:</strong>{" "}
+                  {entry.updatedAt ? new Date(entry.updatedAt).toLocaleString() : "—"}
+                </p>
                 {entry.note && <p><strong>Note:</strong> {entry.note}</p>}
               </div>
             ))}

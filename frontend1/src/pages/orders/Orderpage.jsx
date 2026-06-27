@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/OrdersPage.css";
 
-const API_BASE = "/api/v1";
+const API_BASE =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+
 const API_ENDPOINTS = {
   MY_ORDERS: `${API_BASE}/orders/my-orders`,
   SEARCH_ORDERS: `${API_BASE}/orders/search`,
@@ -49,8 +51,19 @@ const OrderItemRow = ({ item, index }) => {
         {image ? (
           <img className="item-image" src={image} alt={name} />
         ) : (
-          <svg className="item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7h18M3 12h18M3 17h18" />
+          <svg
+            className="item-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M3 7h18M3 12h18M3 17h18"
+            />
           </svg>
         )}
       </div>
@@ -313,8 +326,8 @@ const OrdersPage = () => {
   };
 
   const onInvoice = (order) => {
-  window.open(`/api/v1/orders/${order._id}/invoice`, "_blank", "noopener,noreferrer");
-};
+    window.open(API_ENDPOINTS.INVOICE(order._id), "_blank", "noopener,noreferrer");
+  };
 
   const handleSearchChange = (e) => {
     setParams((prev) => ({
