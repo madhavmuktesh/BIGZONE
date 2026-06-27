@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import '../../styles/ProfilePage.css';
+import '../../styles/profilepage.css';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
