@@ -38,18 +38,16 @@ router.get("/search", searchProducts);
 router.get("/ecozone", getEcoZoneProducts);
 router.get("/ecozone/:id", getSingleecoProduct);
 router.get("/", getAllProducts);
-router.get("/:id", getSingleProduct);
 
 /* ======================
    AUTHENTICATED ROUTES
 ====================== */
-router.use(isAuthenticated);
-
-router.get("/my-products", getMyProducts);
-router.get("/user/:userId", getUserProducts);
+router.get("/my-products", isAuthenticated, getMyProducts);
+router.get("/user/:userId", isAuthenticated, getUserProducts);
 
 router.post(
   "/create",
+  isAuthenticated,
   productImageUpload.array("images", 10),
   handleMulterError,
   cleanupFiles,
@@ -59,27 +57,43 @@ router.post(
 
 router.post(
   "/bulk-create",
+  isAuthenticated,
   productImageUpload.any(),
   handleMulterError,
   cleanupFiles,
   createMultipleProducts
 );
 
-router.post("/:id/reviews", validateReviewInput, addProductReview);
-router.put("/:id/reviews/:reviewId", validateReviewInput, updateProductReview);
-router.delete("/:id/reviews/:reviewId", deleteProductReview);
-router.post("/:id/reviews/:reviewId/helpful", markReviewHelpful);
+router.post("/:id/reviews", isAuthenticated, validateReviewInput, addProductReview);
+router.put(
+  "/:id/reviews/:reviewId",
+  isAuthenticated,
+  validateReviewInput,
+  updateProductReview
+);
+router.delete("/:id/reviews/:reviewId", isAuthenticated, deleteProductReview);
+router.post(
+  "/:id/reviews/:reviewId/helpful",
+  isAuthenticated,
+  markReviewHelpful
+);
 
 router.put(
   "/:id",
+  isAuthenticated,
   productImageUpload.array("images", 10),
   handleMulterError,
   cleanupFiles,
   updateProduct
 );
 
-router.delete("/:id", deleteProduct);
+router.delete("/:id", isAuthenticated, deleteProduct);
 
+/* ======================
+   PUBLIC SINGLE PRODUCT ROUTE
+   KEEP THIS LAST
+====================== */
+router.get("/:id", getSingleProduct);
 
 /* ======================
    ERROR HANDLER
