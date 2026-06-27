@@ -2,8 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -17,23 +15,13 @@ import addressRoutes from "./routes/address.route.js";
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 const API_PREFIX = "/api/v1";
 
+app.set("trust proxy", 1);
+
 connectDB();
-
-app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "production" ? 100 : 1000,
-  message: "Too many requests from this IP, please try again later.",
-});
-app.use("/api/", limiter);
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -45,6 +33,21 @@ const allowedOrigins = [
   "https://bigzone-git-main-mukteshmadhava-8668s-projects.vercel.app",
 ];
 
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+
+app.use(morgan("dev"));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === "production" ? 100 : 1000,
+  message: {
+    success: false,
+    message: "Too many requests from this IP, please try again later.",
+  },
+});
+
+app.use("/api/", limiter);
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -54,7 +57,7 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"));
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -64,36 +67,48 @@ app.use(
 
 app.options("/{*splat}", cors());
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.get(`${API_PREFIX}/health`, (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+  });
+});
+
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "BIGZONE Backend API is running 🚀",
+  });
+});
+
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
 app.use(`${API_PREFIX}/addresses`, addressRoutes);
 
-app.get(`${API_PREFIX}/health`, (_req, res) => {
-  res.status(200).json({ success: true, message: "Server is healthy" });
-});
-
-app.get("/", (_req, res) => {
-  res.json({
-    success: true,
-    message: "BIGZONE Backend API is running 🚀",
+app.all("/api/{*splat}", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `API endpoint ${req.originalUrl} not found`,
   });
-});
-
-app.all("/api/*splat", (req, res) => {
-  res.status(404).json({ success: false, message: `API endpoint ${req.originalUrl} not found` });
 });
 
 app.use((err, req, res, _next) => {
   console.error("Global Error:", err);
 
   let status = err.status || 500;
-  let message = process.env.NODE_ENV === "production" ? "Internal server error" : err.message || "Something went wrong";
+  let message =
+    process.env.NODE_ENV === "production"
+      ? "Internal server error"
+      : err.message || "Something went wrong";
 
   if (err.name === "ValidationError") {
-    status = 400;
-    return res.status(status).json({
+    return res.status(400).json({
       success: false,
       message: "Validation Error",
       errors: Object.values(err.errors).map((e) => e.message),
@@ -111,7 +126,10 @@ app.use((err, req, res, _next) => {
     message = `${field} already exists`;
   }
 
-  res.status(status).json({ success: false, message });
+  res.status(status).json({
+    success: false,
+    message,
+  });
 });
 
 process.on("SIGTERM", () => process.exit(0));

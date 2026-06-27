@@ -38,6 +38,7 @@ router.get("/search", searchProducts);
 router.get("/ecozone", getEcoZoneProducts);
 router.get("/ecozone/:id", getSingleecoProduct);
 router.get("/", getAllProducts);
+router.get("/:id", getSingleProduct);
 
 /* ======================
    AUTHENTICATED ROUTES
@@ -78,7 +79,7 @@ router.put(
 );
 
 router.delete("/:id", deleteProduct);
-router.get("/:id", getSingleProduct);
+
 
 /* ======================
    ERROR HANDLER
