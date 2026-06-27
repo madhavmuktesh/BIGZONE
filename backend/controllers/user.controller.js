@@ -6,18 +6,18 @@ import { v2 as cloudinary } from "cloudinary";
 const sendTokenResponse = (user, statusCode, res, message) => {
   try {
     const token = user.generateAuthToken();
-    
+
     if (!token) {
       return res.status(500).json({
         success: false,
-        message: "Failed to generate authentication token"
+        message: "Failed to generate authentication token",
       });
     }
 
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     };
 
@@ -30,7 +30,7 @@ const sendTokenResponse = (user, statusCode, res, message) => {
       profilePhoto: user.profilePhoto,
       profile: user.profile,
       isVerified: user.isVerified,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
     };
 
     return res
@@ -39,13 +39,15 @@ const sendTokenResponse = (user, statusCode, res, message) => {
       .json({
         success: true,
         message,
+        token, // Optional: useful if you later decide to use Authorization header
         user: userData,
       });
   } catch (error) {
     console.error("Error in sendTokenResponse:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Authentication error"
+      message: "Authentication error",
     });
   }
 };
@@ -178,15 +180,16 @@ export const login = async (req, res) => {
 // LOGOUT
 // ================================
 export const logout = (req, res) => {
-  return res
-    .cookie("token", "", {
-      expires: new Date(0),
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: process.env.NODE_ENV === "production",
-    })
-    .status(200)
-    .json({ success: true, message: "Logout successful." });
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
 };
 
 // ================================
