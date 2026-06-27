@@ -32,20 +32,20 @@ const Header = () => {
     }
   };
 
-  const handleSignIn = () => navigate('/signin');
+  const handleSignIn = () => navigate('/login');
 
   const handleProtectedAction = (path) => {
     if (isAuthenticated) return navigate(path);
     toast.error('Please sign in to continue!');
     sessionStorage.setItem('redirectAfterLogin', path);
-    navigate('/signin');
+    navigate('/login');
   };
 
   const handleDeliveryClick = () => {
     if (isAuthenticated) return navigate('/address');
     sessionStorage.setItem('redirectAfterLogin', '/address');
     toast.error('Please sign in to continue!');
-    navigate('/signin');
+    navigate('/login');
   };
 
   const handleSellerDashboard = () => {
