@@ -68,16 +68,12 @@ app.get(`${API_PREFIX}/health`, (_req, res) => {
   res.status(200).json({ success: true, message: "Server is healthy" });
 });
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-  app.get("*", (_req, res) => {
-    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+app.get("/", (_req, res) => {
+  res.json({
+    success: true,
+    message: "BIGZONE Backend API is running 🚀",
   });
-} else {
-  app.get("/", (_req, res) => {
-    res.json({ success: true, message: "API running in dev mode" });
-  });
-}
+});
 
 app.all("/api/*splat", (req, res) => {
   res.status(404).json({ success: false, message: `API endpoint ${req.originalUrl} not found` });
