@@ -62,7 +62,7 @@ app.use(
   })
 );
 
-app.options("*", cors());
+app.options("/{*splat}", cors());
 
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
