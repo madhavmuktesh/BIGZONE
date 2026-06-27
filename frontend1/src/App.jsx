@@ -65,7 +65,7 @@ function Layout() {
 
   // Routes where Header & Footer should be hidden
   const hideLayoutRoutes = [
-    "/signin",
+    "/login",
     "/register",
     "/forgot-password",
   ];
