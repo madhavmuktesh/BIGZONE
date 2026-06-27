@@ -1,9 +1,6 @@
 // src/context/AuthContext.jsx
-
 import React, { createContext, useState, useContext, useEffect } from "react";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+import { getCurrentUserAPI, logoutAPI } from "../services/api";
 
 const AuthContext = createContext({
   user: null,
@@ -25,18 +22,9 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       setLoading(true);
+      const data = await getCurrentUserAPI();
 
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (data.success) {
         setUser(data.user);
         setToken("cookie-based");
         localStorage.setItem("user", JSON.stringify(data.user));
@@ -44,11 +32,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Unauthorized");
       }
     } catch (error) {
-      console.error(
-        "Auth status check failed (User not logged in):",
-        error.message
-      );
-
+      console.error("Auth status check failed:", error.message);
       localStorage.removeItem("user");
       setUser(null);
       setToken(null);
@@ -70,16 +54,9 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       setLoading(true);
-
-      await fetch(`${API_BASE_URL}/users/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await logoutAPI();
     } catch (error) {
-      console.error("Logout API error:", error);
+      console.error("Logout API error:", error.message);
     } finally {
       setUser(null);
       setToken(null);
@@ -100,19 +77,11 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };

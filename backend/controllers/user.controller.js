@@ -2,7 +2,16 @@ import { User } from "../models/user.model.js";
 import crypto from "crypto";
 import { v2 as cloudinary } from "cloudinary";
 
-// --- Helper: Send Token Response ---
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "None" : "Lax",
+  path: "/",
+  expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+};
+
 const sendTokenResponse = (user, statusCode, res, message) => {
   try {
     const token = user.generateAuthToken();
@@ -13,13 +22,6 @@ const sendTokenResponse = (user, statusCode, res, message) => {
         message: "Failed to generate authentication token",
       });
     }
-
-    const options = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-    };
 
     const userData = {
       _id: user._id,
@@ -35,21 +37,36 @@ const sendTokenResponse = (user, statusCode, res, message) => {
 
     return res
       .status(statusCode)
-      .cookie("token", token, options)
+      .cookie("token", token, cookieOptions)
       .json({
         success: true,
         message,
-        token, // Optional: useful if you later decide to use Authorization header
+        token,
         user: userData,
       });
   } catch (error) {
     console.error("Error in sendTokenResponse:", error);
-
     return res.status(500).json({
       success: false,
       message: "Authentication error",
     });
   }
+};
+
+//LOG OUT
+
+export const logout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "None" : "Lax",
+    path: "/",
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
 };
 
 // --- Input Validation Helpers ---
@@ -176,21 +193,7 @@ export const login = async (req, res) => {
   }
 };
 
-// ================================
-// LOGOUT
-// ================================
-export const logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  });
 
-  return res.status(200).json({
-    success: true,
-    message: "Logged out successfully",
-  });
-};
 
 // ================================
 // GET PROFILE
