@@ -1,18 +1,16 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { useAuth } from '../../context/AuthContext.jsx';
-import { useCart } from '../../context/CartContext.jsx';
-import { renderStars } from '../../utils/starRating.jsx';
-import "../ProductCard/ProductCard.css"
-
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { useCart } from "../../context/CartContext.jsx";
+import { renderStars } from "../../utils/starRating.jsx";
+import "../ProductCard/ProductCard.css";
 
 const ProductCard = ({ product, onToggleWishlist, isWishlisted }) => {
   const { addItemToCart, loading } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // ✅ Prevent crash if product is missing
   if (!product) return null;
 
   const discount = product.originalPrice
@@ -22,25 +20,23 @@ const ProductCard = ({ product, onToggleWishlist, isWishlisted }) => {
   const rating = product.reviewStats?.averageRating || 0;
   const reviewCount = product.reviewStats?.totalReviews || 0;
   const imageUrl =
-    product.images?.[0]?.url || 'https://placehold.co/300x300?text=No+Image';
+    product.images?.[0]?.url || "https://placehold.co/300x300?text=No+Image";
 
-  // Navigate to product detail page
   const handleProductClick = (e) => {
-    if (e.target.closest('button') || e.target.closest('a')) {
+    if (e.target.closest("button") || e.target.closest("a")) {
       return;
     }
     navigate(`/products/${product._id}`);
   };
 
-  // Add to cart
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error('Please sign in to add items to cart!');
-      sessionStorage.setItem('redirectAfterLogin', '/cart');
-      navigate('/signin');
+      toast.error("Please sign in to add items to cart!");
+      sessionStorage.setItem("redirectAfterLogin", "/cart");
+      navigate("/signin");
       return;
     }
 
@@ -55,11 +51,10 @@ const ProductCard = ({ product, onToggleWishlist, isWishlisted }) => {
 
       toast.success(`Added "${product.productname}" to cart!`);
     } catch (error) {
-      toast.error(error.message || 'Failed to add item to cart');
+      toast.error(error.message || "Failed to add item to cart");
     }
   };
 
-  // Toggle wishlist
   const handleWishlistClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -70,59 +65,66 @@ const ProductCard = ({ product, onToggleWishlist, isWishlisted }) => {
 
   return (
     <div
-      className="product-card"
+      className="product-card-main"
       onClick={handleProductClick}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: "pointer" }}
     >
-      <div className="product-image-container">
+      <div className="product-card-main-image-container">
         <img
           src={imageUrl}
-          alt={product.productname || 'Product'}
-          className="product-image"
+          alt={product.productname || "Product"}
+          className="product-card-main-image"
         />
+
         {discount > 0 && (
-          <div className="product-badge sale">{discount}% off</div>
+          <div className="product-card-main-badge product-card-main-badge-sale">
+            {discount}% off
+          </div>
         )}
+
         <button
-          className="wishlist-button"
+          className="product-card-main-wishlist-button"
           onClick={handleWishlistClick}
           type="button"
           aria-label="Add to wishlist"
         >
           <i
-            className={`${isWishlisted ? 'fas' : 'far'} fa-heart ${
-              isWishlisted ? 'wishlisted' : ''
+            className={`${isWishlisted ? "fas" : "far"} fa-heart ${
+              isWishlisted ? "product-card-main-wishlisted" : ""
             }`}
           ></i>
         </button>
       </div>
 
-      <div className="product-info">
-        <h3 className="product-name">
-          {product.productname || 'Unnamed Product'}
+      <div className="product-card-main-info">
+        <h3 className="product-card-main-name">
+          {product.productname || "Unnamed Product"}
         </h3>
 
-        <div className="product-rating">
-          <div className="rating-stars">{renderStars(rating)}</div>
-          <span className="rating-count">({reviewCount})</span>
+        <div className="product-card-main-rating">
+          <div className="product-card-main-rating-stars">{renderStars(rating)}</div>
+          <span className="product-card-main-rating-count">({reviewCount})</span>
         </div>
 
-        <div className="product-pricing">
-          <span className="product-price">${product.productprice ?? 'N/A'}</span>
+        <div className="product-card-main-pricing">
+          <span className="product-card-main-price">
+            ${product.productprice ?? "N/A"}
+          </span>
+
           {product.originalPrice && (
-            <span className="product-original-price">
+            <span className="product-card-main-original-price">
               ${product.originalPrice}
             </span>
           )}
         </div>
 
         <button
-          className="add-to-cart-button"
+          className="product-card-main-add-to-cart-button"
           onClick={handleAddToCart}
           disabled={loading}
           type="button"
         >
-          {loading ? 'Adding...' : 'Add to Cart'}
+          {loading ? "Adding..." : "Add to Cart"}
         </button>
       </div>
     </div>

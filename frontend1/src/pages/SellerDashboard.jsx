@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import "../styles/SellerDashboard.css";
 
 const ORDER_STATUSES = [
   "pending",
@@ -73,7 +74,21 @@ const SellerDashboard = () => {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok || !data.success) {
-      throw new Error(data.message || "Request failed");
+      console.error("API Error:", {
+        url,
+        status: response.status,
+        response: data,
+        requestBody: options.body,
+      });
+
+      throw new Error(
+        data.message ||
+          (Array.isArray(data.errors)
+            ? data.errors
+                .map((err) => (typeof err === "string" ? err : `${err.path}: ${err.message}`))
+                .join(", ")
+            : "Request failed")
+      );
     }
 
     return data;
@@ -165,19 +180,52 @@ const SellerDashboard = () => {
     try {
       setStatusUpdatingId(orderId);
 
-      await fetchJSON(`/api/v1/orders/${orderId}/status`, {
+      const payload = { status };
+
+      if (status === "shipped") {
+        const trackingNumber = window.prompt("Enter tracking ID / tracking number:");
+        if (!trackingNumber || !trackingNumber.trim()) {
+          toast.error("Tracking number is required when marking order as shipped");
+          setStatusUpdatingId(null);
+          return;
+        }
+        payload.trackingNumber = trackingNumber.trim();
+        payload.note = `Order shipped. Tracking ID: ${trackingNumber.trim()}`;
+      }
+
+      if (status === "cancelled") {
+        const cancellationReason = window.prompt("Enter cancellation reason:");
+        if (!cancellationReason || !cancellationReason.trim()) {
+          toast.error("Cancellation reason is required");
+          setStatusUpdatingId(null);
+          return;
+        }
+        payload.cancellationReason = cancellationReason.trim();
+        payload.note = cancellationReason.trim();
+      }
+
+      const data = await fetchJSON(`/api/v1/orders/${orderId}/status`, {
         method: "PATCH",
-        body: JSON.stringify({ status }),
+        body: JSON.stringify(payload),
       });
 
       setOrders((prev) =>
         prev.map((order) =>
-          order._id === orderId ? { ...order, orderStatus: status } : order
+          order._id === orderId
+            ? {
+                ...order,
+                ...data.order,
+                orderStatus: data.order?.orderStatus || status,
+                trackingNumber: data.order?.trackingNumber || order.trackingNumber,
+                statusHistory: data.order?.statusHistory || order.statusHistory || [],
+              }
+            : order
         )
       );
 
       toast.success(`Order marked as ${status}`);
     } catch (error) {
+      console.error("Status update failed:", error);
       toast.error(error.message || "Failed to update order status");
     } finally {
       setStatusUpdatingId(null);
@@ -234,32 +282,40 @@ const SellerDashboard = () => {
   }, [products, orders]);
 
   if (loading) {
-    return <div style={styles.centerBox}>Loading dashboard...</div>;
+    return <div className="seller-dashboard-center-box">Loading dashboard...</div>;
   }
 
   return (
-    <div style={styles.page}>
+    <div className="seller-dashboard seller-dashboard-page">
       <Toaster position="top-center" />
 
-      <div style={styles.header}>
+      <div className="seller-dashboard-header">
         <div>
-          <h1 style={styles.title}>Seller Dashboard</h1>
-          <p style={styles.subtitle}>
+          <h1 className="seller-dashboard-title">Seller Dashboard</h1>
+          <p className="seller-dashboard-subtitle">
             Manage products, track orders, and update order progress.
           </p>
         </div>
 
-        <div style={styles.headerActions}>
-          <button onClick={loadDashboard} style={styles.secondaryBtn} disabled={refreshing}>
+        <div className="seller-dashboard-header-actions">
+          <button
+            onClick={loadDashboard}
+            className="seller-dashboard-secondary-btn"
+            disabled={refreshing}
+          >
             {refreshing ? "Refreshing..." : "Refresh"}
           </button>
-          <button onClick={() => navigate("/form")} style={styles.primaryBtn}>
+
+          <button
+            onClick={() => navigate("/form")}
+            className="seller-dashboard-primary-btn"
+          >
             + Add New Product
           </button>
         </div>
       </div>
 
-      <div style={styles.statsGrid}>
+      <div className="seller-dashboard-stats-grid">
         <StatCard label="Total Products" value={stats.totalProducts} />
         <StatCard label="Low Stock" value={stats.lowStockProducts} color="#b45309" />
         <StatCard label="Total Orders" value={stats.totalOrders} />
@@ -267,65 +323,86 @@ const SellerDashboard = () => {
         <StatCard label="Active Orders" value={stats.activeOrders} color="#2563eb" />
       </div>
 
-      <div style={styles.section}>
-        <div style={styles.sectionHeader}>
+      <div className="seller-dashboard-section">
+        <div className="seller-dashboard-section-header">
           <div>
-            <h2 style={styles.sectionTitle}>My Products</h2>
-            <p style={styles.sectionText}>Edit listings, watch stock, and remove products.</p>
+            <h2 className="seller-dashboard-section-title">My Products</h2>
+            <p className="seller-dashboard-section-text">
+              Edit listings, watch stock, and remove products.
+            </p>
           </div>
+
           <input
             type="text"
             placeholder="Search by name or category"
             value={productSearch}
             onChange={(e) => setProductSearch(e.target.value)}
-            style={styles.searchInput}
+            className="seller-dashboard-search-input"
           />
         </div>
 
         {fetchingProducts ? (
-          <div style={styles.centerBox}>Loading products...</div>
+          <div className="seller-dashboard-center-box">Loading products...</div>
         ) : errorState.products ? (
-          <div style={styles.errorBox}>
+          <div className="seller-dashboard-error-box">
             <p>{errorState.products}</p>
-            <button onClick={fetchMyProducts} style={styles.secondaryBtn}>Retry</button>
+            <button
+              onClick={fetchMyProducts}
+              className="seller-dashboard-secondary-btn"
+            >
+              Retry
+            </button>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div style={styles.emptyBox}>
-            <h3 style={styles.emptyTitle}>No products found</h3>
-            <p style={styles.emptyText}>
+          <div className="seller-dashboard-empty-box">
+            <h3 className="seller-dashboard-empty-title">No products found</h3>
+            <p className="seller-dashboard-empty-text">
               Add your first product or change the search text.
             </p>
           </div>
         ) : (
-          <div style={styles.cardList}>
+          <div className="seller-dashboard-card-list">
             {filteredProducts.map((product) => {
               const stockQty = getStockQty(product);
               const lowStock = stockQty <= LOW_STOCK_LIMIT;
 
               return (
-                <div key={product._id} style={styles.productCard}>
-                  <div style={styles.productInfo}>
+                <div key={product._id} className="seller-dashboard-product-card">
+                  <div className="seller-dashboard-product-info">
                     <img
                       src={product.images?.[0]?.url || "https://placehold.co/100x100?text=No+Image"}
                       alt={product.productname || "Product"}
-                      style={styles.productImage}
+                      className="seller-dashboard-product-image"
                     />
 
                     <div style={{ flex: 1 }}>
-                      <h3 style={styles.productName}>{product.productname}</h3>
-                      <p style={styles.metaText}>Category: {product.category || "—"}</p>
-                      <p style={styles.metaText}>Price: {formatCurrency(product.productprice)}</p>
-                      <p style={{ ...styles.metaText, color: lowStock ? "#b45309" : "#374151" }}>
+                      <h3 className="seller-dashboard-product-name">{product.productname}</h3>
+                      <p className="seller-dashboard-meta-text">
+                        Category: {product.category || "—"}
+                      </p>
+                      <p className="seller-dashboard-meta-text">
+                        Price: {formatCurrency(product.productprice)}
+                      </p>
+                      <p
+                        className="seller-dashboard-meta-text"
+                        style={{ color: lowStock ? "#b45309" : "#374151" }}
+                      >
                         Stock: {stockQty} {lowStock ? "(Low stock)" : ""}
                       </p>
                     </div>
                   </div>
 
-                  <div style={styles.actionGroup}>
-                    <button onClick={() => handleEdit(product._id)} style={styles.secondaryBtn}>
+                  <div className="seller-dashboard-action-group">
+                    <button
+                      onClick={() => handleEdit(product._id)}
+                      className="seller-dashboard-secondary-btn"
+                    >
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(product._id)} style={styles.dangerBtn}>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="seller-dashboard-danger-btn"
+                    >
                       Delete
                     </button>
                   </div>
@@ -336,11 +413,11 @@ const SellerDashboard = () => {
         )}
       </div>
 
-      <div style={styles.section}>
-        <div style={styles.sectionHeader}>
+      <div className="seller-dashboard-section">
+        <div className="seller-dashboard-section-header">
           <div>
-            <h2 style={styles.sectionTitle}>Seller Orders</h2>
-            <p style={styles.sectionText}>
+            <h2 className="seller-dashboard-section-title">Seller Orders</h2>
+            <p className="seller-dashboard-section-text">
               Accept orders and move them through each order stage.
             </p>
           </div>
@@ -348,7 +425,7 @@ const SellerDashboard = () => {
           <select
             value={orderFilter}
             onChange={(e) => setOrderFilter(e.target.value)}
-            style={styles.select}
+            className="seller-dashboard-select-input"
           >
             <option value="all">All statuses</option>
             {ORDER_STATUSES.map((status) => (
@@ -360,54 +437,66 @@ const SellerDashboard = () => {
         </div>
 
         {fetchingOrders ? (
-          <div style={styles.centerBox}>Loading orders...</div>
+          <div className="seller-dashboard-center-box">Loading orders...</div>
         ) : errorState.orders ? (
-          <div style={styles.errorBox}>
+          <div className="seller-dashboard-error-box">
             <p>{errorState.orders}</p>
-            <button onClick={fetchSellerOrders} style={styles.secondaryBtn}>Retry</button>
+            <button
+              onClick={fetchSellerOrders}
+              className="seller-dashboard-secondary-btn"
+            >
+              Retry
+            </button>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div style={styles.emptyBox}>
-            <h3 style={styles.emptyTitle}>No orders available</h3>
-            <p style={styles.emptyText}>Orders placed for your products will appear here.</p>
+          <div className="seller-dashboard-empty-box">
+            <h3 className="seller-dashboard-empty-title">No orders available</h3>
+            <p className="seller-dashboard-empty-text">
+              Orders placed for your products will appear here.
+            </p>
           </div>
         ) : (
-          <div style={styles.orderList}>
+          <div className="seller-dashboard-order-list">
             {filteredOrders.map((order) => {
               const currentStatus = order.orderStatus || "pending";
               const nextStatuses = getNextStatuses(currentStatus);
 
               return (
-                <div key={order._id} style={styles.orderCard}>
-                  <div style={styles.orderTop}>
+                <div key={order._id} className="seller-dashboard-order-card">
+                  <div className="seller-dashboard-order-top">
                     <div>
-                      <h3 style={styles.orderId}>Order #{order._id?.slice(-8).toUpperCase()}</h3>
-                      <p style={styles.metaText}>
+                      <h3 className="seller-dashboard-order-id">
+                        Order #{order._id?.slice(-8).toUpperCase()}
+                      </h3>
+                      <p className="seller-dashboard-meta-text">
                         Date: {formatDate(order.createdAt || order.orderPlacedAt)} | Payment:{" "}
                         {order.paymentMethod || "—"}
                       </p>
-                      <p style={styles.metaText}>
+                      <p className="seller-dashboard-meta-text">
                         Total: {formatCurrency(order.totalAmount || order.totalCost)}
                       </p>
                     </div>
 
                     <span
+                      className="seller-dashboard-badge"
                       style={{
-                        ...styles.badge,
                         backgroundColor: `${STATUS_COLORS[currentStatus] || "#6b7280"}20`,
                         color: STATUS_COLORS[currentStatus] || "#6b7280",
-                        border: `1px solid ${STATUS_COLORS[currentStatus] || "#6b7280"}40`,
+                        borderColor: `${STATUS_COLORS[currentStatus] || "#6b7280"}40`,
                       }}
                     >
                       {currentStatus}
                     </span>
                   </div>
 
-                  <div style={styles.itemsBlock}>
+                  <div className="seller-dashboard-items-block">
                     <strong>Items</strong>
-                    <ul style={styles.itemList}>
+                    <ul className="seller-dashboard-item-list">
                       {(order.items || order.products || []).map((item, index) => (
-                        <li key={item._id || index} style={styles.itemRow}>
+                        <li
+                          key={item._id || index}
+                          className="seller-dashboard-item-row"
+                        >
                           <span>
                             {item.product?.productname ||
                               item.productDetails?.productname ||
@@ -424,22 +513,26 @@ const SellerDashboard = () => {
                     </ul>
                   </div>
 
-                  <div style={styles.statusActions}>
+                  <div className="seller-dashboard-status-actions">
                     {nextStatuses.length === 0 ? (
-                      <p style={styles.metaText}>No more actions available.</p>
+                      <p className="seller-dashboard-meta-text">
+                        No more actions available.
+                      </p>
                     ) : (
                       nextStatuses.map((status) => (
                         <button
                           key={status}
                           onClick={() => handleStatusUpdate(order._id, status)}
                           disabled={statusUpdatingId === order._id}
+                          className="seller-dashboard-secondary-btn"
                           style={{
-                            ...styles.secondaryBtn,
                             borderColor: STATUS_COLORS[status] || "#d1d5db",
                             color: STATUS_COLORS[status] || "#111827",
                           }}
                         >
-                          {statusUpdatingId === order._id ? "Updating..." : `Mark ${status}`}
+                          {statusUpdatingId === order._id
+                            ? "Updating..."
+                            : `Mark ${status}`}
                         </button>
                       ))
                     )}
@@ -456,259 +549,13 @@ const SellerDashboard = () => {
 
 const StatCard = ({ label, value, color = "#111827" }) => {
   return (
-    <div style={styles.statCard}>
-      <p style={styles.statLabel}>{label}</p>
-      <h3 style={{ ...styles.statValue, color }}>{value}</h3>
+    <div className="seller-dashboard-stat-card">
+      <p className="seller-dashboard-stat-label">{label}</p>
+      <h3 className="seller-dashboard-stat-value" style={{ color }}>
+        {value}
+      </h3>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "24px 16px 40px",
-    background: "#f8fafc",
-    minHeight: "100vh",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "16px",
-    flexWrap: "wrap",
-    marginBottom: "24px",
-  },
-  title: {
-    margin: 0,
-    fontSize: "32px",
-    color: "#0f172a",
-  },
-  subtitle: {
-    marginTop: "8px",
-    color: "#475569",
-  },
-  headerActions: {
-    display: "flex",
-    gap: "12px",
-    flexWrap: "wrap",
-  },
-  primaryBtn: {
-    padding: "10px 16px",
-    background: "#0f766e",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-  secondaryBtn: {
-    padding: "10px 16px",
-    background: "#fff",
-    color: "#111827",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-  dangerBtn: {
-    padding: "10px 16px",
-    background: "#dc2626",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "16px",
-    marginBottom: "24px",
-  },
-  statCard: {
-    background: "#fff",
-    borderRadius: "12px",
-    padding: "18px",
-    boxShadow: "0 2px 10px rgba(15, 23, 42, 0.06)",
-  },
-  statLabel: {
-    margin: 0,
-    color: "#64748b",
-    fontSize: "14px",
-  },
-  statValue: {
-    margin: "8px 0 0",
-    fontSize: "28px",
-  },
-  section: {
-    background: "#fff",
-    borderRadius: "14px",
-    padding: "20px",
-    boxShadow: "0 2px 12px rgba(15, 23, 42, 0.06)",
-    marginBottom: "24px",
-  },
-  sectionHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "16px",
-    flexWrap: "wrap",
-    marginBottom: "20px",
-  },
-  sectionTitle: {
-    margin: 0,
-    fontSize: "22px",
-    color: "#111827",
-  },
-  sectionText: {
-    margin: "6px 0 0",
-    color: "#6b7280",
-  },
-  searchInput: {
-    padding: "10px 12px",
-    borderRadius: "8px",
-    border: "1px solid #d1d5db",
-    minWidth: "260px",
-  },
-  select: {
-    padding: "10px 12px",
-    borderRadius: "8px",
-    border: "1px solid #d1d5db",
-    minWidth: "180px",
-    background: "#fff",
-  },
-  centerBox: {
-    padding: "40px",
-    textAlign: "center",
-    color: "#475569",
-  },
-  emptyBox: {
-    textAlign: "center",
-    padding: "40px 20px",
-    background: "#f8fafc",
-    borderRadius: "12px",
-  },
-  emptyTitle: {
-    margin: 0,
-    color: "#0f172a",
-  },
-  emptyText: {
-    marginTop: "8px",
-    color: "#64748b",
-  },
-  errorBox: {
-    padding: "20px",
-    borderRadius: "12px",
-    background: "#fef2f2",
-    color: "#991b1b",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "16px",
-    flexWrap: "wrap",
-  },
-  cardList: {
-    display: "grid",
-    gap: "14px",
-  },
-  productCard: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "16px",
-    flexWrap: "wrap",
-    alignItems: "center",
-    padding: "16px",
-    border: "1px solid #e5e7eb",
-    borderRadius: "12px",
-    background: "#fff",
-  },
-  productInfo: {
-    display: "flex",
-    gap: "14px",
-    alignItems: "center",
-    flex: 1,
-    minWidth: "280px",
-  },
-  productImage: {
-    width: "100px",
-    height: "100px",
-    objectFit: "cover",
-    borderRadius: "10px",
-    background: "#f3f4f6",
-  },
-  productName: {
-    margin: "0 0 6px",
-    color: "#111827",
-  },
-  metaText: {
-    margin: "4px 0",
-    color: "#6b7280",
-    fontSize: "14px",
-  },
-  actionGroup: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-  },
-  orderList: {
-    display: "grid",
-    gap: "16px",
-  },
-  orderCard: {
-    border: "1px solid #e5e7eb",
-    borderRadius: "12px",
-    padding: "18px",
-    background: "#fff",
-  },
-  orderTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "12px",
-    flexWrap: "wrap",
-    marginBottom: "14px",
-  },
-  orderId: {
-    margin: 0,
-    color: "#111827",
-    fontSize: "18px",
-  },
-  badge: {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "6px 10px",
-    borderRadius: "999px",
-    fontSize: "13px",
-    fontWeight: 700,
-    textTransform: "capitalize",
-  },
-  itemsBlock: {
-    marginBottom: "16px",
-    background: "#f8fafc",
-    padding: "14px",
-    borderRadius: "10px",
-  },
-  itemList: {
-    listStyle: "none",
-    padding: 0,
-    margin: "10px 0 0",
-    display: "grid",
-    gap: "8px",
-  },
-  itemRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "12px",
-    flexWrap: "wrap",
-    color: "#334155",
-    fontSize: "14px",
-  },
-  statusActions: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-  },
 };
 
 export default SellerDashboard;

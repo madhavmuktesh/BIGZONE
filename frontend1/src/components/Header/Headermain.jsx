@@ -318,17 +318,6 @@ const Header = () => {
             </button>
 
 
-            <button type="button" className="bz-nav-link">
-              <i className="fas fa-globe" aria-hidden="true" />
-              <span>Language</span>
-            </button>
-
-            <button type="button" className="bz-nav-link">
-              <i className="fas fa-headset" aria-hidden="true" />
-              <span>Customer Service</span>
-            </button>
-
-
           </div>
         </div>
       </nav>
