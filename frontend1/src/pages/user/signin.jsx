@@ -112,7 +112,7 @@ const SignIn = () => {
           <div className="signin-header-left">
             <button
               type="button"
-              onClick={() => window.history.back()}
+              onClick={() => navigate('/')}
               className="back-button"
               aria-label="Go back"
             >

@@ -325,11 +325,17 @@ export const updateProduct = handleAsyncError(async (req, res) => {
 
   const product = await Product.findById(id);
   if (!product) {
-    return res.status(404).json({ success: false, message: "Product not found" });
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
   }
 
   if (!isOwnerOrAdmin(req, product.createdBy)) {
-    return res.status(403).json({ success: false, message: "Not authorized" });
+    return res.status(403).json({
+      success: false,
+      message: "Not authorized",
+    });
   }
 
   let deleteImageIds = req.body.deleteImageIds;
@@ -337,32 +343,51 @@ export const updateProduct = handleAsyncError(async (req, res) => {
     try {
       deleteImageIds = JSON.parse(deleteImageIds);
     } catch {
-      return res.status(400).json({ success: false, message: "Invalid deleteImageIds JSON" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid deleteImageIds JSON",
+      });
     }
   }
 
   if (deleteImageIds && !Array.isArray(deleteImageIds)) {
-    return res.status(400).json({ success: false, message: "deleteImageIds must be an array" });
+    return res.status(400).json({
+      success: false,
+      message: "deleteImageIds must be an array",
+    });
   }
 
   if (Array.isArray(deleteImageIds) && deleteImageIds.length > 0) {
     await deleteCloudinaryPublicIds(deleteImageIds);
-    product.images = product.images.filter((img) => !deleteImageIds.includes(img.public_id));
+    product.images = product.images.filter(
+      (img) => !deleteImageIds.includes(img.public_id)
+    );
   }
 
   if (req.files && req.files.length > 0) {
     if (product.images.length + req.files.length > 10) {
-      return res.status(400).json({ success: false, message: "Maximum 10 images allowed" });
+      return res.status(400).json({
+        success: false,
+        message: "Maximum 10 images allowed",
+      });
     }
 
     const newImgs = [];
+
     try {
       for (const file of req.files) {
-        newImgs.push(await handleCloudinaryUpload(file));
+        const uploadedImage = await handleCloudinaryUpload(file);
+        newImgs.push(uploadedImage);
       }
     } catch (e) {
-      if (newImgs.length) await deleteCloudinaryPublicIds(newImgs.map((i) => i.public_id));
-      return res.status(502).json({ success: false, message: e.message });
+      if (newImgs.length > 0) {
+        await deleteCloudinaryPublicIds(newImgs.map((img) => img.public_id));
+      }
+
+      return res.status(502).json({
+        success: false,
+        message: e.message || "Failed to upload images",
+      });
     }
 
     product.images.push(...newImgs);
@@ -370,7 +395,10 @@ export const updateProduct = handleAsyncError(async (req, res) => {
 
   if (req.body.productname !== undefined) {
     if (!isNonEmptyString(req.body.productname)) {
-      return res.status(400).json({ success: false, message: "Invalid product name" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product name",
+      });
     }
     product.productname = req.body.productname.trim();
   }
@@ -378,7 +406,10 @@ export const updateProduct = handleAsyncError(async (req, res) => {
   if (req.body.productprice !== undefined) {
     const n = toFiniteNumber(req.body.productprice);
     if (!Number.isFinite(n) || n < 0) {
-      return res.status(400).json({ success: false, message: "Invalid product price" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product price",
+      });
     }
     product.productprice = n;
   }
@@ -386,9 +417,16 @@ export const updateProduct = handleAsyncError(async (req, res) => {
   if (req.body.originalPrice !== undefined) {
     const val = req.body.originalPrice;
     const n = val === null || val === "" ? undefined : toFiniteNumber(val);
+
     if (n !== undefined) {
-      if (!Number.isFinite(n) || (product.productprice !== undefined && n < product.productprice)) {
-        return res.status(400).json({ success: false, message: "Original price must be >= current price" });
+      if (
+        !Number.isFinite(n) ||
+        (product.productprice !== undefined && n < product.productprice)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Original price must be >= current price",
+        });
       }
       product.originalPrice = n;
     } else {
@@ -398,52 +436,115 @@ export const updateProduct = handleAsyncError(async (req, res) => {
 
   if (req.body.productdescription !== undefined) {
     if (!isNonEmptyString(req.body.productdescription)) {
-      return res.status(400).json({ success: false, message: "Invalid description" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid description",
+      });
     }
     product.productdescription = req.body.productdescription.trim();
   }
 
   if (req.body.category !== undefined) {
     if (!isNonEmptyString(req.body.category)) {
-      return res.status(400).json({ success: false, message: "Invalid category" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid category",
+      });
     }
     product.category = req.body.category.trim();
   }
 
   if (req.body.subcategory !== undefined) {
-    product.subcategory = req.body.subcategory ? String(req.body.subcategory).trim() : undefined;
+    product.subcategory = req.body.subcategory
+      ? String(req.body.subcategory).trim()
+      : undefined;
   }
 
   if (req.body.tags !== undefined) {
     const tRaw = parseMaybeJSON(req.body.tags);
     if (tRaw === Symbol.for("JSON_ERROR")) {
-      return res.status(400).json({ success: false, message: "Invalid tags JSON" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid tags JSON",
+      });
     }
+
     const t = sanitizeTags(tRaw ?? []);
     if (t === Symbol.for("TAGS_SHAPE")) {
-      return res.status(400).json({ success: false, message: "Invalid tags" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid tags",
+      });
     }
+
     product.tags = t;
   }
 
   if (req.body.stock !== undefined) {
     const sRaw = parseMaybeJSON(req.body.stock);
     if (sRaw === Symbol.for("JSON_ERROR")) {
-      return res.status(400).json({ success: false, message: "Invalid stock JSON" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid stock JSON",
+      });
     }
+
     const s = validateStock(sRaw);
     if (s === Symbol.for("STOCK_SHAPE")) {
-      return res.status(400).json({ success: false, message: "Invalid stock" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid stock",
+      });
     }
+
     product.stock = s;
   }
 
   if (req.body.specifications !== undefined) {
     const specsRaw = parseMaybeJSON(req.body.specifications);
     if (specsRaw === Symbol.for("JSON_ERROR")) {
-      return res.status(400).json({ success: false, message: "Invalid specifications JSON" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid specifications JSON",
+      });
     }
+
     product.specifications = specsRaw ?? {};
+  }
+
+  if (req.body.ecoScore !== undefined) {
+    const ecoScore = toFiniteNumber(req.body.ecoScore);
+    if (!Number.isFinite(ecoScore) || ecoScore < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ecoScore",
+      });
+    }
+    product.ecoScore = ecoScore;
+  }
+
+  if (req.body.co2SavedKg !== undefined) {
+    const co2SavedKg = toFiniteNumber(req.body.co2SavedKg);
+    if (!Number.isFinite(co2SavedKg) || co2SavedKg < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid co2SavedKg",
+      });
+    }
+    product.co2SavedKg = co2SavedKg;
+  }
+
+  if (req.body.isEcoFriendly !== undefined) {
+    const raw = String(req.body.isEcoFriendly).toLowerCase().trim();
+
+    if (raw !== "true" && raw !== "false") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid isEcoFriendly",
+      });
+    }
+
+    product.isEcoFriendly = raw === "true";
   }
 
   await product.save();

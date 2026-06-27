@@ -94,6 +94,35 @@ export default function RegisterPage() {
 
   return (
     <div className="register-page">
+      <header className="signin-header">
+        <div className="signin-container signin-header-content">
+          <div className="signin-header-left">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="back-button"
+              aria-label="Go back"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <h1 className="logo-title">BIGZONE</h1>
+          </div>
+
+          <div className="signin-header-right">
+            <span>New to BIGZONE?</span>
+            <button
+              type="button"
+              onClick={() => navigate('/register')}
+              className="create-account-button"
+            >
+              Create Account
+            </button>
+          </div>
+        </div>
+      </header>
       <div className="register-shell">
         <div className="register-panel register-panel-brand">
           <div className="brand-badge">Join us</div>
@@ -212,7 +241,7 @@ export default function RegisterPage() {
           </form>
 
           <p className="form-helper">
-            Already have an account? <Link to="/login">Sign in</Link>
+            Already have an account? <Link to="/signin">Sign in</Link>
           </p>
         </div>
       </div>

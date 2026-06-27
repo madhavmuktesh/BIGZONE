@@ -42,7 +42,37 @@ const ForgotPassword = () => {
     };
 
     return (
+        
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+            <header className="signin-header">
+                <div className="signin-container signin-header-content">
+                <div className="signin-header-left">
+                    <button
+                    type="button"
+                    onClick={() => window.history.back()}
+                    className="back-button"
+                    aria-label="Go back"
+                    >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    </button>
+
+                    <h1 className="logo-title">BIGZONE</h1>
+                </div>
+
+                <div className="signin-header-right">
+                    <span>New to BIGZONE?</span>
+                    <button
+                    type="button"
+                    onClick={() => navigate('/register')}
+                    className="create-account-button"
+                    >
+                    Create Account
+                    </button>
+                </div>
+                </div>
+            </header>
             <Toaster position="top-center" />
             <div style={{ maxWidth: '400px', width: '100%', padding: '30px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', backgroundColor: '#fff' }}>
                 <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>Forgot Password?</h2>
