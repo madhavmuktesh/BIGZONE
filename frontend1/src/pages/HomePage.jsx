@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
 import { useCart } from '../context/CartContext.jsx';
+import { fetchAllProductsAPI } from '../services/api.js';
 import "../styles/bigzone1.css";
 
 import Header from '../components/Header/Headermain.jsx';
@@ -19,17 +20,15 @@ function Homepage() {
   const [error, setError] = useState(null);
   const [wishlist, setWishlist] = useState(new Set());
 
-  // ✅ clearError now exists in context — no more crash
   const { error: cartError, clearError } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const response = await fetch(`/api/v1/products`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
+        const data = await fetchAllProductsAPI();
 
         if (data.success) {
           const list = data.products || [];
@@ -52,7 +51,7 @@ function Homepage() {
   useEffect(() => {
     if (cartError) {
       toast.error(cartError);
-      clearError?.(); // ✅ optional chaining as safety net
+      clearError?.();
     }
   }, [cartError, clearError]);
 
@@ -74,11 +73,7 @@ function Homepage() {
   };
 
   if (loading) {
-    return (
-      <div className="home-state">
-        Loading your products...
-      </div>
-    );
+    return <div className="home-state">Loading your products...</div>;
   }
 
   if (error) {
