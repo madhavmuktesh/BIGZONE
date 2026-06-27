@@ -9,31 +9,31 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext";
+import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
+import { CartProvider } from "./context/CartContext.jsx";
 
 import Homepage from "./pages/HomePage.jsx";
 import ProductDetailPage from "./pages/ecozone/ProductDetailPage.jsx";
-import ProductUploadForm from "./pages/form";
+import ProductUploadForm from "./pages/form.jsx";
 import SignIn from "./pages/user/signin.jsx";
 import Cart from "./pages/orders/cart.jsx";
 import OrdersPage from "./pages/orders/Orderpage.jsx";
-import OrderDetailsPage from "./pages/orders/OrderDetailsPage";
+import OrderDetailsPage from "./pages/orders/OrderDetailsPage.jsx";
 import Productmain from "./pages/productdetailmain.jsx";
 import RegisterPage from "./pages/user/registerpage.jsx";
 import ProfilePage from "./pages/user/profilepage.jsx";
 import EditProfile from "./pages/user/profileedit.jsx";
-import SearchResults from "./pages/SearchResults";
+import SearchResults from "./pages/SearchResults.jsx";
 import AddAddressPage from "./pages/AddAddress.jsx";
 import AddressPage from "./pages/Addresspage.jsx";
 import EcohomePage from "./pages/ecozone/EcohomePage.jsx";
 import CheckoutPage from "./pages/orders/CheckoutPage.jsx";
 import ForgotPassword from "./pages/user/ForgotPassword.jsx";
 import ResetPassword from "./pages/user/ResetPassword.jsx";
-import SellerDashboard from "./pages/SellerDashboard";
+import SellerDashboard from "./pages/SellerDashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Header from "./components/Header/Headermain.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 
