@@ -201,7 +201,7 @@ const ProfilePage = () => {
                     {isEditing ? 'Opening...' : 'Edit Profile'}
                   </button>
                   {user.role === 'seller' && (
-                    <button onClick={() => navigate('/seller-dashboard')} className="btn-secondary btn-seller">
+                    <button onClick={() => navigate('/sellerdashboard')} className="btn-secondary btn-seller">
                       Manage My Inventory
                     </button>
                   )}
