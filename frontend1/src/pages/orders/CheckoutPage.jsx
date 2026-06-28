@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
-import "../../styles/CheckoutPage.css";
+import "../../styles/checkoutpage.css";
 import EcoCartSummary from "../../components/EcoCartSummary";
 
 const API_BASE_URL =
