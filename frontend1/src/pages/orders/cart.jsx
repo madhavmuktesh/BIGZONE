@@ -9,7 +9,7 @@ import EcoToast from '../../components/EcoToast';
 
 // Inside your CartPage.jsx or CartSidebar.jsx
 
-function EcoCartSummary({ cartItems }) {
+function EcoCartSummary({ cartItems =[]}) {
   const totalEcoScore = cartItems.reduce((sum, item) => {
     return sum + (item.product?.ecoScore || 0) * item.quantity;
   }, 0);
