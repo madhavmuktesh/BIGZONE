@@ -1,9 +1,21 @@
 # 🛍️ BIGZONE — Eco-Friendly E-Commerce Platform
 
 [![Live Demo](https://img.shields.io/badge/Live-bigzone--nu.vercel.app-blue)](https://bigzone-nu.vercel.app)
-[![License: ISC](https://img.shields.io/badge/License-ISC-green.svg)](https://opensource.org/licenses/ISC)
 
 > A full-stack **MERN e-commerce application** with an integrated **EcoZone** — a dedicated section for sustainable and eco-friendly products powered by **Google Gemini AI** for automatic eco-scoring.
+>
+> ## 🛠️ Tech Stack
+
+<p align="center">
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" height="45">
+  <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" height="45">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" height="45">
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" height="45">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" height="45">
+  <img src="https://img.shields.io/badge/Gemini_API-4285F4?style=for-the-badge&logo=google&logoColor=white" height="45">
+  <img src="https://img.shields.io/badge/Multer-FF6F00?style=for-the-badge" height="45">
+  <img src="https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white" height="45">
+</p>
 
 ---
 
@@ -370,11 +382,6 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📝 License
-
-This project is licensed under the **ISC License**.
-
----
 
 ## 👨‍💻 Author
 
