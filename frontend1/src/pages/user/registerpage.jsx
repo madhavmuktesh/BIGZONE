@@ -17,7 +17,7 @@ const schema = z.object({
     .trim()
     .regex(/^\d{10}$/, "Please provide a valid 10-digit phone number."),
   password: z.string().min(6, "Password must be at least 6 characters long."),
-  role: z.enum(["user", "seller", "admin"]).default("user"),
+  role: z.enum(["user", "seller"]).default("user"),
 });
 
 export default function RegisterPage() {
@@ -231,7 +231,6 @@ export default function RegisterPage() {
               >
                 <option value="user">User</option>
                 <option value="seller">Seller</option>
-                <option value="admin">Admin</option>
               </select>
             </div>
 

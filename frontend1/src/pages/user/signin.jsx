@@ -240,8 +240,8 @@ const SignIn = () => {
               <div className="quick-access-content">
                 <p>Quick Demo Access</p>
                 <div className="quick-access-creds">
-                  <span>Email: demo@bigzone.com</span>
-                  <span>Password: demo123</span>
+                  <span>Email: demobigzone@gmail.com</span>
+                  <span>Password: Demobigzone@123</span>
                 </div>
               </div>
             </button>
