@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Slide = ({ slide, isActive }) => {
     const slideRef = useRef(null);
+    const navigate = useNavigate();
 
     const handleMouseMove = (e) => {
         if (!slideRef.current) return;
@@ -34,7 +36,14 @@ const Slide = ({ slide, isActive }) => {
                     <article className={`hero-carousel-article ${isActive ? 'active' : ''}`}>
                         <h2 className="hero-carousel-title">{slide.title}</h2>
                         <div className="hero-carousel-button-wrapper">
-                            <button className="hero-carousel-button">{slide.buttonText}</button>
+                            {/* Make the button navigate to the specific category search */}
+                            <button 
+                                className="hero-carousel-button"
+                                onClick={() => navigate(slide.link)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {slide.buttonText}
+                            </button>
                         </div>
                     </article>
                 </div>
