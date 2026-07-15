@@ -9,7 +9,7 @@ import connectDB from "./config/db.js";
 
 import userRoutes from "./routes/user.route.js";
 import productRoutes from "./routes/product.route.js";
-import orderRoutes from "./routes/orders.route.js";
+import orderRoutes from "./routes/orders.route.js"; // Make sure this filename matches your actual file!
 import cartRoutes from "./routes/cart.route.js";
 import addressRoutes from "./routes/address.route.js";
 
@@ -23,6 +23,34 @@ app.set("trust proxy", 1);
 
 connectDB();
 
+// ✅ 1. DEFINE HEALTH CHECK FIRST (Before any rate limiters!)
+app.get(`${API_PREFIX}/health`, (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+  });
+});
+
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "BIGZONE Backend API is running 🚀",
+  });
+});
+
+// ✅ 2. NOW DEFINE THE RATE LIMITER
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === "production" ? 100 : 1000,
+  message: {
+    success: false,
+    message: "Too many requests from this IP, please try again later.",
+  },
+});
+
+// ✅ 3. APPLY RATE LIMITER TO THE REST OF THE API
+app.use("/api/", limiter);
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
@@ -34,19 +62,7 @@ const allowedOrigins = [
 ];
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
-
 app.use(morgan("dev"));
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "production" ? 100 : 1000,
-  message: {
-    success: false,
-    message: "Too many requests from this IP, please try again later.",
-  },
-});
-
-app.use("/api/", limiter);
 
 app.use(
   cors({
@@ -83,26 +99,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.get(`${API_PREFIX}/health`, (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Server is healthy",
-  });
-});
-
-app.get("/", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "BIGZONE Backend API is running 🚀",
-  });
-});
-
+// Routes
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
 app.use(`${API_PREFIX}/addresses`, addressRoutes);
 
+// 404 Handler
 app.all("/api/{*splat}", (req, res) => {
   res.status(404).json({
     success: false,
@@ -110,6 +114,7 @@ app.all("/api/{*splat}", (req, res) => {
   });
 });
 
+// Global Error Handler
 app.use((err, req, res, _next) => {
   console.error("Global Error:", err);
 
