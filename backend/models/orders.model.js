@@ -254,7 +254,6 @@ const orderSchema = new mongoose.Schema(
 orderSchema.index({ userId: 1, orderPlacedAt: -1 });
 orderSchema.index({ orderStatus: 1, orderPlacedAt: -1 });
 orderSchema.index({ "products.product": 1 });
-orderSchema.index({ invoiceNumber: 1 }, { sparse: true });
 
 orderSchema.virtual("orderAge").get(function () {
   if (!this.orderPlacedAt) return 0;
